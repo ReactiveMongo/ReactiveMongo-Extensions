@@ -14,21 +14,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.model
+package reactivemongo.extensions.dao
 
-import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
 import org.joda.time.DateTime
-import java.util.UUID.randomUUID
+import reactivemongo.bson._
 
-case class DummyModel(
-  id: String = randomUUID.toString,
-  created: DateTime = DateTime.now,
-  updated: DateTime = DateTime.now,
-  name: String,
-  surname: String,
-  age: Int) extends Model
+object Handlers {
 
-object DummyModel {
-  implicit val dummyModelFormat = Macros.handler[DummyModel]
+  implicit object BSONDateTimeHandler
+      extends BSONReader[BSONDateTime, DateTime]
+      with BSONWriter[DateTime, BSONDateTime] {
+
+    def read(bson: BSONDateTime): DateTime = new DateTime(bson.value)
+
+    def write(date: DateTime) = BSONDateTime(date.getMillis)
+  }
+
 }

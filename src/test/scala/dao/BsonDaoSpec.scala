@@ -64,4 +64,26 @@ class BsonDaoSpec extends FlatSpec with Matchers with ScalaFutures {
     }
   }
 
+  "A BsonDao" should "set updated field" in {
+    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
+    println(dummyModel)
+    val update = BSONDocument("$set" -> BSONDocument("age" -> 64))
+
+    val futureResult = for {
+      insert <- DummyBsonDao.insert(dummyModel)
+      update <- DummyBsonDao.updateById(dummyModel.id, update)
+      updatedMaybeDummyModel <- DummyBsonDao.findById(dummyModel.id)
+    } yield updatedMaybeDummyModel
+
+    whenReady(futureResult) { updatedMaybeDummyModel =>
+      updatedMaybeDummyModel should be('defined)
+      val updatedDummyModel = updatedMaybeDummyModel.get
+      println(updatedDummyModel)
+      updatedDummyModel.id should be(dummyModel.id)
+      updatedDummyModel.age should be(64)
+      updatedDummyModel.updated.isAfter(dummyModel.updated) should be(true)
+    }
+
+  }
+
 }
