@@ -17,11 +17,12 @@
 package reactivemongo.extensions.dao
 
 import scala.concurrent.Future
-import reactivemongo.bson._
+import reactivemongo.bson.{ BSONDocument, BSONDocumentReader, BSONDocumentWriter }
 import reactivemongo.api.DB
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, Count }
 import reactivemongo.extensions.model.Model
+import play.api.libs.iteratee.Iteratee
 
 abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter] extends Dao[BSONCollection] {
 
@@ -29,8 +30,8 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter] exten
     findOne(BSONDocument("id" -> id))
   }
 
-  def findOne(query: BSONDocument): Future[Option[T]] = {
-    collection.find(query).one[T]
+  def findOne(selector: BSONDocument): Future[Option[T]] = {
+    collection.find(selector).one[T]
   }
 
   def insert(document: BSONDocument): Future[LastError] = {
@@ -41,12 +42,29 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter] exten
     collection.insert(document)
   }
 
-  def updateById(id: String, query: BSONDocument): Future[LastError] = {
-    collection.update(BSONDocument("id" -> id), query)
+  def updateById(id: String, selector: BSONDocument): Future[LastError] = {
+    collection.update(BSONDocument("id" -> id), selector)
   }
 
-  def count(query: Option[BSONDocument] = None): Future[Int] = {
-    collection.db.command(Count(collectionName, query))
+  def count(selector: Option[BSONDocument] = None): Future[Int] = {
+    collection.db.command(Count(collectionName, selector))
+  }
+
+  def foreach(selector: BSONDocument = BSONDocument.empty,
+              sort: BSONDocument = BSONDocument("_id" -> 1))(f: (T) => Unit): Future[Unit] = {
+    collection.find(selector).sort(sort).cursor[T]
+      .enumerate()
+      .apply(Iteratee.foreach(f))
+      .flatMap(i => i.run)
+  }
+
+  def fold[A](selector: BSONDocument = BSONDocument.empty,
+              sort: BSONDocument = BSONDocument("_id" -> 1),
+              state: A)(f: (A, T) => A): Future[A] = {
+    collection.find(selector).sort(sort).cursor[T]
+      .enumerate()
+      .apply(Iteratee.fold(state)(f))
+      .flatMap(i => i.run)
   }
 }
 

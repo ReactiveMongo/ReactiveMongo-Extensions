@@ -24,5 +24,6 @@ case class DummyModel(
   id: String = randomUUID.toString,
   created: DateTime = DateTime.now,
   updated: DateTime = DateTime.now,
-  ad: String,
-  soyad: String) extends Model
+  name: String,
+  surname: String,
+  age: Int) extends Model
