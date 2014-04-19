@@ -1,5 +1,7 @@
 # Extensions for ReactiveMongo
 
+[![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=master)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
+
 ## DAO
 
 ### BSonDao\[T\]
