@@ -34,7 +34,9 @@ org.scalastyle.sbt.ScalastylePlugin.Settings
 
 shellPrompt in ThisBuild := Common.prompt
 
-resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+resolvers ++= Seq(
+  "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
+  "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/")
 
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % Common.reactiveMongoVersion,
