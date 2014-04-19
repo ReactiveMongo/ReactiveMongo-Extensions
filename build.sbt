@@ -2,9 +2,9 @@ import scalariform.formatter.preferences._
 
 name := "reactivemongo-extensions"
 
-organization := "org.reactivemongo"
+organization := "com.fehmicansaglam.reactivemongo"
 
-version := "0.11.0.0"
+version := "0.11.0.0-SNAPSHOT"
 
 scalaVersion  := "2.10.4"
 
@@ -37,3 +37,36 @@ libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.3",
   "org.joda" % "joda-convert" % "1.6",
   "org.scalatest" %% "scalatest" % "2.1.3" % "test")
+
+publishMavenStyle := true
+
+publishArtifact in Test := false
+
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+
+pomExtra := (
+  <url>http://github.com/fehmicansaglam/reactivemongo-extensions</url>
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>git@github.com:fehmicansaglam/reactivemongo-extensions.git</url>
+    <connection>scm:git@github.com:fehmicansaglam/reactivemongo-extensions.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>fehmicansaglam</id>
+      <name>Fehmi Can Saglam</name>
+      <url>http://github.com/fehmicansaglam</url>
+    </developer>
+  </developers>)
