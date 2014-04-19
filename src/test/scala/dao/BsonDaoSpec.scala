@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class BsonDaoSpec extends FlatSpec with Matchers with ScalaFutures {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = 10 seconds, interval = 1 seconds)
+  override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
 
   "A BsonDao" should "insert bson document" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
@@ -64,9 +64,29 @@ class BsonDaoSpec extends FlatSpec with Matchers with ScalaFutures {
     }
   }
 
+  "A BsonDao" should "iterate(foreach) over documents" in {
+    val dummyModels: Seq[DummyModel] = 1 to 100 map { index =>
+      DummyModel(name = s"foo$index", surname = "bar$index", age = index)
+    }
+
+    val totalAge = dummyModels.foldLeft(0) { (state, document) => state + document.age }
+
+    val futureResult = for {
+      oldTotalAge <- DummyBsonDao.fold(state = 0) { (state, document) => state + document.age }
+      insertResult <- Future.sequence(dummyModels.map(DummyBsonDao.insert))
+      totalAge <- {
+        var total = -oldTotalAge // Just for the test case, please don't do this
+        DummyBsonDao.foreach()(total += _.age).map(_ => total)
+      }
+    } yield totalAge
+
+    whenReady(futureResult) { result =>
+      result shouldBe totalAge
+    }
+  }
+
   "A BsonDao" should "set updated field" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
-    println(dummyModel)
     val update = BSONDocument("$set" -> BSONDocument("age" -> 64))
 
     val futureResult = for {
@@ -78,12 +98,10 @@ class BsonDaoSpec extends FlatSpec with Matchers with ScalaFutures {
     whenReady(futureResult) { updatedMaybeDummyModel =>
       updatedMaybeDummyModel should be('defined)
       val updatedDummyModel = updatedMaybeDummyModel.get
-      println(updatedDummyModel)
       updatedDummyModel.id should be(dummyModel.id)
       updatedDummyModel.age should be(64)
       updatedDummyModel.updated.isAfter(dummyModel.updated) should be(true)
     }
-
   }
 
 }

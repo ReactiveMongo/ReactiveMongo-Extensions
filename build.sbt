@@ -17,6 +17,10 @@ scalacOptions := Seq(
   "-language:implicitConversions",
   "-language:existentials")
 
+parallelExecution in Test := true
+
+testOptions in Test += Tests.Argument("-oDS")
+
 scalariformSettings
 
 // scalariform settings
