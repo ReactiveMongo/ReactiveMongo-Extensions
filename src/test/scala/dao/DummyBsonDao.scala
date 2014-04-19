@@ -20,7 +20,7 @@ import reactivemongo.bson.Macros
 import reactivemongo.bson.Macros.Options.Verbose
 import reactivemongo.extensions.model.DummyModel
 
-object DummyBsonDao extends BsonDao[DummyModel] {
-  val collectionName = "dummy"
-  val db = MongoContext.connection("test")
+class DummyBsonDao extends BsonDao[DummyModel] {
+  val collectionName = "dummy-" + java.util.UUID.randomUUID.toString
+  val db = MongoContext.connection("test-reactivemongo-extensions")
 }

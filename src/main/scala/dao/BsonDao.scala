@@ -16,7 +16,8 @@
 
 package reactivemongo.extensions.dao
 
-import scala.concurrent.Future
+import scala.concurrent.{ Future, Await }
+import scala.concurrent.duration._
 import reactivemongo.bson.{ BSONDocument, BSONDocumentReader, BSONDocumentWriter }
 import reactivemongo.api.DB
 import reactivemongo.api.collections.default.BSONCollection
@@ -64,6 +65,17 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     collection.db.command(Count(collectionName, selector))
   }
 
+  def drop(): Future[Boolean] = {
+    collection.drop()
+  }
+
+  def dropSync(timeout: Duration = 10 seconds): Boolean = {
+    Await.result(drop(), timeout)
+  }
+
+  // Iteratee releated APIs
+
+  /** Iteratee.foreach */
   def foreach(selector: BSONDocument = BSONDocument.empty,
               sort: BSONDocument = BSONDocument("_id" -> 1))(f: (T) => Unit): Future[Unit] = {
     collection.find(selector).sort(sort).cursor[T]
@@ -72,6 +84,7 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
       .flatMap(i => i.run)
   }
 
+  /** Iteratee.fold */
   def fold[A](selector: BSONDocument = BSONDocument.empty,
               sort: BSONDocument = BSONDocument("_id" -> 1),
               state: A)(f: (A, T) => A): Future[A] = {

@@ -25,17 +25,28 @@ import reactivemongo.extensions.model.DummyModel
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class BsonDaoSpec extends FlatSpec with Matchers with ScalaFutures {
+class BsonDaoSpec
+    extends FlatSpec
+    with Matchers
+    with ScalaFutures
+    with BeforeAndAfter
+    with ParallelTestExecution {
 
   override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
+
+  val dao = new DummyBsonDao
+
+  after {
+    dao.dropSync()
+  }
 
   "A BsonDao" should "insert bson document" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
 
     val futureResult = for {
-      insertResult <- DummyBsonDao.insert(dummyModel)
-      maybeDummyModel <- DummyBsonDao.findById(dummyModel.id)
-      count <- DummyBsonDao.count(Some(BSONDocument("id" -> dummyModel.id)))
+      insertResult <- dao.insert(dummyModel)
+      maybeDummyModel <- dao.findById(dummyModel.id)
+      count <- dao.count(Some(BSONDocument("id" -> dummyModel.id)))
     } yield (maybeDummyModel, count)
 
     whenReady(futureResult) {
@@ -54,9 +65,9 @@ class BsonDaoSpec extends FlatSpec with Matchers with ScalaFutures {
     val totalAge = dummyModels.foldLeft(0) { (state, document) => state + document.age }
 
     val futureResult = for {
-      oldTotalAge <- DummyBsonDao.fold(state = 0) { (state, document) => state + document.age }
-      insertResult <- Future.sequence(dummyModels.map(DummyBsonDao.insert))
-      totalAge <- DummyBsonDao.fold(state = -oldTotalAge) { (state, document) => state + document.age }
+      oldTotalAge <- dao.fold(state = 0) { (state, document) => state + document.age }
+      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      totalAge <- dao.fold(state = -oldTotalAge) { (state, document) => state + document.age }
     } yield totalAge
 
     whenReady(futureResult) { result =>
@@ -72,11 +83,11 @@ class BsonDaoSpec extends FlatSpec with Matchers with ScalaFutures {
     val totalAge = dummyModels.foldLeft(0) { (state, document) => state + document.age }
 
     val futureResult = for {
-      oldTotalAge <- DummyBsonDao.fold(state = 0) { (state, document) => state + document.age }
-      insertResult <- Future.sequence(dummyModels.map(DummyBsonDao.insert))
+      oldTotalAge <- dao.fold(state = 0) { (state, document) => state + document.age }
+      insertResult <- Future.sequence(dummyModels.map(dao.insert))
       totalAge <- {
         var total = -oldTotalAge // Just for the test case, please don't do this
-        DummyBsonDao.foreach()(total += _.age).map(_ => total)
+        dao.foreach()(total += _.age).map(_ => total)
       }
     } yield totalAge
 
@@ -90,9 +101,9 @@ class BsonDaoSpec extends FlatSpec with Matchers with ScalaFutures {
     val update = BSONDocument("$set" -> BSONDocument("age" -> 64))
 
     val futureResult = for {
-      insert <- DummyBsonDao.insert(dummyModel)
-      update <- DummyBsonDao.updateById(dummyModel.id, update)
-      updatedMaybeDummyModel <- DummyBsonDao.findById(dummyModel.id)
+      insert <- dao.insert(dummyModel)
+      update <- dao.updateById(dummyModel.id, update)
+      updatedMaybeDummyModel <- dao.findById(dummyModel.id)
     } yield updatedMaybeDummyModel
 
     whenReady(futureResult) { updatedMaybeDummyModel =>
