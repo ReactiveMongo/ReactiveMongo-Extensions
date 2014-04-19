@@ -40,6 +40,8 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % Common.reactiveMongoVersion,
+  "org.reactivemongo" %% "play2-reactivemongo" % Common.reactiveMongoVersion % "provided",
+  "com.typesafe.play" %% "play-json" % "2.2.2" % "provided",
   "joda-time" % "joda-time" % "2.3",
   "org.joda" % "joda-convert" % "1.6",
   "org.scalatest" %% "scalatest" % "2.1.3" % "test")

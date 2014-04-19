@@ -16,11 +16,9 @@
 
 package reactivemongo.extensions.dao
 
-import reactivemongo.bson.Macros
-import reactivemongo.bson.Macros.Options.Verbose
 import reactivemongo.extensions.model.DummyModel
 
 class DummyBsonDao extends BsonDao[DummyModel] {
   val collectionName = "dummy-" + java.util.UUID.randomUUID.toString
-  val db = MongoContext.connection("test-reactivemongo-extensions")
+  val db = MongoContext.db
 }

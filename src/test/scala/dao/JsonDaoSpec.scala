@@ -19,13 +19,12 @@ package reactivemongo.extensions.dao
 import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
-import reactivemongo.bson._
-import reactivemongo.bson.Macros.Options.Verbose
+import play.api.libs.json.Json
 import reactivemongo.extensions.model.DummyModel
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class BsonDaoSpec
+class JsonDaoSpec
     extends FlatSpec
     with Matchers
     with ScalaFutures
@@ -34,19 +33,19 @@ class BsonDaoSpec
 
   override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
 
-  val dao = new DummyBsonDao
+  val dao = new DummyJsonDao
 
   after {
     dao.dropSync()
   }
 
-  "A BsonDao" should "insert bson document" in {
+  it should "insert bson document" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
 
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
       maybeDummyModel <- dao.findById(dummyModel.id)
-      count <- dao.count(Some(BSONDocument("id" -> dummyModel.id)))
+      count <- dao.count(Some(Json.obj("id" -> dummyModel.id)))
     } yield (maybeDummyModel, count)
 
     whenReady(futureResult) {
@@ -77,7 +76,7 @@ class BsonDaoSpec
 
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
-      maybeDummyModel <- dao.findOne(BSONDocument("age" -> dummyModel.age))
+      maybeDummyModel <- dao.findOne(Json.obj("age" -> dummyModel.age))
     } yield maybeDummyModel
 
     whenReady(futureResult) { maybeDummyModel =>
@@ -92,7 +91,7 @@ class BsonDaoSpec
 
     val futureCount = for {
       insertResult <- Future.sequence(dummyModels.map(dao.insert))
-      count <- dao.count(Some(BSONDocument("age" -> BSONDocument("$gte" -> 50))))
+      count <- dao.count(Some(Json.obj("age" -> Json.obj("$gte" -> 50))))
     } yield count
 
     whenReady(futureCount) { count =>
@@ -130,25 +129,6 @@ class BsonDaoSpec
 
     whenReady(futureResult) { result =>
       result shouldBe totalAge
-    }
-  }
-
-  it should "set updated field" in {
-    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
-    val update = BSONDocument("$set" -> BSONDocument("age" -> 64))
-
-    val futureResult = for {
-      insert <- dao.insert(dummyModel)
-      update <- dao.updateById(dummyModel.id, update)
-      updatedMaybeDummyModel <- dao.findById(dummyModel.id)
-    } yield updatedMaybeDummyModel
-
-    whenReady(futureResult) { updatedMaybeDummyModel =>
-      updatedMaybeDummyModel should be('defined)
-      val updatedDummyModel = updatedMaybeDummyModel.get
-      updatedDummyModel.id shouldBe dummyModel.id
-      updatedDummyModel.age shouldBe 64
-      updatedDummyModel.updated.isAfter(dummyModel.updated) shouldBe true
     }
   }
 

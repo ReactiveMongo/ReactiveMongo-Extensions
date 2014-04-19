@@ -14,27 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.model
+package reactivemongo.extensions.dao
 
-import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
-import play.api.libs.json.Json
-import org.joda.time.DateTime
-import java.util.UUID.randomUUID
+import reactivemongo.extensions.model.DummyModel
 
-case class DummyModel(
-  id: String = randomUUID.toString,
-  created: DateTime = DateTime.now,
-  updated: DateTime = DateTime.now,
-  name: String,
-  surname: String,
-  age: Int) extends Model
-
-object DummyModel {
-  implicit val dummyModelHandler = Macros.handler[DummyModel]
-  implicit val dummyModelFormat = Json.format[DummyModel]
-
-  def random(n: Int): Seq[DummyModel] = 1 to n map { index =>
-    DummyModel(name = s"name$index", surname = "surname$index", age = index)
-  }
+class DummyJsonDao extends JsonDao[DummyModel] {
+  val collectionName = "dummy-" + java.util.UUID.randomUUID.toString
+  val db = MongoContext.db
 }
