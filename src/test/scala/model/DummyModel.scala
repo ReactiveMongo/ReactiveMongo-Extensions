@@ -31,4 +31,8 @@ case class DummyModel(
 
 object DummyModel {
   implicit val dummyModelFormat = Macros.handler[DummyModel]
+
+  def random(n: Int): Seq[DummyModel] = 1 to n map { index =>
+    DummyModel(name = s"name$index", surname = "surname$index", age = index)
+  }
 }

@@ -23,7 +23,7 @@ import reactivemongo.api.DB
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import reactivemongo.extensions.model.Model
-import play.api.libs.iteratee.Iteratee
+import play.api.libs.iteratee.{ Iteratee, Enumerator }
 import org.joda.time.DateTime
 import Handlers._
 
@@ -38,12 +38,13 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     collection.find(selector).one[T]
   }
 
-  def insert(document: BSONDocument): Future[LastError] = {
+  def insert(document: T): Future[LastError] = {
     collection.insert(document)
   }
 
-  def insert(document: T): Future[LastError] = {
-    collection.insert(document)
+  def insert(documents: TraversableOnce[T]): Future[Int] = {
+    val enumerator = Enumerator.enumerate(documents)
+    collection.bulkInsert(enumerator)
   }
 
   private def updated(data: BSONDocument): BSONDocument = {
