@@ -85,4 +85,8 @@ object BsonDsl {
   def $set(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
     BSONDocument("$set" -> BSONDocument((Seq(item) ++ items): _*))
   }
+
+  def $unset(key: String, keys: String*): BSONDocument = {
+    BSONDocument("$unset" -> BSONDocument((Seq(key) ++ keys).map(_ -> BSONString(""))))
+  }
 }
