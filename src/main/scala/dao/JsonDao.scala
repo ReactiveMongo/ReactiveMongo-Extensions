@@ -16,6 +16,7 @@
 
 package reactivemongo.extensions.dao
 
+import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import play.api.libs.json.{ Json, JsObject, OFormat }
@@ -28,12 +29,20 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
 abstract class JsonDao[T <: Model: OFormat] extends Dao[JSONCollection] {
 
+  def findOne(selector: JsObject): Future[Option[T]] = {
+    collection.find(selector).one[T]
+  }
+
   def findById(id: String): Future[Option[T]] = {
     findOne(Json.obj("id" -> id))
   }
 
-  def findOne(selector: JsObject): Future[Option[T]] = {
-    collection.find(selector).one[T]
+  def findRandom(selector: JsObject = Json.obj()): Future[Option[T]] = {
+    for {
+      count <- count(selector)
+      index = Random.nextInt(count)
+      random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[T]
+    } yield random
   }
 
   def insert(document: T): Future[LastError] = {
@@ -63,8 +72,8 @@ abstract class JsonDao[T <: Model: OFormat] extends Dao[JSONCollection] {
       .collect[List](pageSize)
   }
 
-  def count(selector: Option[JsObject] = None): Future[Int] = {
-    collection.db.command(Count(collectionName, selector.map(JsObjectWriter.write)))
+  def count(selector: JsObject = Json.obj()): Future[Int] = {
+    collection.db.command(Count(collectionName, Some(JsObjectWriter.write(selector))))
   }
 
   def drop(): Future[Boolean] = {

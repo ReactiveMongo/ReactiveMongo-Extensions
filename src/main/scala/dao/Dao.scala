@@ -27,5 +27,5 @@ abstract class Dao[C <: Collection: CollectionProducer] {
 
   def db: DB
 
-  protected[this] def collection: C = db.collection[C](collectionName)
+  def collection: C = db.collection[C](collectionName)
 }

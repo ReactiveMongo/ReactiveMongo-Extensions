@@ -40,13 +40,73 @@ class BsonDaoSpec
     dao.dropSync()
   }
 
-  "A BsonDao" should "insert bson document" in {
+  "A BsonDao" should "find one document" in {
+    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
+
+    val futureResult = for {
+      insertResult <- dao.insert(dummyModel)
+      maybeDummyModel <- dao.findOne(BSONDocument("age" -> dummyModel.age))
+    } yield maybeDummyModel
+
+    whenReady(futureResult) { maybeDummyModel =>
+      maybeDummyModel should be('defined)
+      maybeDummyModel.get.id shouldBe dummyModel.id
+      maybeDummyModel.get.age shouldBe dummyModel.age
+    }
+  }
+
+  it should "find one random document in selected documents" in {
+    val dummyModels = DummyModel.random(100)
+
+    val futureResult = for {
+      insertCount <- dao.insert(dummyModels)
+      random <- dao.findRandom(BSONDocument("age" -> BSONDocument("$gt" -> 50, "$lt" -> 60)))
+    } yield random
+
+    whenReady(futureResult) { random =>
+      random should be('defined)
+      random.get.age should be > 50
+      random.get.age should be < 60
+    }
+  }
+
+  it should "find one random document in all documents" in {
+    val dummyModels = DummyModel.random(100)
+
+    val futureResult = for {
+      insertCount <- dao.insert(dummyModels)
+      random <- dao.findRandom()
+    } yield random
+
+    whenReady(futureResult) { random =>
+      random should be('defined)
+      random.get.age should be > 1
+      random.get.age should be <= 100
+    }
+  }
+
+  it should "find selected documents" in {
+    val dummyModels = DummyModel.random(100)
+
+    val futureResult = for {
+      insertCount <- dao.insert(dummyModels)
+      selectedModels <- dao.find(page = 2, pageSize = 20, sort = BSONDocument("age" -> 1))
+    } yield selectedModels
+
+    whenReady(futureResult) { selectedModels =>
+      selectedModels should have size 20
+      selectedModels.head.age shouldBe 21
+      selectedModels.last.age shouldBe 40
+    }
+  }
+
+  it should "insert bson document" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
 
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
       maybeDummyModel <- dao.findById(dummyModel.id)
-      count <- dao.count(Some(BSONDocument("id" -> dummyModel.id)))
+      count <- dao.count(BSONDocument("id" -> dummyModel.id))
     } yield (maybeDummyModel, count)
 
     whenReady(futureResult) {
@@ -72,31 +132,29 @@ class BsonDaoSpec
     }
   }
 
-  it should "find one document" in {
-    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
-
-    val futureResult = for {
-      insertResult <- dao.insert(dummyModel)
-      maybeDummyModel <- dao.findOne(BSONDocument("age" -> dummyModel.age))
-    } yield maybeDummyModel
-
-    whenReady(futureResult) { maybeDummyModel =>
-      maybeDummyModel should be('defined)
-      maybeDummyModel.get.id shouldBe dummyModel.id
-      maybeDummyModel.get.age shouldBe dummyModel.age
-    }
-  }
-
-  it should "count documents" in {
+  it should "count selected documents" in {
     val dummyModels = DummyModel.random(100)
 
     val futureCount = for {
       insertResult <- Future.sequence(dummyModels.map(dao.insert))
-      count <- dao.count(Some(BSONDocument("age" -> BSONDocument("$gte" -> 50))))
+      count <- dao.count(BSONDocument("age" -> BSONDocument("$gte" -> 50)))
     } yield count
 
     whenReady(futureCount) { count =>
       count shouldBe 51
+    }
+  }
+
+  it should "count all documents" in {
+    val dummyModels = DummyModel.random(100)
+
+    val futureCount = for {
+      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      count <- dao.count()
+    } yield count
+
+    whenReady(futureCount) { count =>
+      count shouldBe 100
     }
   }
 

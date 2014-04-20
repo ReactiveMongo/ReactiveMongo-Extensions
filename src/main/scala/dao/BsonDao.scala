@@ -16,10 +16,11 @@
 
 package reactivemongo.extensions.dao
 
+import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import reactivemongo.bson.{ BSONDocument, BSONDocumentReader, BSONDocumentWriter }
-import reactivemongo.api.DB
+import reactivemongo.api.{ DB, QueryOpts }
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import reactivemongo.extensions.model.Model
@@ -30,12 +31,35 @@ import Handlers._
 abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     extends Dao[BSONCollection] {
 
+  def findOne(selector: BSONDocument): Future[Option[T]] = {
+    collection.find(selector).one[T]
+  }
+
   def findById(id: String): Future[Option[T]] = {
     findOne(BSONDocument("id" -> id))
   }
 
-  def findOne(selector: BSONDocument): Future[Option[T]] = {
-    collection.find(selector).one[T]
+  /** @page 1 based
+    */
+  def find(selector: BSONDocument = BSONDocument.empty,
+           sort: BSONDocument = BSONDocument("_id" -> 1),
+           page: Int,
+           pageSize: Int): Future[List[T]] = {
+    val from = (page - 1) * pageSize
+    collection
+      .find(selector)
+      .sort(sort)
+      .options(QueryOpts(skipN = from, batchSizeN = pageSize))
+      .cursor[T]
+      .collect[List](pageSize)
+  }
+
+  def findRandom(selector: BSONDocument = BSONDocument.empty): Future[Option[T]] = {
+    for {
+      count <- count(selector)
+      index = Random.nextInt(count)
+      random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[T]
+    } yield random
   }
 
   def insert(document: T): Future[LastError] = {
@@ -62,8 +86,8 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     collection.update(BSONDocument("id" -> id), updated(update), writeConcern, upsert, multi)
   }
 
-  def count(selector: Option[BSONDocument] = None): Future[Int] = {
-    collection.db.command(Count(collectionName, selector))
+  def count(selector: BSONDocument = BSONDocument.empty): Future[Int] = {
+    collection.db.command(Count(collectionName, Some(selector)))
   }
 
   def drop(): Future[Boolean] = {
