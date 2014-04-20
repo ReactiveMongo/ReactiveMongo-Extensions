@@ -21,14 +21,21 @@ def findById(id: String): Future[Option[T]]
 def insert(document: BSONDocument): Future[LastError]
 ```
 
-### insert(document: T): Future[LastError]
 ```scala
 def insert(document: T): Future[LastError]
 ```
 
+```scala
+def insert(documents: TraversableOnce[T]): Future[Int]
+```
+
 ### updateById
 ```scala
-def updateById(id: String, selector: BSONDocument): Future[LastError]
+def updateById(id: String,
+               update: BSONDocument,
+               writeConcern: GetLastError = GetLastError(),
+               upsert: Boolean = false,
+               multi: Boolean = false): Future[LastError]
 ```
 
 ### count
