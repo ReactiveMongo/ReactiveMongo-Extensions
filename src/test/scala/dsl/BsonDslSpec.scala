@@ -22,14 +22,28 @@ import BsonDsl._
 
 class BsonDslSpec extends FlatSpec with Matchers {
 
-  "A BsonDsl" should "create $eq" in {
-    val dsl = $eq("name" -> "foo", "surname" -> "bar", "age" -> 32)
+  "A BsonDsl" should "create document" in {
+    val dsl = $doc("name" -> "foo", "surname" -> "bar", "age" -> 32)
 
     val expected = BSONDocument(
       "name" -> "foo",
       "surname" -> "bar",
       "age" -> 32)
 
+    dsl shouldBe expected
+  }
+
+  "A BsonDsl" should "create complex document 1" in {
+    val dsl = $doc("age", $gt(50), $lt(60))
+    Logger.debug(dsl)
+    val expected = BSONDocument("age" -> BSONDocument("$gt" -> 50, "$lt" -> 60))
+    dsl shouldBe expected
+  }
+
+  "A BsonDsl" should "create complex document 2" in {
+    val dsl = $doc("age", $gte(50), $lte(60))
+    Logger.debug(dsl)
+    val expected = BSONDocument("age" -> BSONDocument("$gte" -> 50, "$lte" -> 60))
     dsl shouldBe expected
   }
 

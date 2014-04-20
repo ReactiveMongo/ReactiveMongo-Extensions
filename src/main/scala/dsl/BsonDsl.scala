@@ -25,8 +25,12 @@ object BsonDsl {
     BSONDocument.pretty(document)
   }
 
-  def $eq(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
+  def $doc(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
     BSONDocument((Seq(item) ++ items): _*)
+  }
+
+  def $doc(key: String, element: BSONElement, elements: BSONElement*): BSONDocument = {
+    BSONDocument(key -> BSONDocument((Seq(element) ++ elements)))
   }
 
   def $ne(item: Producer[BSONElement]): BSONDocument = {
@@ -39,6 +43,10 @@ object BsonDsl {
     BSONDocument(key -> BSONDocument("$gt" -> value))
   }
 
+  def $gt(value: Producer[BSONValue]): BSONElement = {
+    "$gt" -> value.produce.get
+  }
+
   def $in(key: String, values: Producer[BSONValue]*): BSONDocument = {
     BSONDocument(key -> BSONDocument("$in" -> BSONArray(values.map(_.produce.get))))
   }
@@ -48,14 +56,26 @@ object BsonDsl {
     BSONDocument(key -> BSONDocument("$gte" -> value))
   }
 
+  def $gte(value: Producer[BSONValue]): BSONElement = {
+    "$gte" -> value.produce.get
+  }
+
   def $lt(item: Producer[BSONElement]): BSONDocument = {
     val (key, value) = item.produce.get
     BSONDocument(key -> BSONDocument("$lt" -> value))
   }
 
+  def $lt(value: Producer[BSONValue]): BSONElement = {
+    "$lt" -> value.produce.get
+  }
+
   def $lte(item: Producer[BSONElement]): BSONDocument = {
     val (key, value) = item.produce.get
     BSONDocument(key -> BSONDocument("$lte" -> value))
+  }
+
+  def $lte(value: Producer[BSONValue]): BSONElement = {
+    "$lte" -> value.produce.get
   }
 
   def $nin(key: String, values: Producer[BSONValue]*): BSONDocument = {
