@@ -121,7 +121,7 @@ $lt("age" -> 16)
 BSONDocument("age" -> BSONDocument("$lt" -> 16))
 ```
 
-### $gte
+### $lte
 ```scala
 // Input
 $lte("age" -> 16)
