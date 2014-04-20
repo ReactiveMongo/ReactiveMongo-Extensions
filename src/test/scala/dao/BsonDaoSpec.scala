@@ -20,6 +20,7 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import reactivemongo.bson._
+import reactivemongo.bson.BsonDsl._
 import reactivemongo.bson.Macros.Options.Verbose
 import reactivemongo.extensions.model.DummyModel
 import scala.concurrent.Future
@@ -45,7 +46,7 @@ class BsonDaoSpec
 
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
-      maybeDummyModel <- dao.findOne(BSONDocument("age" -> dummyModel.age))
+      maybeDummyModel <- dao.findOne($doc("age" -> dummyModel.age))
     } yield maybeDummyModel
 
     whenReady(futureResult) { maybeDummyModel =>
@@ -60,7 +61,7 @@ class BsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.insert(dummyModels)
-      random <- dao.findRandom(BSONDocument("age" -> BSONDocument("$gt" -> 50, "$lt" -> 60)))
+      random <- dao.findRandom($doc("age", $gt(50), $lt(60)))
     } yield random
 
     whenReady(futureResult) { random =>
@@ -90,7 +91,7 @@ class BsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.insert(dummyModels)
-      selectedModels <- dao.find(page = 2, pageSize = 20, sort = BSONDocument("age" -> 1))
+      selectedModels <- dao.find(page = 2, pageSize = 20, sort = $doc("age" -> 1))
     } yield selectedModels
 
     whenReady(futureResult) { selectedModels =>
@@ -106,7 +107,7 @@ class BsonDaoSpec
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
       maybeDummyModel <- dao.findById(dummyModel.id)
-      count <- dao.count(BSONDocument("id" -> dummyModel.id))
+      count <- dao.count($doc("id" -> dummyModel.id))
     } yield (maybeDummyModel, count)
 
     whenReady(futureResult) {
@@ -137,7 +138,7 @@ class BsonDaoSpec
 
     val futureCount = for {
       insertResult <- Future.sequence(dummyModels.map(dao.insert))
-      count <- dao.count(BSONDocument("age" -> BSONDocument("$gte" -> 50)))
+      count <- dao.count($gte("age" -> 50))
     } yield count
 
     whenReady(futureCount) { count =>
@@ -193,7 +194,7 @@ class BsonDaoSpec
 
   it should "set updated field" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
-    val update = BSONDocument("$set" -> BSONDocument("age" -> 64))
+    val update = $set("age" -> 64)
 
     val futureResult = for {
       insert <- dao.insert(dummyModel)
