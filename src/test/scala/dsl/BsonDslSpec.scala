@@ -34,14 +34,14 @@ class BsonDslSpec extends FlatSpec with Matchers {
   }
 
   it should "create complex document 1" in {
-    val dsl = $doc("age", $gt(50), $lt(60))
+    val dsl = $docex("age", $gt(50), $lt(60))
     Logger.debug(dsl)
     val expected = BSONDocument("age" -> BSONDocument("$gt" -> 50, "$lt" -> 60))
     dsl shouldBe expected
   }
 
   it should "create complex document 2" in {
-    val dsl = $doc("age", $gte(50), $lte(60))
+    val dsl = $docex("age", $gte(50), $lte(60))
     Logger.debug(dsl)
     val expected = BSONDocument("age" -> BSONDocument("$gte" -> 50, "$lte" -> 60))
     dsl shouldBe expected

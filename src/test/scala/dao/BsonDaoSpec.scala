@@ -61,7 +61,7 @@ class BsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.insert(dummyModels)
-      random <- dao.findRandom($doc("age", $gt(50), $lt(60)))
+      random <- dao.findRandom($docex("age", $gt(50), $lt(60)))
     } yield random
 
     whenReady(futureResult) { random =>

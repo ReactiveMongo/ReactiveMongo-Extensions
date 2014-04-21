@@ -29,7 +29,7 @@ object BsonDsl {
     BSONDocument((Seq(item) ++ items): _*)
   }
 
-  def $doc(field: String, element: BSONElement, elements: BSONElement*): BSONDocument = {
+  def $docex(field: String, element: BSONElement, elements: BSONElement*): BSONDocument = {
     BSONDocument(field -> BSONDocument((Seq(element) ++ elements)))
   }
 
