@@ -40,7 +40,7 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     findOne($id(id))
   }
 
-  /** @page 1 based
+  /** @param page 1 based
     */
   def find(selector: BSONDocument = BSONDocument.empty,
            sort: BSONDocument = BSONDocument("_id" -> 1),

@@ -59,7 +59,7 @@ abstract class JsonDao[T <: Model: OFormat] extends Dao[JSONCollection] {
   def updateById(id: BSONObjectID, query: JsObject): Future[LastError] =
     collection.update(Json.obj("_id" -> id), query)
 
-  /** @page 1 based
+  /** @param page 1 based
     */
   def scroll(selector: JsObject = Json.obj(),
              sort: JsObject = Json.obj("_id" -> 1),
