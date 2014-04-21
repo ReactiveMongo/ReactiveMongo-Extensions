@@ -20,6 +20,7 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import play.api.libs.json.Json
+import play.modules.reactivemongo.json.BSONFormats._
 import reactivemongo.extensions.model.DummyModel
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,7 +50,7 @@ class JsonDaoSpec
 
     whenReady(futureResult) { maybeDummyModel =>
       maybeDummyModel should be('defined)
-      maybeDummyModel.get.id shouldBe dummyModel.id
+      maybeDummyModel.get._id shouldBe dummyModel._id
       maybeDummyModel.get.age shouldBe dummyModel.age
     }
   }
@@ -89,14 +90,14 @@ class JsonDaoSpec
 
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
-      maybeDummyModel <- dao.findById(dummyModel.id)
-      count <- dao.count(Json.obj("id" -> dummyModel.id))
+      maybeDummyModel <- dao.findById(dummyModel._id)
+      count <- dao.count(Json.obj("_id" -> dummyModel._id))
     } yield (maybeDummyModel, count)
 
     whenReady(futureResult) {
       case (maybeDummyModel, count) =>
         maybeDummyModel should be('defined)
-        maybeDummyModel.get.id shouldBe dummyModel.id
+        maybeDummyModel.get._id shouldBe dummyModel._id
         count shouldBe 1
     }
   }

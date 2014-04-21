@@ -33,6 +33,10 @@ object BsonDsl {
     BSONDocument(key -> BSONDocument((Seq(element) ++ elements)))
   }
 
+  def $id(id: BSONObjectID): BSONDocument = {
+    BSONDocument("_id" -> id)
+  }
+
   def $ne(item: Producer[BSONElement]): BSONDocument = {
     val (key, value) = item.produce.get
     BSONDocument(key -> BSONDocument("$ne" -> value))

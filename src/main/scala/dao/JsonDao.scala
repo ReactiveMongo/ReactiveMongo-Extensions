@@ -20,9 +20,11 @@ import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import play.api.libs.json.{ Json, JsObject, OFormat }
+import reactivemongo.bson.BSONObjectID
 import reactivemongo.api.QueryOpts
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.modules.reactivemongo.json.collection.JSONCollection
+import play.modules.reactivemongo.json.BSONFormats._
 import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
 import reactivemongo.extensions.model.Model
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
@@ -33,8 +35,8 @@ abstract class JsonDao[T <: Model: OFormat] extends Dao[JSONCollection] {
     collection.find(selector).one[T]
   }
 
-  def findById(id: String): Future[Option[T]] = {
-    findOne(Json.obj("id" -> id))
+  def findById(id: BSONObjectID): Future[Option[T]] = {
+    findOne(Json.obj("_id" -> id))
   }
 
   def findRandom(selector: JsObject = Json.obj()): Future[Option[T]] = {
@@ -54,8 +56,8 @@ abstract class JsonDao[T <: Model: OFormat] extends Dao[JSONCollection] {
     collection.bulkInsert(enumerator)
   }
 
-  def updateById(id: String, query: JsObject): Future[LastError] =
-    collection.update(Json.obj("id" -> id), query)
+  def updateById(id: BSONObjectID, query: JsObject): Future[LastError] =
+    collection.update(Json.obj("_id" -> id), query)
 
   /** @page 1 based
     */

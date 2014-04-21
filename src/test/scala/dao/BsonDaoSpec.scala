@@ -51,7 +51,7 @@ class BsonDaoSpec
 
     whenReady(futureResult) { maybeDummyModel =>
       maybeDummyModel should be('defined)
-      maybeDummyModel.get.id shouldBe dummyModel.id
+      maybeDummyModel.get._id shouldBe dummyModel._id
       maybeDummyModel.get.age shouldBe dummyModel.age
     }
   }
@@ -106,14 +106,14 @@ class BsonDaoSpec
 
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
-      maybeDummyModel <- dao.findById(dummyModel.id)
-      count <- dao.count($doc("id" -> dummyModel.id))
+      maybeDummyModel <- dao.findById(dummyModel._id)
+      count <- dao.count($id(dummyModel._id))
     } yield (maybeDummyModel, count)
 
     whenReady(futureResult) {
       case (maybeDummyModel, count) =>
         maybeDummyModel should be('defined)
-        maybeDummyModel.get.id shouldBe dummyModel.id
+        maybeDummyModel.get._id shouldBe dummyModel._id
         count shouldBe 1
     }
   }
@@ -192,22 +192,21 @@ class BsonDaoSpec
     }
   }
 
-  it should "set updated field" in {
+  it should "set update document by id" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
     val update = $set("age" -> 64)
 
     val futureResult = for {
       insert <- dao.insert(dummyModel)
-      update <- dao.updateById(dummyModel.id, update)
-      updatedMaybeDummyModel <- dao.findById(dummyModel.id)
+      update <- dao.updateById(dummyModel._id, update)
+      updatedMaybeDummyModel <- dao.findById(dummyModel._id)
     } yield updatedMaybeDummyModel
 
     whenReady(futureResult) { updatedMaybeDummyModel =>
       updatedMaybeDummyModel should be('defined)
       val updatedDummyModel = updatedMaybeDummyModel.get
-      updatedDummyModel.id shouldBe dummyModel.id
+      updatedDummyModel._id shouldBe dummyModel._id
       updatedDummyModel.age shouldBe 64
-      updatedDummyModel.updated.isAfter(dummyModel.updated) shouldBe true
     }
   }
 

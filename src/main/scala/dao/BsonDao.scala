@@ -19,7 +19,8 @@ package reactivemongo.extensions.dao
 import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
-import reactivemongo.bson.{ BSONDocument, BSONDocumentReader, BSONDocumentWriter }
+import reactivemongo.bson._
+import reactivemongo.bson.BsonDsl._
 import reactivemongo.api.{ DB, QueryOpts }
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
@@ -35,8 +36,8 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     collection.find(selector).one[T]
   }
 
-  def findById(id: String): Future[Option[T]] = {
-    findOne(BSONDocument("id" -> id))
+  def findById(id: BSONObjectID): Future[Option[T]] = {
+    findOne($id(id))
   }
 
   /** @page 1 based
@@ -71,19 +72,12 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     collection.bulkInsert(enumerator)
   }
 
-  private def updated(data: BSONDocument): BSONDocument = {
-    BSONDocument(data.elements map {
-      case element @ ("$set", value: BSONDocument) => "$set" -> (value ++ BSONDocument("updated" -> DateTime.now))
-      case element => element
-    })
-  }
-
-  def updateById(id: String,
+  def updateById(id: BSONObjectID,
                  update: BSONDocument,
                  writeConcern: GetLastError = GetLastError(),
                  upsert: Boolean = false,
                  multi: Boolean = false): Future[LastError] = {
-    collection.update(BSONDocument("id" -> id), updated(update), writeConcern, upsert, multi)
+    collection.update($id(id), update, writeConcern, upsert, multi)
   }
 
   def count(selector: BSONDocument = BSONDocument.empty): Future[Int] = {

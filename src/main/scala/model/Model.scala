@@ -16,11 +16,9 @@
 
 package reactivemongo.extensions.model
 
-import org.joda.time.DateTime
+import reactivemongo.bson.BSONObjectID
 
 trait Model {
-  def id: String
-  def created: DateTime
-  def updated: DateTime
+  def _id: BSONObjectID
 }
 

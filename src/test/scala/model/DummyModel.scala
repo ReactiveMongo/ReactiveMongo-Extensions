@@ -19,13 +19,11 @@ package reactivemongo.extensions.model
 import reactivemongo.bson._
 import reactivemongo.extensions.dao.Handlers._
 import play.api.libs.json.Json
+import play.modules.reactivemongo.json.BSONFormats._
 import org.joda.time.DateTime
-import java.util.UUID.randomUUID
 
 case class DummyModel(
-  id: String = randomUUID.toString,
-  created: DateTime = DateTime.now,
-  updated: DateTime = DateTime.now,
+  _id: BSONObjectID = BSONObjectID.generate,
   name: String,
   surname: String,
   age: Int) extends Model
