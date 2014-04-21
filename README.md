@@ -1,18 +1,35 @@
 # ReactiveMongo Extensions
 
-This is an extension library providing DAO and DSL support for ReactiveMongo. 
+This is an extension library providing DAO and DSL support for ReactiveMongo.
 
 [![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=master)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
 
+## Using ReactiveMongo Extensions in your project
+
+The latest release is 0.11.0.0-SNAPSHOT which is compatible with ReactiveMongo 0.11.0-SNAPSHOT.
+The general format is that release a.b.c.d is compatible with ReactiveMongo a.b.c.
+
+Note: Only available for scala 2.10.
+
+If you use SBT, you just have to edit build.sbt and add the following:
+
+```scala
+resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+
+libraryDependencies ++= Seq(
+  "net.fehmicansaglam" %% "reactivemongo-extensions" % "0.11.0.0-SNAPSHOT"
+)
+```
+
 ## BsonDao
 
-### findOne 
-```scala 
+### findOne
+```scala
 def findOne(selector: BSONDocument): Future[Option[T]]
 ```
 
 ### findById
-```scala 
+```scala
 def findById(id: String): Future[Option[T]]
 ```
 
@@ -58,12 +75,12 @@ def fold[A](selector: BSONDocument = BSONDocument.empty,
 
 ### drop
 ```scala
-def drop(): Future[Boolean] 
+def drop(): Future[Boolean]
 ```
 
 ### dropSync
 ```scala
-def dropSync(timeout: Duration = 10 seconds): Boolean 
+def dropSync(timeout: Duration = 10 seconds): Boolean
 ```
 
 ## BsonDsl
@@ -71,7 +88,7 @@ def dropSync(timeout: Duration = 10 seconds): Boolean
 ### $doc
 ```scala
 // Input
-$doc("name" -> "foo", "surname" -> "bar", "age" -> 32) 
+$doc("name" -> "foo", "surname" -> "bar", "age" -> 32)
 // Output
 BSONDocument("name" -> "foo", "surname" -> "bar", "age" -> 32)
 

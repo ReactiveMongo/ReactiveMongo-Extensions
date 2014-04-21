@@ -2,7 +2,7 @@ import scalariform.formatter.preferences._
 
 name := "reactivemongo-extensions"
 
-organization := "com.fehmicansaglam.reactivemongo"
+organization := "net.fehmicansaglam"
 
 version := "0.11.0.0-SNAPSHOT"
 
