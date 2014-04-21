@@ -118,4 +118,31 @@ class BsonDslSpec extends FlatSpec with Matchers {
     dsl shouldBe expected
   }
 
+  it should "create $push" in {
+    val dsl = $push("scores", 89)
+    val expected = BSONDocument("$push" -> BSONDocument("scores" -> 89))
+    dsl shouldBe expected
+  }
+
+  it should "create $pushEach" in {
+    val dsl = $pushEach("scores", 89, 90, 91, 92)
+    val expected = BSONDocument(
+      "$push" -> BSONDocument(
+        "scores" -> BSONDocument(
+          "$each" -> BSONArray(89, 90, 91, 92))))
+    dsl shouldBe expected
+  }
+
+  it should "create $pull with one value" in {
+    val dsl = $pull("flags", "msr")
+    val expected = BSONDocument("$pull" -> BSONDocument("flags" -> "msr"))
+    dsl shouldBe expected
+  }
+
+  it should "create $pull with query" in {
+    val dsl = $pull("votes", $doc($gte(6)))
+    val expected = BSONDocument("$pull" -> BSONDocument("votes" -> BSONDocument("$gte" -> 6)))
+    dsl shouldBe expected
+  }
+
 }
