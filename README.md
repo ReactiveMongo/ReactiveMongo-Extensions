@@ -21,6 +21,14 @@ libraryDependencies ++= Seq(
 )
 ```
 
+## Contributions
+Contributions are always welcome. Good ways to contribute include:
+
+* Raising bugs and feature requests
+* Fixing bugs
+* Improving the performance
+* Adding to the documentation
+
 ## BsonDao
 
 ### findOne
