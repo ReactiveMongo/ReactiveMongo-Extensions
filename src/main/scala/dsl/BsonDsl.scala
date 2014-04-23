@@ -51,10 +51,6 @@ object BsonDsl {
     "$gt" -> value.produce.get
   }
 
-  def $in(field: String, values: Producer[BSONValue]*): BSONDocument = {
-    BSONDocument(field -> BSONDocument("$in" -> BSONArray(values.map(_.produce.get))))
-  }
-
   def $gte(item: Producer[BSONElement]): BSONDocument = {
     val (field, value) = item.produce.get
     BSONDocument(field -> BSONDocument("$gte" -> value))
@@ -62,6 +58,10 @@ object BsonDsl {
 
   def $gtex(value: Producer[BSONValue]): BSONElement = {
     "$gte" -> value.produce.get
+  }
+
+  def $in(field: String, values: Producer[BSONValue]*): BSONDocument = {
+    BSONDocument(field -> BSONDocument("$in" -> BSONArray(values.map(_.produce.get))))
   }
 
   def $lt(item: Producer[BSONElement]): BSONDocument = {

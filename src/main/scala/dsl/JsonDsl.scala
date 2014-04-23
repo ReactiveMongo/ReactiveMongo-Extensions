@@ -54,12 +54,28 @@ object JsonDsl {
     "$gt" -> value
   }
 
+  def $gte(element: Element): JsObject = {
+    Json.obj(element._1 -> Json.obj("$gte" -> element._2))
+  }
+
   def $gtex(value: Value): Element = {
     "$gte" -> value
   }
 
+  def $in(field: String, values: Value*): JsObject = {
+    Json.obj(field -> Json.obj("$in" -> Json.arr(values: _*)))
+  }
+
+  def $lt(element: Element): JsObject = {
+    Json.obj(element._1 -> Json.obj("$lt" -> element._2))
+  }
+
   def $ltx(value: Value): Element = {
     "$lt" -> value
+  }
+
+  def $lte(element: Element): JsObject = {
+    Json.obj(element._1 -> Json.obj("$lte" -> element._2))
   }
 
   def $ltex(value: Value): Element = {

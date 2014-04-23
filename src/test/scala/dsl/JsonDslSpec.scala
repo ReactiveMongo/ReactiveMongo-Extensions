@@ -71,6 +71,34 @@ class JsonDslSpec extends FlatSpec with Matchers {
     dsl shouldBe expected
   }
 
+  it should "create $gte" in {
+    val dsl = $gte("age" -> 18)
+    Logger.debug(s"$dsl")
+    val expected = Json.obj("age" -> Json.obj("$gte" -> 18))
+    dsl shouldBe expected
+  }
+
+  it should "create $in" in {
+    val dsl = $in("age", 1, 2, 3)
+    Logger.debug(s"$dsl")
+    val expected = Json.obj("age" -> Json.obj("$in" -> Json.arr(1, 2, 3)))
+    dsl shouldBe expected
+  }
+
+  it should "create $lt" in {
+    val dsl = $lt("age" -> 18)
+    Logger.debug(s"$dsl")
+    val expected = Json.obj("age" -> Json.obj("$lt" -> 18))
+    dsl shouldBe expected
+  }
+
+  it should "create $lte" in {
+    val dsl = $lte("age" -> 18)
+    Logger.debug(s"$dsl")
+    val expected = Json.obj("age" -> Json.obj("$lte" -> 18))
+    dsl shouldBe expected
+  }
+
   it should "create $nin" in {
     val dsl = $nin("age", 1, 2, 3)
     Logger.debug(s"$dsl")

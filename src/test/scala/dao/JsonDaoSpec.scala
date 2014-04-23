@@ -22,6 +22,7 @@ import org.scalatest.time.SpanSugar._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats._
 import reactivemongo.extensions.model.DummyModel
+import reactivemongo.extensions.dsl.JsonDsl._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -45,7 +46,7 @@ class JsonDaoSpec
 
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
-      maybeDummyModel <- dao.findOne(Json.obj("age" -> dummyModel.age))
+      maybeDummyModel <- dao.findOne($doc("age" -> dummyModel.age))
     } yield maybeDummyModel
 
     whenReady(futureResult) { maybeDummyModel =>
@@ -60,7 +61,7 @@ class JsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.insert(dummyModels)
-      random <- dao.findRandom(Json.obj("age" -> Json.obj("$gt" -> 50, "$lt" -> 60)))
+      random <- dao.findRandom($docx("age", $gtx(50), $ltx(60)))
     } yield random
 
     whenReady(futureResult) { random =>
@@ -91,7 +92,7 @@ class JsonDaoSpec
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
       maybeDummyModel <- dao.findById(dummyModel._id)
-      count <- dao.count(Json.obj("_id" -> dummyModel._id))
+      count <- dao.count($id(dummyModel._id))
     } yield (maybeDummyModel, count)
 
     whenReady(futureResult) {
@@ -122,7 +123,7 @@ class JsonDaoSpec
 
     val futureCount = for {
       insertResult <- Future.sequence(dummyModels.map(dao.insert))
-      count <- dao.count(Json.obj("age" -> Json.obj("$gte" -> 50)))
+      count <- dao.count($gte("age" -> 50))
     } yield count
 
     whenReady(futureCount) { count =>
