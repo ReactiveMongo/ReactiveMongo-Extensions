@@ -33,6 +33,9 @@ Contributions are always welcome. Good ways to contribute include:
 ## Introduction
 
 [BSON DAO](guide/bsondao.md)
+
 [BSON DSL](guide/bsondsl.md)
+
 [JSON DAO](guide/jsondao.md)
+
 [JSON DSL](guide/bsondao.md)
