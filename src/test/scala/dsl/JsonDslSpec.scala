@@ -44,16 +44,91 @@ class JsonDslSpec extends FlatSpec with Matchers {
   }
 
   it should "create complex document 1" in {
-    val dsl = $docex("age", $gt(50), $lt(60))
+    val dsl = $docx("age", $gtx(50), $ltx(60))
     Logger.debug(s"$dsl")
     val expected = Json.obj("age" -> Json.obj("$gt" -> 50, "$lt" -> 60))
     dsl shouldBe expected
   }
 
   it should "create complex document 2" in {
-    val dsl = $docex("age", $gte(50), $lte(60))
+    val dsl = $docx("age", $gtex(50), $ltex(60))
     Logger.debug(s"$dsl")
     val expected = Json.obj("age" -> Json.obj("$gte" -> 50, "$lte" -> 60))
     dsl shouldBe expected
   }
+
+  it should "create $ne" in {
+    val dsl = $ne("name" -> "foo")
+    Logger.debug(s"$dsl")
+    val expected = Json.obj("name" -> Json.obj("$ne" -> "foo"))
+    dsl shouldBe expected
+  }
+
+  it should "create $gt" in {
+    val dsl = $gt("age" -> 18)
+    Logger.debug(s"$dsl")
+    val expected = Json.obj("age" -> Json.obj("$gt" -> 18))
+    dsl shouldBe expected
+  }
+
+  it should "create $nin" in {
+    val dsl = $nin("age", 1, 2, 3)
+    Logger.debug(s"$dsl")
+    val expected = Json.obj("age" -> Json.obj("$nin" -> Json.arr(1, 2, 3)))
+    dsl shouldBe expected
+  }
+
+  it should "create $set" in {
+    val dsl = $set("name" -> "foo", "surname" -> "bar", "age" -> 32)
+
+    val expected = Json.obj(
+      "$set" ->
+        Json.obj(
+          "name" -> "foo",
+          "surname" -> "bar",
+          "age" -> 32))
+
+    dsl shouldBe expected
+  }
+
+  it should "create $unset" in {
+    val dsl = $unset("name", "surname", "age")
+
+    val expected = Json.obj(
+      "$unset" ->
+        Json.obj(
+          "name" -> "",
+          "surname" -> "",
+          "age" -> ""))
+
+    dsl shouldBe expected
+  }
+
+  it should "create $push" in {
+    val dsl = $push("scores", 89)
+    val expected = Json.obj("$push" -> Json.obj("scores" -> 89))
+    dsl shouldBe expected
+  }
+
+  it should "create $pushEach" in {
+    val dsl = $pushEach("scores", 89, 90, 91, 92)
+    val expected = Json.obj(
+      "$push" -> Json.obj(
+        "scores" -> Json.obj(
+          "$each" -> Json.arr(89, 90, 91, 92))))
+    dsl shouldBe expected
+  }
+
+  it should "create $pull with one value" in {
+    val dsl = $pull("flags", "msr")
+    val expected = Json.obj("$pull" -> Json.obj("flags" -> "msr"))
+    dsl shouldBe expected
+  }
+
+  it should "create $pull with query" in {
+    val dsl = $pull("votes", $doc($gtex(6)))
+    val expected = Json.obj("$pull" -> Json.obj("votes" -> Json.obj("$gte" -> 6)))
+    dsl shouldBe expected
+  }
+
 }

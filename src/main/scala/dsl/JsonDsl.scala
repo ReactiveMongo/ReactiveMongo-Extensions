@@ -17,7 +17,7 @@
 // In order to use Producer.produce we must be in this package.
 package reactivemongo.extensions.dsl
 
-import play.api.libs.json.{ Json, JsObject }
+import play.api.libs.json._
 import play.api.libs.json.Json.{ JsValueWrapper, toJsFieldJsValueWrapper }
 import reactivemongo.bson.BSONObjectID
 import play.modules.reactivemongo.json.BSONFormats._
@@ -34,7 +34,7 @@ object JsonDsl {
     Json.obj((Seq(element) ++ elements): _*)
   }
 
-  def $docex(field: Field, element: Element, elements: Element*): JsObject = {
+  def $docx(field: Field, element: Element, elements: Element*): JsObject = {
     Json.obj(field -> Json.obj((Seq(element) ++ elements): _*))
   }
 
@@ -42,20 +42,55 @@ object JsonDsl {
     $doc("_id" -> id)
   }
 
-  def $gt(value: Value): Element = {
+  def $ne(element: Element): JsObject = {
+    Json.obj(element._1 -> Json.obj("$ne" -> element._2))
+  }
+
+  def $gt(element: Element): JsObject = {
+    Json.obj(element._1 -> Json.obj("$gt" -> element._2))
+  }
+
+  def $gtx(value: Value): Element = {
     "$gt" -> value
   }
 
-  def $gte(value: Value): Element = {
+  def $gtex(value: Value): Element = {
     "$gte" -> value
   }
 
-  def $lt(value: Value): Element = {
+  def $ltx(value: Value): Element = {
     "$lt" -> value
   }
 
-  def $lte(value: Value): Element = {
+  def $ltex(value: Value): Element = {
     "$lte" -> value
+  }
+
+  def $nin(field: String, values: Value*): JsObject = {
+    Json.obj(field -> Json.obj("$nin" -> Json.arr(values: _*)))
+  }
+
+  def $set(element: Element, elements: Element*): JsObject = {
+    Json.obj("$set" -> Json.obj((Seq(element) ++ elements): _*))
+  }
+
+  def $unset(field: String, fields: String*): JsObject = {
+    Json.obj("$unset" -> Json.obj((Seq(field) ++ fields).map(_ -> toJsFieldJsValueWrapper("")): _*))
+  }
+
+  def $push(element: Element): JsObject = {
+    Json.obj("$push" -> Json.obj(element))
+  }
+
+  def $pushEach(field: String, values: Value*): JsObject = {
+    Json.obj(
+      "$push" -> Json.obj(
+        field -> Json.obj(
+          "$each" -> Json.arr(values: _*))))
+  }
+
+  def $pull(element: Element): JsObject = {
+    Json.obj("$pull" -> Json.obj(element))
   }
 
 }

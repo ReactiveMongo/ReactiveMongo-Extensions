@@ -29,7 +29,7 @@ object BsonDsl {
     BSONDocument((Seq(item) ++ items): _*)
   }
 
-  def $docex(field: String, element: BSONElement, elements: BSONElement*): BSONDocument = {
+  def $docx(field: String, element: BSONElement, elements: BSONElement*): BSONDocument = {
     BSONDocument(field -> BSONDocument((Seq(element) ++ elements)))
   }
 
@@ -47,7 +47,7 @@ object BsonDsl {
     BSONDocument(field -> BSONDocument("$gt" -> value))
   }
 
-  def $gt(value: Producer[BSONValue]): BSONElement = {
+  def $gtx(value: Producer[BSONValue]): BSONElement = {
     "$gt" -> value.produce.get
   }
 
@@ -60,7 +60,7 @@ object BsonDsl {
     BSONDocument(field -> BSONDocument("$gte" -> value))
   }
 
-  def $gte(value: Producer[BSONValue]): BSONElement = {
+  def $gtex(value: Producer[BSONValue]): BSONElement = {
     "$gte" -> value.produce.get
   }
 
@@ -69,7 +69,7 @@ object BsonDsl {
     BSONDocument(field -> BSONDocument("$lt" -> value))
   }
 
-  def $lt(value: Producer[BSONValue]): BSONElement = {
+  def $ltx(value: Producer[BSONValue]): BSONElement = {
     "$lt" -> value.produce.get
   }
 
@@ -78,7 +78,7 @@ object BsonDsl {
     BSONDocument(field -> BSONDocument("$lte" -> value))
   }
 
-  def $lte(value: Producer[BSONValue]): BSONElement = {
+  def $ltex(value: Producer[BSONValue]): BSONElement = {
     "$lte" -> value.produce.get
   }
 
