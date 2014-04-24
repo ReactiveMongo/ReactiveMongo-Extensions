@@ -21,17 +21,17 @@ import reactivemongo.extensions.dao.Handlers._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats._
 
-case class DummyModel(
-  _id: BSONObjectID = BSONObjectID.generate,
+case class CustomIdModel(
+  id: String = java.util.UUID.randomUUID.toString,
   name: String,
   surname: String,
   age: Int) extends Model
 
-object DummyModel {
-  implicit val dummyModelHandler = Macros.handler[DummyModel]
-  implicit val dummyModelFormat = Json.format[DummyModel]
+object CustomIdModel {
+  implicit val customIdModelHandler = Macros.handler[CustomIdModel]
+  implicit val customIdModelFormat = Json.format[CustomIdModel]
 
-  def random(n: Int): Seq[DummyModel] = 1 to n map { index =>
-    DummyModel(name = s"name$index", surname = "surname$index", age = index)
+  def random(n: Int): Seq[CustomIdModel] = 1 to n map { index =>
+    CustomIdModel(name = s"name$index", surname = "surname$index", age = index)
   }
 }

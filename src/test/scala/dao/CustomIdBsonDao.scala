@@ -14,24 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.model
+package reactivemongo.extensions.dao
 
-import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
-import play.api.libs.json.Json
-import play.modules.reactivemongo.json.BSONFormats._
+import reactivemongo.extensions.model.CustomIdModel
 
-case class DummyModel(
-  _id: BSONObjectID = BSONObjectID.generate,
-  name: String,
-  surname: String,
-  age: Int) extends Model
-
-object DummyModel {
-  implicit val dummyModelHandler = Macros.handler[DummyModel]
-  implicit val dummyModelFormat = Json.format[DummyModel]
-
-  def random(n: Int): Seq[DummyModel] = 1 to n map { index =>
-    DummyModel(name = s"name$index", surname = "surname$index", age = index)
-  }
+class CustomIdBsonDao extends BsonDao[CustomIdModel] {
+  val collectionName = "customId-" + java.util.UUID.randomUUID.toString
+  val db = MongoContext.db
+  override def idField = "id"
 }

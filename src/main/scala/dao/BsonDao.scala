@@ -36,14 +36,14 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     collection.find(selector).one[T]
   }
 
-  def findById(id: BSONObjectID): Future[Option[T]] = {
-    findOne($id(id))
+  def findById(id: Producer[BSONValue]): Future[Option[T]] = {
+    findOne($id(id, idField))
   }
 
   /** @param page 1 based
     */
   def find(selector: BSONDocument = BSONDocument.empty,
-           sort: BSONDocument = BSONDocument("_id" -> 1),
+           sort: BSONDocument = BSONDocument(idField -> 1),
            page: Int,
            pageSize: Int): Future[List[T]] = {
     val from = (page - 1) * pageSize
@@ -72,12 +72,12 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
     collection.bulkInsert(enumerator)
   }
 
-  def updateById(id: BSONObjectID,
+  def updateById(id: Producer[BSONValue],
                  update: BSONDocument,
                  writeConcern: GetLastError = GetLastError(),
                  upsert: Boolean = false,
                  multi: Boolean = false): Future[LastError] = {
-    collection.update($id(id), update, writeConcern, upsert, multi)
+    collection.update($id(id, idField), update, writeConcern, upsert, multi)
   }
 
   def count(selector: BSONDocument = BSONDocument.empty): Future[Int] = {
@@ -96,7 +96,7 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
 
   /** Iteratee.foreach */
   def foreach(selector: BSONDocument = BSONDocument.empty,
-              sort: BSONDocument = BSONDocument("_id" -> 1))(f: (T) => Unit): Future[Unit] = {
+              sort: BSONDocument = BSONDocument(idField -> 1))(f: (T) => Unit): Future[Unit] = {
     collection.find(selector).sort(sort).cursor[T]
       .enumerate()
       .apply(Iteratee.foreach(f))
@@ -105,7 +105,7 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
 
   /** Iteratee.fold */
   def fold[A](selector: BSONDocument = BSONDocument.empty,
-              sort: BSONDocument = BSONDocument("_id" -> 1),
+              sort: BSONDocument = BSONDocument(idField -> 1),
               state: A)(f: (A, T) => A): Future[A] = {
     collection.find(selector).sort(sort).cursor[T]
       .enumerate()

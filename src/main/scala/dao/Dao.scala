@@ -17,6 +17,7 @@
 package reactivemongo.extensions.dao
 
 import reactivemongo.api.{ DB, Collection, CollectionProducer }
+import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext
 
 abstract class Dao[C <: Collection: CollectionProducer] {
@@ -28,4 +29,6 @@ abstract class Dao[C <: Collection: CollectionProducer] {
   def db: DB
 
   def collection: C = db.collection[C](collectionName)
+
+  def idField = "_id"
 }

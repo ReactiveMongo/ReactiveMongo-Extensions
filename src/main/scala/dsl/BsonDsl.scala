@@ -17,8 +17,6 @@
 // In order to use Producer.produce we must be in this package.
 package reactivemongo.bson
 
-import reactivemongo.bson._
-
 object BsonDsl {
 
   implicit def bsonDocumentToPretty(document: BSONDocument): String = {
@@ -33,8 +31,8 @@ object BsonDsl {
     BSONDocument(field -> BSONDocument((Seq(element) ++ elements)))
   }
 
-  def $id(id: BSONObjectID): BSONDocument = {
-    BSONDocument("_id" -> id)
+  def $id(id: Producer[BSONValue], idField: String = "_id"): BSONDocument = {
+    BSONDocument(idField -> id.produce.get)
   }
 
   def $ne(item: Producer[BSONElement]): BSONDocument = {

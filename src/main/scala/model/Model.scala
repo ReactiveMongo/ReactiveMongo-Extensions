@@ -16,9 +16,4 @@
 
 package reactivemongo.extensions.model
 
-import reactivemongo.bson.BSONObjectID
-
-trait Model {
-  def _id: BSONObjectID
-}
-
+trait Model
