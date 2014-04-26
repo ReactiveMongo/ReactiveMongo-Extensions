@@ -35,6 +35,10 @@ trait BsonDsl {
     BSONDocument(idField -> id.produce.get)
   }
 
+  def $exists(field: String, exists: Boolean = true): BSONDocument = {
+    $doc(field -> $doc("$exists" -> exists))
+  }
+
   def $ne(item: Producer[BSONElement]): BSONDocument = {
     val (field, value) = item.produce.get
     BSONDocument(field -> BSONDocument("$ne" -> value))

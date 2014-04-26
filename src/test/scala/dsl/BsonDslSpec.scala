@@ -155,4 +155,14 @@ class BsonDslSpec extends FlatSpec with Matchers {
     dsl shouldBe expected
   }
 
+  it should "create $exists" in {
+    val dsl1 = $exists("qty")
+    val expected1 = BSONDocument("qty" -> BSONDocument("$exists" -> true))
+    dsl1 shouldBe expected1
+
+    val dsl2 = $exists("qty", false)
+    val expected2 = BSONDocument("qty" -> BSONDocument("$exists" -> false))
+    dsl2 shouldBe expected2
+  }
+
 }

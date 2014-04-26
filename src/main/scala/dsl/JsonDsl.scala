@@ -44,6 +44,10 @@ trait JsonDsl {
     $doc(idField -> id)
   }
 
+  def $exists(field: Field, exists: Boolean = true): JsObject = {
+    $doc(field -> $doc("$exists" -> exists))
+  }
+
   def $ne(element: Element): JsObject = {
     Json.obj(element._1 -> Json.obj("$ne" -> element._2))
   }
