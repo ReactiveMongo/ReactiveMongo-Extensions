@@ -22,7 +22,7 @@ import play.api.libs.json.Json.{ JsValueWrapper, toJsFieldJsValueWrapper }
 import reactivemongo.bson.BSONObjectID
 import play.modules.reactivemongo.json.BSONFormats._
 
-object JsonDsl {
+trait JsonDsl {
 
   type Field = String
 
@@ -116,3 +116,6 @@ object JsonDsl {
   }
 
 }
+
+object JsonDsl extends JsonDsl
+

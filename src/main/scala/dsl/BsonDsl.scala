@@ -17,7 +17,7 @@
 // In order to use Producer.produce we must be in this package.
 package reactivemongo.bson
 
-object BsonDsl {
+trait BsonDsl {
 
   implicit def bsonDocumentToPretty(document: BSONDocument): String = {
     BSONDocument.pretty(document)
@@ -112,3 +112,6 @@ object BsonDsl {
   }
 
 }
+
+object BsonDsl extends BsonDsl
+
