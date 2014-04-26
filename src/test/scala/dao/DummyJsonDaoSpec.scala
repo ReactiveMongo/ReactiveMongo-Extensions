@@ -23,10 +23,11 @@ import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats._
 import reactivemongo.extensions.model.DummyModel
 import reactivemongo.extensions.dsl.JsonDsl._
+import reactivemongo.extensions.util.Logger
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class JsonDaoSpec
+class DummyJsonDaoSpec
     extends FlatSpec
     with Matchers
     with ScalaFutures
@@ -41,7 +42,7 @@ class JsonDaoSpec
     dao.dropSync()
   }
 
-  "A JsonDao" should "find one document" in {
+  "A DummyJsonDao" should "find one document" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
 
     val futureResult = for {
@@ -71,6 +72,32 @@ class JsonDaoSpec
     }
   }
 
+  it should "find all of the selected documents" in {
+    val dummyModels = DummyModel.random(100)
+
+    val futureModels = for {
+      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      models <- dao.findAll($gte("age" -> 50))
+    } yield models
+
+    whenReady(futureModels) { models =>
+      models should have size 51
+    }
+  }
+
+  it should "find all documents" in {
+    val dummyModels = DummyModel.random(100)
+
+    val futureModels = for {
+      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      models <- dao.findAll()
+    } yield models
+
+    whenReady(futureModels) { models =>
+      models should have size 100
+    }
+  }
+
   it should "find one random document in all documents" in {
     val dummyModels = DummyModel.random(100)
 
@@ -80,8 +107,9 @@ class JsonDaoSpec
     } yield random
 
     whenReady(futureResult) { random =>
+      Logger.trace(s"$random")
       random should be('defined)
-      random.get.age should be > 1
+      random.get.age should be >= 1
       random.get.age should be <= 100
     }
   }

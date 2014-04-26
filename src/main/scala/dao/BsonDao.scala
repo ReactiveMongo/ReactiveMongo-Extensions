@@ -55,6 +55,11 @@ abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
       .collect[List](pageSize)
   }
 
+  def findAll(selector: BSONDocument = BSONDocument.empty,
+              sort: BSONDocument = BSONDocument(idField -> 1)): Future[List[T]] = {
+    collection.find(selector).sort(sort).cursor[T].collect[List]()
+  }
+
   def findRandom(selector: BSONDocument = BSONDocument.empty): Future[Option[T]] = {
     for {
       count <- count(selector)

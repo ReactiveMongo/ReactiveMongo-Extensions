@@ -41,6 +41,26 @@ abstract class JsonDao[T <: Model: OFormat] extends Dao[JSONCollection] {
     findOne($id(id, idField))
   }
 
+  /** @param page 1 based
+    */
+  def find(selector: JsObject = Json.obj(),
+           sort: JsObject = Json.obj(idField -> 1),
+           page: Int,
+           pageSize: Int): Future[List[T]] = {
+    val from = (page - 1) * pageSize
+    collection
+      .find(selector)
+      .sort(sort)
+      .options(QueryOpts(skipN = from, batchSizeN = pageSize))
+      .cursor[T]
+      .collect[List](pageSize)
+  }
+
+  def findAll(selector: JsObject = Json.obj(),
+              sort: JsObject = Json.obj(idField -> 1)): Future[List[T]] = {
+    collection.find(selector).sort(sort).cursor[T].collect[List]()
+  }
+
   def findRandom(selector: JsObject = Json.obj()): Future[Option[T]] = {
     for {
       count <- count(selector)
@@ -60,21 +80,6 @@ abstract class JsonDao[T <: Model: OFormat] extends Dao[JSONCollection] {
 
   def updateById(id: JsValueWrapper, query: JsObject): Future[LastError] =
     collection.update($id(id, idField), query)
-
-  /** @param page 1 based
-    */
-  def scroll(selector: JsObject = Json.obj(),
-             sort: JsObject = Json.obj("_id" -> 1),
-             page: Int,
-             pageSize: Int): Future[List[T]] = {
-    val from = (page - 1) * pageSize
-    collection
-      .find(selector)
-      .sort(sort)
-      .options(QueryOpts(skipN = from, batchSizeN = pageSize))
-      .cursor[T]
-      .collect[List](pageSize)
-  }
 
   def count(selector: JsObject = Json.obj()): Future[Int] = {
     collection.db.command(Count(collectionName, Some(JsObjectWriter.write(selector))))
