@@ -74,4 +74,22 @@ class CustomIdBsonDaoSpec
     }
   }
 
+  it should "update the whole document by id" in {
+    val customIdModel = CustomIdModel(name = "foo", surname = "bar", age = 32)
+    val update = customIdModel.copy(age = 64)
+
+    val futureResult = for {
+      insert <- dao.insert(customIdModel)
+      update <- dao.updateById(customIdModel.id, update)
+      updatedMaybeCustomIdModel <- dao.findById(customIdModel.id)
+    } yield updatedMaybeCustomIdModel
+
+    whenReady(futureResult) { updatedMaybeCustomIdModel =>
+      updatedMaybeCustomIdModel should be('defined)
+      val updatedCustomIdModel = updatedMaybeCustomIdModel.get
+      updatedCustomIdModel.id shouldBe customIdModel.id
+      updatedCustomIdModel.age shouldBe 64
+    }
+  }
+
 }

@@ -77,8 +77,13 @@ abstract class JsonDao[T: OFormat] extends Dao[JSONCollection] {
     collection.bulkInsert(enumerator)
   }
 
-  def updateById(id: JsValueWrapper, query: JsObject): Future[LastError] =
+  def updateById(id: JsValueWrapper, query: JsObject): Future[LastError] = {
     collection.update($id(id, idField), query)
+  }
+
+  def updateById(id: JsValueWrapper, query: T): Future[LastError] = {
+    collection.update($id(id, idField), query)
+  }
 
   def count(selector: JsObject = Json.obj()): Future[Int] = {
     collection.db.command(Count(collectionName, Some(JsObjectWriter.write(selector))))
