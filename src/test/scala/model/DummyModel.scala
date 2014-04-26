@@ -25,7 +25,7 @@ case class DummyModel(
   _id: BSONObjectID = BSONObjectID.generate,
   name: String,
   surname: String,
-  age: Int) extends Model
+  age: Int)
 
 object DummyModel {
   implicit val dummyModelHandler = Macros.handler[DummyModel]

@@ -25,7 +25,7 @@ case class CustomIdModel(
   id: String = java.util.UUID.randomUUID.toString,
   name: String,
   surname: String,
-  age: Int) extends Model
+  age: Int)
 
 object CustomIdModel {
   implicit val customIdModelHandler = Macros.handler[CustomIdModel]

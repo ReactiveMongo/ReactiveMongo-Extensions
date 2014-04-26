@@ -27,11 +27,10 @@ import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.modules.reactivemongo.json.BSONFormats._
 import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
-import reactivemongo.extensions.model.Model
 import reactivemongo.extensions.dsl.JsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
-abstract class JsonDao[T <: Model: OFormat] extends Dao[JSONCollection] {
+abstract class JsonDao[T: OFormat] extends Dao[JSONCollection] {
 
   def findOne(selector: JsObject): Future[Option[T]] = {
     collection.find(selector).one[T]

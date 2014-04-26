@@ -30,6 +30,8 @@ object JsonDsl {
 
   type Element = (Field, Value)
 
+  def $empty: JsObject = Json.obj()
+
   def $doc(element: Element, elements: Element*): JsObject = {
     Json.obj((Seq(element) ++ elements): _*)
   }

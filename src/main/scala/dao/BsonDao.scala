@@ -24,12 +24,11 @@ import reactivemongo.bson.BsonDsl._
 import reactivemongo.api.{ DB, QueryOpts }
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
-import reactivemongo.extensions.model.Model
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 import org.joda.time.DateTime
 import Handlers._
 
-abstract class BsonDao[T <: Model: BSONDocumentReader: BSONDocumentWriter]
+abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter]
     extends Dao[BSONCollection] {
 
   def findOne(selector: BSONDocument): Future[Option[T]] = {
