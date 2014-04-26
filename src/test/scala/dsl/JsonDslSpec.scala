@@ -57,6 +57,16 @@ class JsonDslSpec extends FlatSpec with Matchers {
     dsl shouldBe expected
   }
 
+  it should "create $or" in {
+    val dsl = $or($lt("qty" -> 20), $doc("sale" -> true))
+    Logger.debug(s"$dsl")
+    val expected = Json.obj(
+      "$or" -> Json.arr(
+        Json.obj("qty" -> Json.obj("$lt" -> 20)),
+        Json.obj("sale" -> true)))
+    dsl shouldBe expected
+  }
+
   it should "create $ne" in {
     val dsl = $ne("name" -> "foo")
     Logger.debug(s"$dsl")

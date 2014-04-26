@@ -109,4 +109,8 @@ object JsonDsl {
     Json.obj("$pull" -> Json.obj(element))
   }
 
+  def $or(expressions: JsObject*): JsObject = {
+    Json.obj("$or" -> expressions)
+  }
+
 }

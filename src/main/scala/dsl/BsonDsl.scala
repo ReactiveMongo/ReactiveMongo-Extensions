@@ -106,4 +106,9 @@ object BsonDsl {
   def $pull(item: Producer[BSONElement]): BSONDocument = {
     BSONDocument("$pull" -> BSONDocument(item))
   }
+
+  def $or(expressions: BSONDocument*): BSONDocument = {
+    BSONDocument("$or" -> expressions)
+  }
+
 }
