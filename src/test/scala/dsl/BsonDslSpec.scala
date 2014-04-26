@@ -77,7 +77,8 @@ class BsonDslSpec extends FlatSpec with Matchers {
   }
 
   it should "create $in" in {
-    val dsl = $in("age", 1, 2, 3)
+    val seq = Seq(1, 2, 3)
+    val dsl = $in("age", seq)
     Logger.debug(dsl)
     val expected = BSONDocument("age" -> BSONDocument("$in" -> BSONArray(1, 2, 3)))
     dsl shouldBe expected
@@ -96,7 +97,8 @@ class BsonDslSpec extends FlatSpec with Matchers {
   }
 
   it should "create $nin" in {
-    val dsl = $nin("age", 1, 2, 3)
+    val seq = Seq(1, 2, 3)
+    val dsl = $nin("age", seq)
     Logger.debug(dsl)
     val expected = BSONDocument("age" -> BSONDocument("$nin" -> BSONArray(1, 2, 3)))
     dsl shouldBe expected

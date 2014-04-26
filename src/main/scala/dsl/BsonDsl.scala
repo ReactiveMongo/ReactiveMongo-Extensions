@@ -62,8 +62,8 @@ trait BsonDsl {
     "$gte" -> value.produce.get
   }
 
-  def $in(field: String, values: Producer[BSONValue]*): BSONDocument = {
-    BSONDocument(field -> BSONDocument("$in" -> BSONArray(values.map(_.produce.get))))
+  def $in(field: String, values: Producer[BSONValue]): BSONDocument = {
+    BSONDocument(field -> BSONDocument("$in" -> values.produce.get))
   }
 
   def $lt(item: Producer[BSONElement]): BSONDocument = {
@@ -84,8 +84,8 @@ trait BsonDsl {
     "$lte" -> value.produce.get
   }
 
-  def $nin(field: String, values: Producer[BSONValue]*): BSONDocument = {
-    BSONDocument(field -> BSONDocument("$nin" -> BSONArray(values.map(_.produce.get))))
+  def $nin(field: String, values: Producer[BSONValue]): BSONDocument = {
+    BSONDocument(field -> BSONDocument("$nin" -> values.produce.get))
   }
 
   def $set(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {

@@ -68,8 +68,8 @@ trait JsonDsl {
     "$gte" -> value
   }
 
-  def $in(field: String, values: Value*): JsObject = {
-    Json.obj(field -> Json.obj("$in" -> Json.arr(values: _*)))
+  def $in(field: String, value: Value): JsObject = {
+    Json.obj(field -> Json.obj("$in" -> value))
   }
 
   def $lt(element: Element): JsObject = {
@@ -88,8 +88,8 @@ trait JsonDsl {
     "$lte" -> value
   }
 
-  def $nin(field: String, values: Value*): JsObject = {
-    Json.obj(field -> Json.obj("$nin" -> Json.arr(values: _*)))
+  def $nin(field: String, value: Value): JsObject = {
+    Json.obj(field -> Json.obj("$nin" -> value))
   }
 
   def $set(element: Element, elements: Element*): JsObject = {

@@ -89,7 +89,8 @@ class JsonDslSpec extends FlatSpec with Matchers {
   }
 
   it should "create $in" in {
-    val dsl = $in("age", 1, 2, 3)
+    val seq = Seq(1, 2, 3)
+    val dsl = $in("age", seq)
     Logger.debug(s"$dsl")
     val expected = Json.obj("age" -> Json.obj("$in" -> Json.arr(1, 2, 3)))
     dsl shouldBe expected
@@ -110,7 +111,8 @@ class JsonDslSpec extends FlatSpec with Matchers {
   }
 
   it should "create $nin" in {
-    val dsl = $nin("age", 1, 2, 3)
+    val seq = Seq(1, 2, 3)
+    val dsl = $nin("age", seq)
     Logger.debug(s"$dsl")
     val expected = Json.obj("age" -> Json.obj("$nin" -> Json.arr(1, 2, 3)))
     dsl shouldBe expected
