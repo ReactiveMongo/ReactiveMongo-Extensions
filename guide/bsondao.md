@@ -14,7 +14,7 @@ case class Person(
   age: Int)
 ```
 
-Now let's define a JsonDao for this model.
+Now let's define a BsonDao for this model.
 
 ```scala
 object PersonDao extends BsonDao[Person] {
