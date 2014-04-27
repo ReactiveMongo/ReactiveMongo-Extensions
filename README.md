@@ -1,6 +1,6 @@
 # ReactiveMongo Extensions
 
-This is an extension library providing DAO and DSL support for ReactiveMongo.
+This is a library providing DAO and DSL support for ReactiveMongo. The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
 [![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=master)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
 
@@ -29,8 +29,11 @@ Contributions are always welcome. Good ways to contribute include:
 * Improving the performance
 * Adding to the documentation
 
-
 ## Introduction
+
+ *ReactiveMongo Extensions* currently provides two DAO types, which are [BsonDao](src/main/scala/dao/BsonDao.scala) and [JsonDao](src/main/scala/dao/JsonDao.scala). You may want to check test specifications for possible use cases. Both of the DAOs have similar APIs. Some of them are ```find```, ```findOne```, ```findById```, ```insert```, ```updateById```, ```count```, ```foreach```, ```fold```...
+ 
+There also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries. 
 
 [BSON DAO](guide/bsondao.md)
 
