@@ -23,7 +23,7 @@ object PersonDao extends BsonDao[Person] {
 }
 ```
 
-```db``` and ```collectionName``` are the only required members of JsonDao. 
+```db``` and ```collectionName``` are the only required members of BsonDao. 
 
 ### API
 
