@@ -43,7 +43,7 @@ Each type has its own dedicated documentation page, however API for all types ar
 
 [JsonDao](guide/jsondao.md)
 
-[JsonDsl](guide/bsondao.md)
+[JsonDsl](guide/jsondsl.md)
 
 
  
