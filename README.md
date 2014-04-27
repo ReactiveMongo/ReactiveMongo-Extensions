@@ -35,10 +35,16 @@ Contributions are always welcome. Good ways to contribute include:
  
 There also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries. 
 
-[BSON DAO](guide/bsondao.md)
+Each type has its own dedicated documentation page, however API for all types are very similar. You need to define a DAO for each of your models. A DAO needs a ```db``` and a ```collectionName```. If you don't want to use the default id field which is ```_id```, you can also override ```idField``` which expects a field name. 
 
-[BSON DSL](guide/bsondsl.md)
+[BsonDao](guide/bsondao.md)
 
-[JSON DAO](guide/jsondao.md)
+[BsonDsl](guide/bsondsl.md)
 
-[JSON DSL](guide/bsondao.md)
+[JsonDao](guide/jsondao.md)
+
+[JsonDsl](guide/bsondao.md)
+
+
+ 
+
