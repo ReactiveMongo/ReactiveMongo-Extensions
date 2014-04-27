@@ -1,20 +1,44 @@
 ## BsonDao
 
-### findOne
+### Usage 
+
+BsonDao operates on reactivemongo.api.collections.default.BSONCollection. You will need to define a DAO for each of your models(case classes).
+
+Below is a sample model.
+
+```scala
+case class Person(
+  _id: BSONObjectID = BSONObjectID.generate,
+  name: String, 
+  surname: String, 
+  age: Int)
+```
+
+Now let's define a JsonDao for this model.
+
+```scala
+object PersonDao extends BsonDao[Person] {
+  def db: DB = ???
+  val collectionName: String = "persons"
+}
+```
+
+```db``` and ```collectionName``` are the only required members of JsonDao. 
+
+### API
+
+
+#### findOne
 ```scala
 def findOne(selector: BSONDocument): Future[Option[T]]
 ```
 
-### findById
+#### findById
 ```scala
-def findById(id: String): Future[Option[T]]
+def findById(id: BSONValue): Future[Option[T]]
 ```
 
-### insert
-```scala
-def insert(document: BSONDocument): Future[LastError]
-```
-
+#### insert
 ```scala
 def insert(document: T): Future[LastError]
 ```
@@ -23,39 +47,39 @@ def insert(document: T): Future[LastError]
 def insert(documents: TraversableOnce[T]): Future[Int]
 ```
 
-### updateById
+#### updateById
 ```scala
-def updateById(id: String,
+def updateById(id: BSONValue,
                update: BSONDocument,
                writeConcern: GetLastError = GetLastError(),
                upsert: Boolean = false,
                multi: Boolean = false): Future[LastError]
 ```
 
-### count
+#### count
 ```scala
-def count(selector: Option[BSONDocument] = None): Future[Int]
+def count(selector: BSONDocument = BSONDocument.empty): Future[Int]
 ```
 
-### foreach
+#### foreach
 ```scala
 def foreach(selector: BSONDocument = BSONDocument.empty,
-            sort: BSONDocument = BSONDocument("_id" -> 1))(f: (T) => Unit): Future[Unit]
+            sort: BSONDocument = BSONDocument(idField -> 1))(f: (T) => Unit): Future[Unit]
 ```
 
-### fold
+#### fold
 ```scala
 def fold[A](selector: BSONDocument = BSONDocument.empty,
-            sort: BSONDocument = BSONDocument("_id" -> 1),
+            sort: BSONDocument = BSONDocument(idField -> 1),
             state: A)(f: (A, T) => A): Future[A]
 ```
 
-### drop
+#### drop
 ```scala
 def drop(): Future[Boolean]
 ```
 
-### dropSync
+#### dropSync
 ```scala
 def dropSync(timeout: Duration = 10 seconds): Boolean
 ```
