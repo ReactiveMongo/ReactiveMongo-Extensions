@@ -40,7 +40,7 @@ BSONDocument("age" -> BSONDocument("$gte" -> 16))
 ### $in
 ```scala
 // Input
-$in("age", 1, 2, 3)
+$in("age", Seq(1, 2, 3))
 // Output
 BSONDocument("age" -> BSONDocument("$in" -> BSONArray(1, 2, 3)))
 ```
@@ -64,7 +64,7 @@ BSONDocument("age" -> BSONDocument("$lte" -> 16))
 ### $nin
 ```scala
 // Input
-$nin("age", 1, 2, 3)
+$nin("age", Seq(1, 2, 3))
 // Output
 BSONDocument("age" -> BSONDocument("$nin" -> BSONArray(1, 2, 3)))
 ```
