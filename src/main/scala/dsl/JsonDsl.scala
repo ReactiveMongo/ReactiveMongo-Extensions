@@ -14,7 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// In order to use Producer.produce we must be in this package.
 package reactivemongo.extensions.dsl
 
 import play.api.libs.json._
@@ -34,6 +33,10 @@ trait JsonDsl {
 
   def $doc(element: Element, elements: Element*): JsObject = {
     Json.obj((Seq(element) ++ elements): _*)
+  }
+
+  def $and(element: Element, elements: Element*): JsObject = {
+    $doc(element, elements: _*)
   }
 
   def $docx(field: Field, element: Element, elements: Element*): JsObject = {
