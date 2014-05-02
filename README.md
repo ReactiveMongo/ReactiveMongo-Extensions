@@ -17,6 +17,7 @@ If you use SBT, you just have to edit build.sbt and add the following:
 libraryDependencies ++= Seq(
   "net.fehmicansaglam" %% "reactivemongo-extensions" % "0.10.0.0"
 )
+```
 
 Or if you want to be on the bleeding edge using snapshots:
 
