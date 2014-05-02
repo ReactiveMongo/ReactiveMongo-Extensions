@@ -2,7 +2,7 @@
 
 This is a library providing DAO and DSL support for ReactiveMongo. The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
-[![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=master)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
+[![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=0.10.x)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
 
 ## Using ReactiveMongo Extensions in your project
 
@@ -32,10 +32,10 @@ Contributions are always welcome. Good ways to contribute include:
 ## Introduction
 
  *ReactiveMongo Extensions* currently provides two DAO types, which are [BsonDao](src/main/scala/dao/BsonDao.scala) and [JsonDao](src/main/scala/dao/JsonDao.scala). You may want to check test specifications for possible use cases. Both of the DAOs have similar APIs. Some of them are ```find```, ```findOne```, ```findById```, ```insert```, ```updateById```, ```count```, ```foreach```, ```fold```...
- 
-There also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries. 
 
-Each type has its own dedicated documentation page, however API for all types are very similar. You need to define a DAO for each of your models. A DAO needs a ```db``` and a ```collectionName```. If you don't want to use the default id field which is ```_id```, you can also override ```idField``` which expects a field name. 
+There also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries.
+
+Each type has its own dedicated documentation page, however API for all types are very similar. You need to define a DAO for each of your models. A DAO needs a ```db``` and a ```collectionName```. If you don't want to use the default id field which is ```_id```, you can also override ```idField``` which expects a field name.
 
 [BsonDao](guide/bsondao.md)
 
@@ -46,5 +46,5 @@ Each type has its own dedicated documentation page, however API for all types ar
 [JsonDsl](guide/jsondsl.md)
 
 
- 
+
 
