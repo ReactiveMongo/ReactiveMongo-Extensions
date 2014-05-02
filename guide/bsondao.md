@@ -57,7 +57,9 @@ def updateById(id: BSONValue,
 ```
 
 #### save
+```scala
 def save(document: T, writeConcern: GetLastError = GetLastError())
+```
 
 #### count
 ```scala
