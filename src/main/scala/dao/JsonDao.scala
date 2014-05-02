@@ -85,6 +85,10 @@ abstract class JsonDao[T: OFormat] extends Dao[JSONCollection] {
     collection.update($id(id, idField), query)
   }
 
+  def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
+    collection.save(document, writeConcern)
+  }
+
   def count(selector: JsObject = Json.obj()): Future[Int] = {
     collection.db.command(Count(collectionName, Some(JsObjectWriter.write(selector))))
   }

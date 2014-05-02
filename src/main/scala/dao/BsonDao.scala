@@ -88,6 +88,10 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter]
     collection.update($id(id, idField), update)
   }
 
+  def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
+    collection.save(document, writeConcern)
+  }
+
   def count(selector: BSONDocument = BSONDocument.empty): Future[Int] = {
     collection.db.command(Count(collectionName, Some(selector)))
   }
