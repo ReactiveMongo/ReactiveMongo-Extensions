@@ -1,6 +1,6 @@
 ## BsonDao
 
-### Usage 
+### Usage
 
 BsonDao operates on reactivemongo.api.collections.default.BSONCollection. You will need to define a DAO for each of your models(case classes).
 
@@ -9,8 +9,8 @@ Below is a sample model.
 ```scala
 case class Person(
   _id: BSONObjectID = BSONObjectID.generate,
-  name: String, 
-  surname: String, 
+  name: String,
+  surname: String,
   age: Int)
 ```
 
@@ -23,7 +23,7 @@ object PersonDao extends BsonDao[Person] {
 }
 ```
 
-```db``` and ```collectionName``` are the only required members of BsonDao. 
+```db``` and ```collectionName``` are the only required members of BsonDao.
 
 ### API
 
@@ -55,6 +55,9 @@ def updateById(id: BSONValue,
                upsert: Boolean = false,
                multi: Boolean = false): Future[LastError]
 ```
+
+#### save
+def save(document: T, writeConcern: GetLastError = GetLastError())
 
 #### count
 ```scala

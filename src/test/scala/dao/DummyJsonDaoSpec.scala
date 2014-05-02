@@ -205,4 +205,28 @@ class DummyJsonDaoSpec
     }
   }
 
+  it should "save document" in {
+    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
+
+    val futureResult = for {
+      insert <- dao.save(dummyModel)
+      maybeInsertedDummyModel <- dao.findById(dummyModel._id)
+      update <- dao.save(dummyModel.copy(age = 64))
+      maybeUpdatedDummyModel <- dao.findById(dummyModel._id)
+    } yield (maybeInsertedDummyModel, maybeUpdatedDummyModel)
+
+    whenReady(futureResult) {
+      case (maybeInsertedDummyModel, maybeUpdatedDummyModel) =>
+        maybeInsertedDummyModel should be('defined)
+        val insertedDummyModel = maybeInsertedDummyModel.get
+        insertedDummyModel._id shouldBe dummyModel._id
+        insertedDummyModel.age shouldBe 32
+
+        maybeUpdatedDummyModel should be('defined)
+        val updatedDummyModel = maybeUpdatedDummyModel.get
+        updatedDummyModel._id shouldBe dummyModel._id
+        updatedDummyModel.age shouldBe 64
+    }
+  }
+
 }

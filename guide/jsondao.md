@@ -7,8 +7,8 @@ Below is a sample model.
 ```scala
 case class Person(
   _id: BSONObjectID = BSONObjectID.generate,
-  name: String, 
-  surname: String, 
+  name: String,
+  surname: String,
   age: Int)
 ```
 
@@ -29,3 +29,8 @@ object PersonDao extends JsonDao[Person] {
   val collectionName: String = "persons"
 }
 ```
+
+### API
+
+#### save
+def save(document: T, writeConcern: GetLastError = GetLastError())
