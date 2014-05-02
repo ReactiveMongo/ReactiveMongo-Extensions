@@ -4,7 +4,7 @@ name := "reactivemongo-extensions"
 
 organization := "net.fehmicansaglam"
 
-version := "0.11.0.0-SNAPSHOT"
+version := "0.10.0.0"
 
 scalaVersion  := "2.10.4"
 
@@ -37,12 +37,11 @@ org.scalastyle.sbt.ScalastylePlugin.Settings
 shellPrompt in ThisBuild := Common.prompt
 
 resolvers ++= Seq(
-  "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
   "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/")
 
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % Common.reactiveMongoVersion,
-  "org.reactivemongo" %% "play2-reactivemongo" % Common.reactiveMongoVersion % "provided",
+  "org.reactivemongo" %% "play2-reactivemongo" % Common.playReactiveMongoVersion % "provided",
   "com.typesafe.play" %% "play-json" % "2.2.2" % "provided",
   "joda-time" % "joda-time" % "2.3",
   "org.joda" % "joda-convert" % "1.6",
