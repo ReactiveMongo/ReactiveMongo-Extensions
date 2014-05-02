@@ -33,4 +33,6 @@ object PersonDao extends JsonDao[Person] {
 ### API
 
 #### save
+```scala
 def save(document: T, writeConcern: GetLastError = GetLastError())
+```
