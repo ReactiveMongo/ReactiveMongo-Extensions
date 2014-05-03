@@ -30,4 +30,44 @@ object Handlers {
     def write(date: DateTime) = BSONDateTime(date.getMillis)
   }
 
+  /* Source: https://github.com/hmrc/simple-reactivemongo/blob/master/src/main/scala/uk/gov/hmrc/mongo/ExtraBSONHandlers.scala */
+  implicit def MapBSONReader[T](implicit reader: BSONReader[_ <: BSONValue, T]): BSONDocumentReader[Map[String, T]] =
+    new BSONDocumentReader[Map[String, T]] {
+      def read(doc: BSONDocument): Map[String, T] = {
+        doc.elements.collect {
+          case (key, value) => value.seeAsOpt[T](reader) map {
+            ov => (key, ov)
+          }
+        }.flatten.toMap
+      }
+    }
+
+  /* Source: https://github.com/hmrc/simple-reactivemongo/blob/master/src/main/scala/uk/gov/hmrc/mongo/ExtraBSONHandlers.scala */
+  implicit def MapBSONWriter[T](implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocumentWriter[Map[String, T]] = new BSONDocumentWriter[Map[String, T]] {
+    def write(doc: Map[String, T]): BSONDocument = {
+      BSONDocument(doc.toTraversable map (t => (t._1, writer.write(t._2))))
+    }
+  }
+
+  /* Source: https://github.com/ReactiveMongo/ReactiveMongo/blob/master/driver/samples/BSON.scala */
+  implicit def MapReader[V](implicit vr: BSONDocumentReader[V]): BSONDocumentReader[Map[String, V]] = new BSONDocumentReader[Map[String, V]] {
+    def read(bson: BSONDocument): Map[String, V] = {
+      val elements = bson.elements.map { tuple =>
+        // assume that all values in the document are BSONDocuments
+        tuple._1 -> vr.read(tuple._2.seeAsTry[BSONDocument].get)
+      }
+      elements.toMap
+    }
+  }
+
+  /* Source: https://github.com/ReactiveMongo/ReactiveMongo/blob/master/driver/samples/BSON.scala */
+  implicit def MapWriter[V](implicit vw: BSONDocumentWriter[V]): BSONDocumentWriter[Map[String, V]] = new BSONDocumentWriter[Map[String, V]] {
+    def write(map: Map[String, V]): BSONDocument = {
+      val elements = map.toStream.map { tuple =>
+        tuple._1 -> vw.write(tuple._2)
+      }
+      BSONDocument(elements)
+    }
+  }
+
 }

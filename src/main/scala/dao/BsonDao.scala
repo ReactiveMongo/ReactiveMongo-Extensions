@@ -31,7 +31,7 @@ import Handlers._
 abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter]
     extends Dao[BSONCollection] {
 
-  def findOne(selector: BSONDocument): Future[Option[T]] = {
+  def findOne(selector: BSONDocument = BSONDocument.empty): Future[Option[T]] = {
     collection.find(selector).one[T]
   }
 
