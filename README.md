@@ -25,7 +25,7 @@ Or if you want to be on the bleeding edge using snapshots:
 resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions" % "0.11.0.0-SNAPSHOT"
+  "net.fehmicansaglam" %% "reactivemongo-extensions" % "0.10.0.1-SNAPSHOT"
 )
 ```
 
