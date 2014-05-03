@@ -20,7 +20,7 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import reactivemongo.bson._
-import reactivemongo.bson.BsonDsl._
+import reactivemongo.extensions.dsl.functional.BsonDsl._
 import reactivemongo.bson.Macros.Options.Verbose
 import reactivemongo.extensions.model.DummyModel
 import reactivemongo.extensions.util.Logger
@@ -47,7 +47,7 @@ class DummyBsonDaoSpec
 
     val futureResult = for {
       insertResult <- dao.insert(dummyModel)
-      maybeDummyModel <- dao.findOne($doc("age" -> dummyModel.age))
+      maybeDummyModel <- dao.findOne("age" $eq dummyModel.age)
     } yield maybeDummyModel
 
     whenReady(futureResult) { maybeDummyModel =>
@@ -62,7 +62,7 @@ class DummyBsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.insert(dummyModels)
-      random <- dao.findRandom($docx("age", $gtx(50), $ltx(60)))
+      random <- dao.findRandom("age" $gt 50 $lt 60)
     } yield random
 
     whenReady(futureResult) { random =>
@@ -77,7 +77,7 @@ class DummyBsonDaoSpec
 
     val futureModels = for {
       insertResult <- Future.sequence(dummyModels.map(dao.insert))
-      models <- dao.findAll($gte("age" -> 50))
+      models <- dao.findAll("age" $gte 50)
     } yield models
 
     whenReady(futureModels) { models =>
@@ -119,7 +119,7 @@ class DummyBsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.insert(dummyModels)
-      selectedModels <- dao.find(page = 2, pageSize = 20, sort = $doc("age" -> 1))
+      selectedModels <- dao.find(page = 2, pageSize = 20, sort = "age" $eq 1)
     } yield selectedModels
 
     whenReady(futureResult) { selectedModels =>
@@ -166,7 +166,7 @@ class DummyBsonDaoSpec
 
     val futureCount = for {
       insertResult <- Future.sequence(dummyModels.map(dao.insert))
-      count <- dao.count($gte("age" -> 50))
+      count <- dao.count("age" $gte 50)
     } yield count
 
     whenReady(futureCount) { count =>

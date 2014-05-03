@@ -23,8 +23,16 @@ trait BsonDsl {
     BSONDocument.pretty(document)
   }
 
+  protected def produce(producer: Producer[BSONValue]): BSONValue = {
+    producer.produce.get
+  }
+
   def $doc(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
     BSONDocument((Seq(item) ++ items): _*)
+  }
+
+  def $and(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
+    $doc(item, items: _*)
   }
 
   def $docx(field: String, element: BSONElement, elements: BSONElement*): BSONDocument = {
