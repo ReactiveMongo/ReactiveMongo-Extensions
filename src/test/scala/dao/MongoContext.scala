@@ -16,11 +16,11 @@
 
 package reactivemongo.extensions.dao
 
-import reactivemongo.api.MongoDriver
+import reactivemongo.api.{ MongoDriver, DB }
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object MongoContext {
   val driver = new MongoDriver
   val connection = driver.connection(List("localhost"))
-  val db = connection("test-reactivemongo-extensions")
+  def db: () => DB = () => connection("test-reactivemongo-extensions")
 }

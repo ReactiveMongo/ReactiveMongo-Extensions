@@ -29,7 +29,7 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
 import org.joda.time.DateTime
 import Handlers._
 
-abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: DB, collectionName: String)
+abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, collectionName: String)
     extends Dao[BSONCollection](db, collectionName) {
 
   def autoIndexes: Traversable[Index] = Seq.empty

@@ -21,11 +21,11 @@ import reactivemongo.api.indexes.Index
 import reactivemongo.bson.BSONObjectID
 import scala.concurrent.{ Future, ExecutionContext }
 
-abstract class Dao[C <: Collection: CollectionProducer](db: DB, collectionName: String) {
+abstract class Dao[C <: Collection: CollectionProducer](db: () => DB, collectionName: String) {
 
   implicit def ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  def collection: C = db.collection[C](collectionName)
+  def collection: C = db().collection[C](collectionName)
 
   def idField = "_id"
 

@@ -31,7 +31,7 @@ import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
 import reactivemongo.extensions.dsl.JsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
-abstract class JsonDao[T: OFormat](db: DB, collectionName: String)
+abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
     extends Dao[JSONCollection](db, collectionName) {
 
   def autoIndexes: Traversable[Index] = Seq.empty
