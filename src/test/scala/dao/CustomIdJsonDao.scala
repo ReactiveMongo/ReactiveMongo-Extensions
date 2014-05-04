@@ -17,9 +17,15 @@
 package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.CustomIdModel
+import reactivemongo.api.indexes.{ Index, IndexType }
 
-class CustomIdJsonDao extends JsonDao[CustomIdModel] {
-  val collectionName = "dummy-" + java.util.UUID.randomUUID.toString
-  val db = MongoContext.db
+class CustomIdJsonDao
+    extends JsonDao[CustomIdModel](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
+
   override def idField = "id"
+
+  override def autoIndexes = Seq(
+    Index(Seq("id" -> IndexType.Ascending), unique = true, background = true),
+    Index(Seq("age" -> IndexType.Ascending), background = true)
+  )
 }

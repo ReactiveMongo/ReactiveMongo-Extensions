@@ -18,7 +18,6 @@ package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.MapModel
 
-class MapModelBsonDao extends BsonDao[MapModel] {
-  val collectionName = "dummy-" + java.util.UUID.randomUUID.toString
-  val db = MongoContext.db
+class MapModelBsonDao
+    extends BsonDao[MapModel](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
 }

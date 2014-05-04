@@ -17,18 +17,16 @@
 package reactivemongo.extensions.dao
 
 import reactivemongo.api.{ DB, Collection, CollectionProducer }
+import reactivemongo.api.indexes.Index
 import reactivemongo.bson.BSONObjectID
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ Future, ExecutionContext }
 
-abstract class Dao[C <: Collection: CollectionProducer] {
+abstract class Dao[C <: Collection: CollectionProducer](db: DB, collectionName: String) {
 
   implicit def ec: ExecutionContext = ExecutionContext.Implicits.global
-
-  def collectionName: String
-
-  def db: DB
 
   def collection: C = db.collection[C](collectionName)
 
   def idField = "_id"
+
 }

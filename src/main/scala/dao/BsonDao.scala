@@ -22,14 +22,27 @@ import scala.concurrent.duration._
 import reactivemongo.bson._
 import reactivemongo.bson.BsonDsl._
 import reactivemongo.api.{ DB, QueryOpts }
+import reactivemongo.api.indexes.Index
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 import org.joda.time.DateTime
 import Handlers._
 
-abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter]
-    extends Dao[BSONCollection] {
+abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: DB, collectionName: String)
+    extends Dao[BSONCollection](db, collectionName) {
+
+  def autoIndexes: Traversable[Index] = Seq.empty
+
+  def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
+    autoIndexes map { index =>
+      collection.indexesManager.ensure(index)
+    }
+  }
+
+  def listIndexes(): Future[List[Index]] = {
+    collection.indexesManager.list()
+  }
 
   def findOne(selector: BSONDocument = BSONDocument.empty): Future[Option[T]] = {
     collection.find(selector).one[T]
@@ -124,5 +137,7 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter]
       .apply(Iteratee.fold(state)(f))
       .flatMap(i => i.run)
   }
+
+  ensureIndexes()
 }
 

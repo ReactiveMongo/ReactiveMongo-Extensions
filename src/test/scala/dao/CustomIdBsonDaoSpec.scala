@@ -92,4 +92,17 @@ class CustomIdBsonDaoSpec
     }
   }
 
+  it should "ensure indexes" in {
+    val futureIndexes = Future {
+      // Give some time for indexes to be ensured
+      Thread.sleep(2000)
+    } flatMap { _ =>
+      dao.listIndexes()
+    }
+
+    whenReady(futureIndexes) { indexes =>
+      indexes should have size 3 // including _id
+    }
+  }
+
 }

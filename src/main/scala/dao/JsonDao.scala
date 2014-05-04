@@ -22,7 +22,8 @@ import scala.concurrent.duration._
 import play.api.libs.json.{ Json, JsObject, OFormat }
 import play.api.libs.json.Json.JsValueWrapper
 import reactivemongo.bson.BSONObjectID
-import reactivemongo.api.QueryOpts
+import reactivemongo.api.{ DB, QueryOpts }
+import reactivemongo.api.indexes.Index
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.modules.reactivemongo.json.BSONFormats._
@@ -30,7 +31,20 @@ import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
 import reactivemongo.extensions.dsl.JsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
-abstract class JsonDao[T: OFormat] extends Dao[JSONCollection] {
+abstract class JsonDao[T: OFormat](db: DB, collectionName: String)
+    extends Dao[JSONCollection](db, collectionName) {
+
+  def autoIndexes: Traversable[Index] = Seq.empty
+
+  def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
+    autoIndexes map { index =>
+      collection.indexesManager.ensure(index)
+    }
+  }
+
+  def listIndexes(): Future[List[Index]] = {
+    collection.indexesManager.list()
+  }
 
   def findOne(selector: JsObject): Future[Option[T]] = {
     collection.find(selector).one[T]
@@ -121,4 +135,6 @@ abstract class JsonDao[T: OFormat] extends Dao[JSONCollection] {
       .apply(Iteratee.fold(state)(f))
       .flatMap(i => i.run)
   }
+
+  ensureIndexes()
 }

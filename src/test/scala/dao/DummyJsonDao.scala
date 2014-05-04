@@ -18,7 +18,6 @@ package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.DummyModel
 
-class DummyJsonDao extends JsonDao[DummyModel] {
-  val collectionName = "dummy-" + java.util.UUID.randomUUID.toString
-  val db = MongoContext.db
+class DummyJsonDao
+    extends JsonDao[DummyModel](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
 }
