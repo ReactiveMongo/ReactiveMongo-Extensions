@@ -6,8 +6,14 @@ This is a library providing DAO and DSL support for ReactiveMongo. The goal of *
 
 ## Using ReactiveMongo Extensions in your project
 
-The latest release is 0.10.0.0 which is compatible with ReactiveMongo 0.10.0.
 The general format is that release a.b.c.d is compatible with ReactiveMongo a.b.c.
+Current version matrix is below:
+
+|ReactiveMongo Extensions Release|Target ReactiveMongo version|
+|-------|---------------------|
+|0.10.0.0|0.10.0|
+|0.10.0.1-SNAPSHOT|0.10.0|
+|0.11.0.0-SNAPSHOT|0.11.0-SNAPSHOT|
 
 Note: Only available for scala 2.10.
 
