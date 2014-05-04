@@ -9,15 +9,16 @@ This is a library providing DAO and DSL support for ReactiveMongo. The goal of *
 The general format is that release a.b.c.d is compatible with ReactiveMongo a.b.c.
 Current version matrix is below:
 
-|ReactiveMongo Extensions Release|Target ReactiveMongo version|
-|-------|---------------------|
-|0.10.0.0|0.10.0|
-|0.10.0.1-SNAPSHOT|0.10.0|
-|0.11.0.0-SNAPSHOT|0.11.0-SNAPSHOT|
+| ReactiveMongo Extensions Release | Target ReactiveMongo version |
+|----------------------------------|------------------------------|
+| 0.10.0.0                         | 0.10.0                       |
+| 0.10.0.1-SNAPSHOT                | 0.10.0                       |
+| 0.11.0.0-SNAPSHOT                | 0.11.0-SNAPSHOT              |
 
 Note: Only available for scala 2.10.
 
-If you use SBT, you just have to edit build.sbt and add the following:
+If you use SBT, you just have to edit build.sbt and add the foll
+wing:
 
 ```scala
 libraryDependencies ++= Seq(
@@ -47,7 +48,7 @@ Contributions are always welcome. Good ways to contribute include:
 
  *ReactiveMongo Extensions* currently provides two DAO types, which are [BsonDao](src/main/scala/dao/BsonDao.scala) and [JsonDao](src/main/scala/dao/JsonDao.scala). You may want to check test specifications for possible use cases. Both of the DAOs have similar APIs. Some of them are ```find```, ```findOne```, ```findById```, ```insert```, ```updateById```, ```count```, ```foreach```, ```fold```...
 
-There also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries.
+There are also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries.
 
 Each type has its own dedicated documentation page, however API for all types are very similar. You need to define a DAO for each of your models. A DAO needs a ```db``` and a ```collectionName```. If you don't want to use the default id field which is ```_id```, you can also override ```idField``` which expects a field name.
 
