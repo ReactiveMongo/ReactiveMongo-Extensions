@@ -51,13 +51,13 @@ abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
   }
 
   def findById(id: JsValueWrapper): Future[Option[T]] = {
-    findOne($id(id, idField))
+    findOne($id(id))
   }
 
   /** @param page 1 based
     */
   def find(selector: JsObject = Json.obj(),
-           sort: JsObject = Json.obj(idField -> 1),
+           sort: JsObject = Json.obj("_id" -> 1),
            page: Int,
            pageSize: Int): Future[List[T]] = {
     val from = (page - 1) * pageSize
@@ -70,7 +70,7 @@ abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
   }
 
   def findAll(selector: JsObject = Json.obj(),
-              sort: JsObject = Json.obj(idField -> 1)): Future[List[T]] = {
+              sort: JsObject = Json.obj("_id" -> 1)): Future[List[T]] = {
     collection.find(selector).sort(sort).cursor[T].collect[List]()
   }
 
@@ -92,11 +92,11 @@ abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
   }
 
   def updateById(id: JsValueWrapper, query: JsObject): Future[LastError] = {
-    collection.update($id(id, idField), query)
+    collection.update($id(id), query)
   }
 
   def updateById(id: JsValueWrapper, query: T): Future[LastError] = {
-    collection.update($id(id, idField), query)
+    collection.update($id(id), query)
   }
 
   def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {

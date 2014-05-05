@@ -27,6 +27,4 @@ abstract class Dao[C <: Collection: CollectionProducer](db: () => DB, collection
 
   def collection: C = db().collection[C](collectionName)
 
-  def idField = "_id"
-
 }

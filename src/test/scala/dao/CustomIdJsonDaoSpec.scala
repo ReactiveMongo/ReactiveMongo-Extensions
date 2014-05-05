@@ -46,12 +46,12 @@ class CustomIdJsonDaoSpec
 
     val futureResult = for {
       insertResult <- dao.insert(customIdModel)
-      maybeCustomIdModel <- dao.findById(customIdModel.id)
+      maybeCustomIdModel <- dao.findById(customIdModel._id)
     } yield maybeCustomIdModel
 
     whenReady(futureResult) { maybeCustomIdModel =>
       maybeCustomIdModel should be('defined)
-      maybeCustomIdModel.get.id shouldBe customIdModel.id
+      maybeCustomIdModel.get._id shouldBe customIdModel._id
       maybeCustomIdModel.get.age shouldBe customIdModel.age
     }
   }
@@ -62,14 +62,14 @@ class CustomIdJsonDaoSpec
 
     val futureResult = for {
       insert <- dao.insert(customIdModel)
-      update <- dao.updateById(customIdModel.id, update)
-      updatedMaybeCustomIdModel <- dao.findById(customIdModel.id)
+      update <- dao.updateById(customIdModel._id, update)
+      updatedMaybeCustomIdModel <- dao.findById(customIdModel._id)
     } yield updatedMaybeCustomIdModel
 
     whenReady(futureResult) { updatedMaybeCustomIdModel =>
       updatedMaybeCustomIdModel should be('defined)
       val updatedCustomIdModel = updatedMaybeCustomIdModel.get
-      updatedCustomIdModel.id shouldBe customIdModel.id
+      updatedCustomIdModel._id shouldBe customIdModel._id
       updatedCustomIdModel.age shouldBe 64
     }
   }
@@ -80,14 +80,14 @@ class CustomIdJsonDaoSpec
 
     val futureResult = for {
       insert <- dao.insert(customIdModel)
-      update <- dao.updateById(customIdModel.id, update)
-      updatedMaybeCustomIdModel <- dao.findById(customIdModel.id)
+      update <- dao.updateById(customIdModel._id, update)
+      updatedMaybeCustomIdModel <- dao.findById(customIdModel._id)
     } yield updatedMaybeCustomIdModel
 
     whenReady(futureResult) { updatedMaybeCustomIdModel =>
       updatedMaybeCustomIdModel should be('defined)
       val updatedCustomIdModel = updatedMaybeCustomIdModel.get
-      updatedCustomIdModel.id shouldBe customIdModel.id
+      updatedCustomIdModel._id shouldBe customIdModel._id
       updatedCustomIdModel.age shouldBe 64
     }
   }

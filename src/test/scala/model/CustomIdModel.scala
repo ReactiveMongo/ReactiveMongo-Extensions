@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats._
 
 case class CustomIdModel(
-  id: String = java.util.UUID.randomUUID.toString,
+  _id: String = java.util.UUID.randomUUID.toString,
   name: String,
   surname: String,
   age: Int)

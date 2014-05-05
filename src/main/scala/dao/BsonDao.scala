@@ -49,13 +49,13 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
   }
 
   def findById(id: Producer[BSONValue]): Future[Option[T]] = {
-    findOne($id(id, idField))
+    findOne($id(id))
   }
 
   /** @param page 1 based
     */
   def find(selector: BSONDocument = BSONDocument.empty,
-           sort: BSONDocument = BSONDocument(idField -> 1),
+           sort: BSONDocument = BSONDocument("_id" -> 1),
            page: Int,
            pageSize: Int): Future[List[T]] = {
     val from = (page - 1) * pageSize
@@ -68,7 +68,7 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
   }
 
   def findAll(selector: BSONDocument = BSONDocument.empty,
-              sort: BSONDocument = BSONDocument(idField -> 1)): Future[List[T]] = {
+              sort: BSONDocument = BSONDocument("_id" -> 1)): Future[List[T]] = {
     collection.find(selector).sort(sort).cursor[T].collect[List]()
   }
 
@@ -94,11 +94,11 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
                  writeConcern: GetLastError = GetLastError(),
                  upsert: Boolean = false,
                  multi: Boolean = false): Future[LastError] = {
-    collection.update($id(id, idField), update, writeConcern, upsert, multi)
+    collection.update($id(id), update, writeConcern, upsert, multi)
   }
 
   def updateById(id: Producer[BSONValue], update: T): Future[LastError] = {
-    collection.update($id(id, idField), update)
+    collection.update($id(id), update)
   }
 
   def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
@@ -121,7 +121,7 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
 
   /** Iteratee.foreach */
   def foreach(selector: BSONDocument = BSONDocument.empty,
-              sort: BSONDocument = BSONDocument(idField -> 1))(f: (T) => Unit): Future[Unit] = {
+              sort: BSONDocument = BSONDocument("_id" -> 1))(f: (T) => Unit): Future[Unit] = {
     collection.find(selector).sort(sort).cursor[T]
       .enumerate()
       .apply(Iteratee.foreach(f))
@@ -130,7 +130,7 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
 
   /** Iteratee.fold */
   def fold[A](selector: BSONDocument = BSONDocument.empty,
-              sort: BSONDocument = BSONDocument(idField -> 1),
+              sort: BSONDocument = BSONDocument("_id" -> 1),
               state: A)(f: (A, T) => A): Future[A] = {
     collection.find(selector).sort(sort).cursor[T]
       .enumerate()

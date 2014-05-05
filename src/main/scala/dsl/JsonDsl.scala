@@ -43,8 +43,8 @@ trait JsonDsl {
     Json.obj(field -> Json.obj((Seq(element) ++ elements): _*))
   }
 
-  def $id(id: Value, idField: String = "_id"): JsObject = {
-    $doc(idField -> id)
+  def $id(id: Value): JsObject = {
+    $doc("_id" -> id)
   }
 
   def $exists(field: Field, exists: Boolean = true): JsObject = {

@@ -21,11 +21,7 @@ import reactivemongo.api.indexes.{ Index, IndexType }
 
 class CustomIdBsonDao extends {
   override val autoIndexes = Seq(
-    Index(Seq("id" -> IndexType.Ascending), unique = true, background = true),
+    Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),
     Index(Seq("age" -> IndexType.Ascending), background = true)
   )
-} with BsonDao[CustomIdModel](MongoContext.db, "customId-" + java.util.UUID.randomUUID.toString) {
-
-  override def idField = "id"
-
-}
+} with BsonDao[CustomIdModel](MongoContext.db, "customId-" + java.util.UUID.randomUUID.toString)

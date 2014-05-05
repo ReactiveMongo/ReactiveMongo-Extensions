@@ -17,7 +17,11 @@
 package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.DummyModel
+import reactivemongo.api.indexes.{ Index, IndexType }
 
-class DummyJsonDao
-    extends JsonDao[DummyModel](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
-}
+class DummyJsonDao extends {
+  override val autoIndexes = Seq(
+    Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),
+    Index(Seq("age" -> IndexType.Ascending), background = true)
+  )
+} with JsonDao[DummyModel](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString)

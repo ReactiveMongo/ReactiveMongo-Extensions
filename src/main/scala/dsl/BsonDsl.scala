@@ -39,8 +39,8 @@ trait BsonDsl {
     BSONDocument(field -> BSONDocument((Seq(element) ++ elements)))
   }
 
-  def $id(id: Producer[BSONValue], idField: String = "_id"): BSONDocument = {
-    BSONDocument(idField -> id.produce.get)
+  def $id(id: Producer[BSONValue]): BSONDocument = {
+    BSONDocument("_id" -> id.produce.get)
   }
 
   def $exists(field: String, exists: Boolean = true): BSONDocument = {
