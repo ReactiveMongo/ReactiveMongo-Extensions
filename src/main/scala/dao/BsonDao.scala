@@ -117,6 +117,10 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
     Await.result(drop(), timeout)
   }
 
+  def removeById(id: Producer[BSONValue]): Future[LastError] = {
+    collection.remove($id(id))
+  }
+
   // Iteratee releated APIs
 
   /** Iteratee.foreach */

@@ -242,4 +242,22 @@ class DummyJsonDaoSpec
     }
   }
 
+  it should "remove document by id" in {
+    val dummyModels = DummyModel.random(10)
+
+    val futureResult = for {
+      insertCount <- dao.insert(dummyModels)
+      beforeCount <- dao.count()
+      remove <- dao.removeById(dummyModels.head._id)
+      afterCount <- dao.count()
+    } yield (insertCount, beforeCount, afterCount)
+
+    whenReady(futureResult) {
+      case (insertCount, beforeCount, afterCount) =>
+        insertCount shouldBe 10
+        beforeCount shouldBe 10
+        afterCount shouldBe 9
+    }
+  }
+
 }

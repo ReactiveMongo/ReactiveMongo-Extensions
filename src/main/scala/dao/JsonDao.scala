@@ -46,7 +46,7 @@ abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
     collection.indexesManager.list()
   }
 
-  def findOne(selector: JsObject): Future[Option[T]] = {
+  def findOne(selector: JsObject = Json.obj()): Future[Option[T]] = {
     collection.find(selector).one[T]
   }
 
@@ -113,6 +113,10 @@ abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
 
   def dropSync(timeout: Duration = 10 seconds): Boolean = {
     Await.result(drop(), timeout)
+  }
+
+  def removeById(id: JsValueWrapper): Future[LastError] = {
+    collection.remove($id(id))
   }
 
   // Iteratee releated APIs

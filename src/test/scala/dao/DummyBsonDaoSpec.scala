@@ -262,4 +262,35 @@ class DummyBsonDaoSpec
     }
   }
 
+  it should "ensure indexes" in {
+    val futureIndexes = Future {
+      // Give some time for indexes to be ensured
+      Thread.sleep(2000)
+    } flatMap { _ =>
+      dao.listIndexes()
+    }
+
+    whenReady(futureIndexes) { indexes =>
+      indexes should have size 3 // including _id
+    }
+  }
+
+  it should "remove document by id" in {
+    val dummyModels = DummyModel.random(10)
+
+    val futureResult = for {
+      insertCount <- dao.insert(dummyModels)
+      beforeCount <- dao.count()
+      remove <- dao.removeById(dummyModels.head._id)
+      afterCount <- dao.count()
+    } yield (insertCount, beforeCount, afterCount)
+
+    whenReady(futureResult) {
+      case (insertCount, beforeCount, afterCount) =>
+        insertCount shouldBe 10
+        beforeCount shouldBe 10
+        afterCount shouldBe 9
+    }
+  }
+
 }
