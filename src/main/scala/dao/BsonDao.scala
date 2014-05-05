@@ -20,7 +20,7 @@ import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import reactivemongo.bson._
-import reactivemongo.bson.BsonDsl._
+import reactivemongo.extensions.dsl.functional.BsonDsl
 import reactivemongo.api.{ DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.collections.default.BSONCollection
@@ -29,8 +29,12 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
 import org.joda.time.DateTime
 import Handlers._
 
-abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, collectionName: String)
-    extends Dao[BSONCollection](db, collectionName) {
+abstract class BsonDao[T, ID](db: () => DB,
+                              collectionName: String)(implicit domainReader: BSONDocumentReader[T],
+                                                      domainWriter: BSONDocumentWriter[T],
+                                                      idWriter: BSONWriter[ID, _ <: BSONValue])
+    extends Dao[BSONCollection](db, collectionName)
+    with BsonDsl {
 
   def autoIndexes: Traversable[Index] = Seq.empty
 
@@ -48,7 +52,7 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
     collection.find(selector).one[T]
   }
 
-  def findById(id: Producer[BSONValue]): Future[Option[T]] = {
+  def findById(id: ID): Future[Option[T]] = {
     findOne($id(id))
   }
 
@@ -97,7 +101,7 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
     collection.update($id(id), update, writeConcern, upsert, multi)
   }
 
-  def updateById(id: Producer[BSONValue], update: T): Future[LastError] = {
+  def updateById(id: ID, update: T): Future[LastError] = {
     collection.update($id(id), update)
   }
 
@@ -117,7 +121,7 @@ abstract class BsonDao[T: BSONDocumentReader: BSONDocumentWriter](db: () => DB, 
     Await.result(drop(), timeout)
   }
 
-  def removeById(id: Producer[BSONValue]): Future[LastError] = {
+  def removeById(id: ID): Future[LastError] = {
     collection.remove($id(id))
   }
 

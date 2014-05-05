@@ -17,7 +17,9 @@
 package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.MapModel
+import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.DefaultBSONHandlers._
 
 class MapModelBsonDao
-    extends BsonDao[MapModel](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
+    extends BsonDao[MapModel, BSONObjectID](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
 }

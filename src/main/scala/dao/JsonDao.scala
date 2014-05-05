@@ -19,20 +19,20 @@ package reactivemongo.extensions.dao
 import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
-import play.api.libs.json.{ Json, JsObject, OFormat }
+import play.api.libs.json.{ Json, JsObject, Format, Writes }
 import play.api.libs.json.Json.JsValueWrapper
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.api.{ DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.modules.reactivemongo.json.collection.JSONCollection
-import play.modules.reactivemongo.json.BSONFormats._
 import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
-import reactivemongo.extensions.dsl.JsonDsl._
+import reactivemongo.extensions.dsl.functional.JsonDsl
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
-abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
-    extends Dao[JSONCollection](db, collectionName) {
+abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: String)
+    extends Dao[JSONCollection](db, collectionName)
+    with JsonDsl {
 
   def autoIndexes: Traversable[Index] = Seq.empty
 
@@ -50,7 +50,7 @@ abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
     collection.find(selector).one[T]
   }
 
-  def findById(id: JsValueWrapper): Future[Option[T]] = {
+  def findById(id: ID): Future[Option[T]] = {
     findOne($id(id))
   }
 
@@ -91,11 +91,11 @@ abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
     collection.bulkInsert(enumerator)
   }
 
-  def updateById(id: JsValueWrapper, query: JsObject): Future[LastError] = {
+  def updateById(id: ID, query: JsObject): Future[LastError] = {
     collection.update($id(id), query)
   }
 
-  def updateById(id: JsValueWrapper, query: T): Future[LastError] = {
+  def updateById(id: ID, query: T): Future[LastError] = {
     collection.update($id(id), query)
   }
 
@@ -115,7 +115,7 @@ abstract class JsonDao[T: OFormat](db: () => DB, collectionName: String)
     Await.result(drop(), timeout)
   }
 
-  def removeById(id: JsValueWrapper): Future[LastError] = {
+  def removeById(id: ID): Future[LastError] = {
     collection.remove($id(id))
   }
 
