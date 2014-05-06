@@ -11,8 +11,8 @@ Current version matrix is below:
 
 | ReactiveMongo Extensions Release | Target ReactiveMongo version |
 |----------------------------------|------------------------------|
-| 0.10.0.0                         | 0.10.0                       |
-| 0.10.0.1-SNAPSHOT                | 0.10.0                       |
+| 0.10.0.1                         | 0.10.0                       |
+| 0.10.0.2-SNAPSHOT                | 0.10.0                       |
 | 0.11.0.0-SNAPSHOT                | 0.11.0-SNAPSHOT              |
 
 Note: Only available for scala 2.10.
@@ -22,7 +22,7 @@ wing:
 
 ```scala
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions" % "0.10.0.0"
+  "net.fehmicansaglam" %% "reactivemongo-extensions" % "0.10.0.1"
 )
 ```
 
@@ -32,7 +32,7 @@ Or if you want to be on the bleeding edge using snapshots:
 resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions" % "0.10.0.1-SNAPSHOT"
+  "net.fehmicansaglam" %% "reactivemongo-extensions" % "0.10.0.2-SNAPSHOT"
 )
 ```
 
