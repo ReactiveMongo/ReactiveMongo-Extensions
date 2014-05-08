@@ -103,6 +103,14 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
     collection.update($id(id), query)
   }
 
+  def update(selector: JsObject,
+             update: JsObject,
+             writeConcern: GetLastError = GetLastError(),
+             upsert: Boolean = false,
+             multi: Boolean = false): Future[LastError] = {
+    collection.update(selector, update, writeConcern, upsert, multi)
+  }
+
   def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
     collection.save(document, writeConcern)
   }
@@ -121,6 +129,16 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
 
   def removeById(id: ID): Future[LastError] = {
     collection.remove($id(id))
+  }
+
+  def remove(query: JsObject,
+             writeConcern: GetLastError = GetLastError(),
+             firstMatchOnly: Boolean = false): Future[LastError] = {
+    collection.remove(query, writeConcern, firstMatchOnly)
+  }
+
+  def removeAll(writeConcern: GetLastError = GetLastError()): Future[LastError] = {
+    collection.remove(query = Json.obj(), writeConcern = writeConcern, firstMatchOnly = false)
   }
 
   // Iteratee releated APIs

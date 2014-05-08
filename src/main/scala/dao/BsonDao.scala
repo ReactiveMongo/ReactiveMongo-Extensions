@@ -109,6 +109,14 @@ abstract class BsonDao[T, ID](db: () => DB,
     collection.update($id(id), update)
   }
 
+  def update(selector: BSONDocument,
+             update: BSONDocument,
+             writeConcern: GetLastError = GetLastError(),
+             upsert: Boolean = false,
+             multi: Boolean = false): Future[LastError] = {
+    collection.update(selector, update, writeConcern, upsert, multi)
+  }
+
   def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
     collection.save(document, writeConcern)
   }
@@ -127,6 +135,16 @@ abstract class BsonDao[T, ID](db: () => DB,
 
   def removeById(id: ID): Future[LastError] = {
     collection.remove($id(id))
+  }
+
+  def remove(query: BSONDocument,
+             writeConcern: GetLastError = GetLastError(),
+             firstMatchOnly: Boolean = false): Future[LastError] = {
+    collection.remove(query, writeConcern, firstMatchOnly)
+  }
+
+  def removeAll(writeConcern: GetLastError = GetLastError()): Future[LastError] = {
+    collection.remove(query = BSONDocument.empty, writeConcern = writeConcern, firstMatchOnly = false)
   }
 
   // Iteratee releated APIs
