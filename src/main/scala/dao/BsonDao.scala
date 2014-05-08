@@ -56,6 +56,10 @@ abstract class BsonDao[T, ID](db: () => DB,
     findOne($id(id))
   }
 
+  def findByIds(ids: Traversable[ID]): Future[List[T]] = {
+    findAll("_id" $in ids)
+  }
+
   /** @param page 1 based
     */
   def find(selector: BSONDocument = BSONDocument.empty,

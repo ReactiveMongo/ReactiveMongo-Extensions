@@ -4,7 +4,7 @@ name := "reactivemongo-extensions"
 
 organization := "net.fehmicansaglam"
 
-version := "0.10.0.1"
+version := "0.10.0.2-SNAPSHOT"
 
 scalaVersion  := "2.10.4"
 

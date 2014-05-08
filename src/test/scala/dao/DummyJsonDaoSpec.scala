@@ -114,6 +114,19 @@ class DummyJsonDaoSpec
     }
   }
 
+  it should "find documents by ids" in {
+    val dummyModels = DummyModel.random(100)
+
+    val futureResult = for {
+      insertCount <- dao.insert(dummyModels)
+      models <- dao.findByIds(dummyModels.map(_._id))
+    } yield models
+
+    whenReady(futureResult) { models =>
+      models should have size 100
+    }
+  }
+
   it should "insert bson document" in {
     val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
 

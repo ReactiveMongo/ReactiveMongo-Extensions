@@ -56,6 +56,19 @@ class CustomIdBsonDaoSpec
     }
   }
 
+  it should "find documents by ids" in {
+    val customIdModels = CustomIdModel.random(100)
+
+    val futureResult = for {
+      insertResult <- dao.insert(customIdModels)
+      models <- dao.findByIds(customIdModels.drop(5).map(_._id))
+    } yield models
+
+    whenReady(futureResult) { models =>
+      models should have size 95
+    }
+  }
+
   it should "update document by id" in {
     val customIdModel = CustomIdModel(name = "foo", surname = "bar", age = 32)
     val update = $set("age" -> 64)

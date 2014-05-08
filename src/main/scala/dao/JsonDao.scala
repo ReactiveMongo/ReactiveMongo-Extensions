@@ -54,6 +54,10 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
     findOne($id(id))
   }
 
+  def findByIds(ids: Traversable[ID]): Future[List[T]] = {
+    findAll("_id" $in ids)
+  }
+
   /** @param page 1 based
     */
   def find(selector: JsObject = Json.obj(),
