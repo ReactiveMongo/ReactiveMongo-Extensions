@@ -4,6 +4,101 @@ This is a library providing DAO and DSL support for ReactiveMongo. The goal of *
 
 [![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=0.10.x)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
 
+## Introduction
+
+*ReactiveMongo Extensions* currently provides two DAO types, which are [BsonDao](src/main/scala/dao/BsonDao.scala) for BSONCollection and [JsonDao](src/main/scala/dao/JsonDao.scala) for JSONCollection. DAOs provide an abstraction layer on top of ReactiveMongo adding higher levels of APIs like findOne, findById, count, foreach, fold, etc.
+
+You will need to define a DAO for each of your models(case classes).
+
+Below is a sample model.
+
+```scala
+import reactivemongo.bson._
+import reactivemongo.extensions.dao.Handlers._
+
+case class Person(
+  _id: BSONObjectID = BSONObjectID.generate,
+  name: String,
+  surname: String,
+  age: Int)
+
+object Person {
+  implicit val personHandler = Macros.handler[Person]
+}
+```
+
+To define a BsonDao for the Person model you just need to extend BsonDao.
+
+```scala
+import reactivemongo.api.{ MongoDriver, DB }
+import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.DefaultBSONHandlers._
+import reactivemongo.extensions.dao.BsonDao
+import scala.concurrent.ExecutionContext.Implicits.global
+
+ object MongoContext {
+  val driver = new MongoDriver
+  val connection = driver.connection(List("localhost"))
+  def db: () => DB = () => connection("reactivemongo-extensions")
+}
+
+class PersonDao extends BsonDao[Person, BSONObjectID](MongoContext.db, "persons")
+```
+
+From now on you can insert a Person instance, find it by id, find a random person or etc.
+
+```scala
+val person1 = Person(name = "foo", surname = "bar", age = 16)
+val person2 = Person(name = "foo", surname = "bar", age = 32)
+val person3 = Person(name = "foo", surname = "bar", age = 64)
+
+PersonDao.insert(person1)
+PersonDao.insert(Seq(person2, person3))
+
+PersonDao.findById(person1._id)
+PersonDao.findRandom(BSONDocument("age" -> BSONDocument("$ne" -> 16)))
+```
+
+There are also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries.
+
+By mixing or importing BsonDsl you could write the query above like this:
+
+```scala
+import reactivemongo.extensions.dsl.BsonDsl._
+
+PersonDao.findRandom($ne("age" -> 16))
+```
+
+Or even better there is also an infix version for each DSL type.
+
+```scala
+import reactivemongo.extensions.dsl.functional.BsonDsl._
+
+PersonDao.findRandom("age" $gt 16 $lt 32)
+```
+
+ReactiveMongo Extensions support autoIndexes which ensures indexes on DAO load.
+
+```scala
+class PersonDao extends {
+  override val autoIndexes = Seq(
+    Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),
+    Index(Seq("age" -> IndexType.Ascending), background = true)
+  )
+} with BsonDao[Person, BSONObjectID](MongoContext.db, "persons")
+
+```
+
+Each type has its own dedicated documentation page, however API for all types are very similar. You need to define a DAO for each of your models. A DAO needs a ```db``` and a ```collectionName```.
+
+[BsonDao](guide/bsondao.md)
+
+[BsonDsl](guide/bsondsl.md)
+
+[JsonDao](guide/jsondao.md)
+
+[JsonDsl](guide/jsondsl.md)
+
 ## Using ReactiveMongo Extensions in your project
 
 The general format is that release a.b.c.d is compatible with ReactiveMongo a.b.c.
@@ -17,8 +112,7 @@ Current version matrix is below:
 
 Note: Only available for scala 2.10.
 
-If you use SBT, you just have to edit build.sbt and add the foll
-wing:
+If you use SBT, you just have to edit build.sbt and add the following:
 
 ```scala
 libraryDependencies ++= Seq(
@@ -44,23 +138,7 @@ Contributions are always welcome. Good ways to contribute include:
 * Improving the performance
 * Adding to the documentation
 
-## Introduction
 
-*DOCS ARE STALE. PLEASE CHECK THE TEST FOLDER UNTIL DOCS ARE FIXED*
-
- *ReactiveMongo Extensions* currently provides two DAO types, which are [BsonDao](src/main/scala/dao/BsonDao.scala) and [JsonDao](src/main/scala/dao/JsonDao.scala). You may want to check test specifications for possible use cases. Both of the DAOs have similar APIs. Some of them are ```find```, ```findOne```, ```findById```, ```insert```, ```updateById```, ```count```, ```foreach```, ```fold```...
-
-There are also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries.
-
-Each type has its own dedicated documentation page, however API for all types are very similar. You need to define a DAO for each of your models. A DAO needs a ```db``` and a ```collectionName```. If you don't want to use the default id field which is ```_id```, you can also override ```idField``` which expects a field name.
-
-[BsonDao](guide/bsondao.md)
-
-[BsonDsl](guide/bsondsl.md)
-
-[JsonDao](guide/jsondao.md)
-
-[JsonDsl](guide/jsondsl.md)
 
 
 
