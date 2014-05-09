@@ -46,6 +46,8 @@ Contributions are always welcome. Good ways to contribute include:
 
 ## Introduction
 
+*DOCS ARE STALE. PLEASE CHECK THE TEST FOLDER UNTIL DOCS ARE FIXED*
+
  *ReactiveMongo Extensions* currently provides two DAO types, which are [BsonDao](src/main/scala/dao/BsonDao.scala) and [JsonDao](src/main/scala/dao/JsonDao.scala). You may want to check test specifications for possible use cases. Both of the DAOs have similar APIs. Some of them are ```find```, ```findOne```, ```findById```, ```insert```, ```updateById```, ```count```, ```foreach```, ```fold```...
 
 There are also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries.
