@@ -27,6 +27,8 @@ object Person {
 }
 ```
 
+#### DAOs to Serve You
+
 To define a BsonDao for the Person model you just need to extend BsonDao.
 
 ```scala
@@ -36,21 +38,21 @@ import reactivemongo.bson.DefaultBSONHandlers._
 import reactivemongo.extensions.dao.BsonDao
 import scala.concurrent.ExecutionContext.Implicits.global
 
- object MongoContext {
+object MongoContext {
   val driver = new MongoDriver
   val connection = driver.connection(List("localhost"))
   def db: () => DB = () => connection("reactivemongo-extensions")
 }
 
-class PersonDao extends BsonDao[Person, BSONObjectID](MongoContext.db, "persons")
+object PersonDao extends BsonDao[Person, BSONObjectID](MongoContext.db, "persons")
 ```
 
 From now on you can insert a Person instance, find it by id, find a random person or etc.
 
 ```scala
 val person1 = Person(name = "foo", surname = "bar", age = 16)
-val person2 = Person(name = "foo", surname = "bar", age = 32)
-val person3 = Person(name = "foo", surname = "bar", age = 64)
+val person2 = Person(name = "fehmi can", surname = "saglam", age = 32)
+val person3 = Person(name = "ali", surname = "veli", age = 64)
 
 PersonDao.insert(person1)
 PersonDao.insert(Seq(person2, person3))
@@ -58,6 +60,8 @@ PersonDao.insert(Seq(person2, person3))
 PersonDao.findById(person1._id)
 PersonDao.findRandom(BSONDocument("age" -> BSONDocument("$ne" -> 16)))
 ```
+
+#### Easy Query Construction
 
 There are also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries.
 
@@ -69,7 +73,9 @@ import reactivemongo.extensions.dsl.BsonDsl._
 PersonDao.findRandom($ne("age" -> 16))
 ```
 
-Or even better there is also an infix version for each DSL type.
+#### Functional DSL
+
+Even better there is also an infix version for each DSL type.
 
 ```scala
 import reactivemongo.extensions.dsl.functional.BsonDsl._
@@ -77,10 +83,12 @@ import reactivemongo.extensions.dsl.functional.BsonDsl._
 PersonDao.findRandom("age" $gt 16 $lt 32)
 ```
 
-ReactiveMongo Extensions support autoIndexes which ensures indexes on DAO load.
+#### Auto Indexes
+
+ReactiveMongo Extensions support auto indexes which ensures indexes on DAO load.
 
 ```scala
-class PersonDao extends {
+object PersonDao extends {
   override val autoIndexes = Seq(
     Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),
     Index(Seq("age" -> IndexType.Ascending), background = true)
