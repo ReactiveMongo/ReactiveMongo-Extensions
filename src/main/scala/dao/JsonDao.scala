@@ -86,8 +86,8 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
     } yield random
   }
 
-  def insert(document: T): Future[LastError] = {
-    collection.insert(document)
+  def insert(document: T, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    collection.insert(document, writeConcern)
   }
 
   def insert(documents: TraversableOnce[T]): Future[Int] = {
@@ -105,7 +105,7 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
 
   def update(selector: JsObject,
              update: JsObject,
-             writeConcern: GetLastError = GetLastError(),
+             writeConcern: GetLastError = defaultWriteConcern,
              upsert: Boolean = false,
              multi: Boolean = false): Future[LastError] = {
     collection.update(selector, update, writeConcern, upsert, multi)
@@ -127,17 +127,17 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
     Await.result(drop(), timeout)
   }
 
-  def removeById(id: ID): Future[LastError] = {
-    collection.remove($id(id))
+  def removeById(id: ID, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    collection.remove($id(id), writeConcern = writeConcern)
   }
 
   def remove(query: JsObject,
-             writeConcern: GetLastError = GetLastError(),
+             writeConcern: GetLastError = defaultWriteConcern,
              firstMatchOnly: Boolean = false): Future[LastError] = {
     collection.remove(query, writeConcern, firstMatchOnly)
   }
 
-  def removeAll(writeConcern: GetLastError = GetLastError()): Future[LastError] = {
+  def removeAll(writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
     collection.remove(query = Json.obj(), writeConcern = writeConcern, firstMatchOnly = false)
   }
 

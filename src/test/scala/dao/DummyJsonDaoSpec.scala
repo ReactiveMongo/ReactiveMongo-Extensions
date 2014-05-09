@@ -76,7 +76,7 @@ class DummyJsonDaoSpec
     val dummyModels = DummyModel.random(100)
 
     val futureModels = for {
-      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      insertResult <- dao.insert(dummyModels)
       models <- dao.findAll("age" $gte 50)
     } yield models
 
@@ -89,7 +89,7 @@ class DummyJsonDaoSpec
     val dummyModels = DummyModel.random(100)
 
     val futureModels = for {
-      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      insertResult <- dao.insert(dummyModels)
       models <- dao.findAll()
     } yield models
 
@@ -163,7 +163,7 @@ class DummyJsonDaoSpec
     val dummyModels = DummyModel.random(100)
 
     val futureCount = for {
-      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      insertResult <- dao.insert(dummyModels)
       count <- dao.count("age" $gte 50)
     } yield count
 
@@ -176,7 +176,7 @@ class DummyJsonDaoSpec
     val dummyModels = DummyModel.random(100)
 
     val futureCount = for {
-      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      insertResult <- dao.insert(dummyModels)
       count <- dao.count()
     } yield count
 
@@ -206,7 +206,7 @@ class DummyJsonDaoSpec
 
     val futureResult = for {
       oldTotalAge <- dao.fold(state = 0) { (state, document) => state + document.age }
-      insertResult <- Future.sequence(dummyModels.map(dao.insert))
+      insertResult <- dao.insert(dummyModels)
       totalAge <- {
         var total = -oldTotalAge // Just for the test case, please don't do this
         dao.foreach()(total += _.age).map(_ => total)

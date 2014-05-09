@@ -88,8 +88,8 @@ abstract class BsonDao[T, ID](db: () => DB,
     } yield random
   }
 
-  def insert(document: T): Future[LastError] = {
-    collection.insert(document)
+  def insert(document: T, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    collection.insert(document, writeConcern)
   }
 
   def insert(documents: TraversableOnce[T]): Future[Int] = {
@@ -99,7 +99,7 @@ abstract class BsonDao[T, ID](db: () => DB,
 
   def updateById(id: Producer[BSONValue],
                  update: BSONDocument,
-                 writeConcern: GetLastError = GetLastError(),
+                 writeConcern: GetLastError = defaultWriteConcern,
                  upsert: Boolean = false,
                  multi: Boolean = false): Future[LastError] = {
     collection.update($id(id), update, writeConcern, upsert, multi)
@@ -111,13 +111,13 @@ abstract class BsonDao[T, ID](db: () => DB,
 
   def update(selector: BSONDocument,
              update: BSONDocument,
-             writeConcern: GetLastError = GetLastError(),
+             writeConcern: GetLastError = defaultWriteConcern,
              upsert: Boolean = false,
              multi: Boolean = false): Future[LastError] = {
     collection.update(selector, update, writeConcern, upsert, multi)
   }
 
-  def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
+  def save(document: T, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
     collection.save(document, writeConcern)
   }
 
@@ -133,17 +133,17 @@ abstract class BsonDao[T, ID](db: () => DB,
     Await.result(drop(), timeout)
   }
 
-  def removeById(id: ID): Future[LastError] = {
-    collection.remove($id(id))
+  def removeById(id: ID, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    collection.remove($id(id), writeConcern = defaultWriteConcern)
   }
 
   def remove(query: BSONDocument,
-             writeConcern: GetLastError = GetLastError(),
+             writeConcern: GetLastError = defaultWriteConcern,
              firstMatchOnly: Boolean = false): Future[LastError] = {
     collection.remove(query, writeConcern, firstMatchOnly)
   }
 
-  def removeAll(writeConcern: GetLastError = GetLastError()): Future[LastError] = {
+  def removeAll(writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
     collection.remove(query = BSONDocument.empty, writeConcern = writeConcern, firstMatchOnly = false)
   }
 

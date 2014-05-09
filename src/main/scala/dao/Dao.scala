@@ -19,6 +19,7 @@ package reactivemongo.extensions.dao
 import reactivemongo.api.{ DB, Collection, CollectionProducer }
 import reactivemongo.api.indexes.Index
 import reactivemongo.bson.BSONObjectID
+import reactivemongo.core.commands.GetLastError
 import scala.concurrent.{ Future, ExecutionContext }
 
 abstract class Dao[C <: Collection: CollectionProducer](db: () => DB, collectionName: String) {
@@ -26,5 +27,7 @@ abstract class Dao[C <: Collection: CollectionProducer](db: () => DB, collection
   implicit def ec: ExecutionContext = ExecutionContext.Implicits.global
 
   def collection: C = db().collection[C](collectionName)
+
+  def defaultWriteConcern: GetLastError = GetLastError()
 
 }

@@ -20,9 +20,10 @@ import reactivemongo.extensions.model.DummyModel
 import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.DefaultBSONHandlers._
+import util.Misc.UUID
 
 class DummyBsonDao
-    extends BsonDao[DummyModel, BSONObjectID](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
+    extends BsonDao[DummyModel, BSONObjectID](MongoContext.db, "dummy-" + UUID()) {
 
   override def autoIndexes = Seq(
     Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),

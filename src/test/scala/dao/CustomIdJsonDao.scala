@@ -18,9 +18,10 @@ package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.CustomIdModel
 import reactivemongo.api.indexes.{ Index, IndexType }
+import util.Misc.UUID
 
 class CustomIdJsonDao
-    extends JsonDao[CustomIdModel, String](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
+    extends JsonDao[CustomIdModel, String](MongoContext.db, "dummy-" + UUID()) {
 
   override def autoIndexes = Seq(
     Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),

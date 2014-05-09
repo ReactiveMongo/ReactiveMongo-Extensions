@@ -19,7 +19,11 @@ package reactivemongo.extensions.dao
 import reactivemongo.extensions.model.MapModel
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.DefaultBSONHandlers._
+import reactivemongo.core.commands.GetLastError
+import util.Misc.UUID
 
 class MapModelBsonDao
-    extends BsonDao[MapModel, BSONObjectID](MongoContext.db, "dummy-" + java.util.UUID.randomUUID.toString) {
+    extends BsonDao[MapModel, BSONObjectID](MongoContext.db, "dummy-" + UUID()) {
+
+  override def defaultWriteConcern = GetLastError(j = true)
 }
