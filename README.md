@@ -97,6 +97,18 @@ object PersonDao extends {
 
 ```
 
+#### Default Write Concern
+
+You can override writeConcern in your DAO definition which defaults to GetLastError().
+
+```scala
+object PersonDao extends BsonDao[Person, BSONObjectID](MongoContext.db, "persons") {
+  override def defaultWriteConcern = GetLastError(j = true)
+}
+```
+
+
+
 Each type has its own dedicated documentation page, however API for all types are very similar. You need to define a DAO for each of your models. A DAO needs a ```db``` and a ```collectionName```.
 
 [BsonDao](guide/bsondao.md)
