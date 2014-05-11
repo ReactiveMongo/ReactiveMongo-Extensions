@@ -21,9 +21,9 @@ import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import reactivemongo.bson._
 import reactivemongo.extensions.dsl.functional.BsonDsl._
-import reactivemongo.bson.Macros.Options.Verbose
 import reactivemongo.extensions.model.MapModel
 import reactivemongo.extensions.util.Logger
+import reactivemongo.extensions.Implicits._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -54,6 +54,39 @@ class MapModelBsonDaoSpec
       maybeMapModel should be('defined)
       maybeMapModel.get._id shouldBe mapModel._id
       maybeMapModel.get.data("count") shouldBe 1
+    }
+  }
+
+  it should "support ~ operator" in {
+    val mapModel = MapModel(data = Map("count" -> 1))
+
+    val futureResult = for {
+      insertResult <- dao.insert(mapModel)
+      mapModel <- ~dao.findOne()
+      count <- dao.count($id(mapModel._id))
+    } yield (mapModel, count)
+
+    whenReady(futureResult) {
+      case (foundMapModel, count) =>
+        foundMapModel._id shouldBe mapModel._id
+        foundMapModel.data("count") shouldBe 1
+        count shouldBe 1
+    }
+  }
+
+  it should "throw exception when using ~ operator with None" in {
+    val mapModel = MapModel(data = Map("count" -> 1))
+
+    val futureResult = (for {
+      insertResult <- dao.insert(mapModel)
+      mapModel <- ~dao.findOne("none" $eq "unknown")
+      count <- dao.count($id(mapModel._id))
+    } yield count) recover {
+      case ex: java.util.NoSuchElementException => ex
+    }
+
+    whenReady(futureResult) { ex =>
+      ex shouldBe a[java.util.NoSuchElementException]
     }
   }
 

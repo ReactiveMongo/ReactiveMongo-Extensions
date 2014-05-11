@@ -107,9 +107,30 @@ object PersonDao extends BsonDao[Person, BSONObjectID](MongoContext.db, "persons
 }
 ```
 
+#### ```~``` Operator for the Happy Path
 
+While composing futures with for comprehensions, handling option values can be cumbersome.
+```~``` operator converts a ```Future[Option[T]]``` to ```Future[T]```. It throws a *java.util.NoSuchElementException* if the Option is None.
+Then you can check the exception in ```Future.recover```.
 
-Each type has its own dedicated documentation page, however API for all types are very similar. You need to define a DAO for each of your models. A DAO needs a ```db``` and a ```collectionName```.
+```scala
+import reactivemongo.extensions.Implicits._
+
+(for {
+  model1 <- ~dao.findOne("none" $eq "unknown")
+  model2 <- ~dao.findOne("none" $eq "unknown")
+  result <- compute(model1, model2)
+} yield result) recover {
+  case ex: java.util.NoSuchElementException =>
+    println("Option is None")
+    throw ex
+}
+
+```
+
+## Further documentation
+
+Each type has its own dedicated documentation page, however API for all types are very similar.
 
 [BsonDao](guide/bsondao.md)
 
