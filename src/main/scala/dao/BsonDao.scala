@@ -21,7 +21,7 @@ import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import reactivemongo.bson._
 import reactivemongo.extensions.dsl.functional.BsonDsl
-import reactivemongo.api.{ DB, QueryOpts }
+import reactivemongo.api.{ bulk, DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
@@ -33,10 +33,8 @@ abstract class BsonDao[T, ID](db: () => DB,
                               collectionName: String)(implicit domainReader: BSONDocumentReader[T],
                                                       domainWriter: BSONDocumentWriter[T],
                                                       idWriter: BSONWriter[ID, _ <: BSONValue])
-    extends Dao[BSONCollection](db, collectionName)
+    extends Dao[BSONCollection, BSONDocument, T, ID, BSONDocumentWriter](db, collectionName)
     with BsonDsl {
-
-  def autoIndexes: Traversable[Index] = Seq.empty
 
   def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
     autoIndexes map { index =>
@@ -92,29 +90,25 @@ abstract class BsonDao[T, ID](db: () => DB,
     collection.insert(document, writeConcern)
   }
 
-  def insert(documents: TraversableOnce[T]): Future[Int] = {
+  def bulkInsert(documents: TraversableOnce[T],
+                 bulkSize: Int = bulk.MaxDocs,
+                 bulkByteSize: Int = bulk.MaxBulkSize): Future[Int] = {
     val enumerator = Enumerator.enumerate(documents)
-    collection.bulkInsert(enumerator)
+    collection.bulkInsert(enumerator, bulkSize, bulkByteSize)
   }
 
-  def updateById(id: Producer[BSONValue],
-                 update: BSONDocument,
-                 writeConcern: GetLastError = defaultWriteConcern,
-                 upsert: Boolean = false,
-                 multi: Boolean = false): Future[LastError] = {
-    collection.update($id(id), update, writeConcern, upsert, multi)
-  }
-
-  def updateById(id: ID, update: T): Future[LastError] = {
-    collection.update($id(id), update)
-  }
-
-  def update(selector: BSONDocument,
-             update: BSONDocument,
-             writeConcern: GetLastError = defaultWriteConcern,
-             upsert: Boolean = false,
-             multi: Boolean = false): Future[LastError] = {
+  def update[U: BSONDocumentWriter](selector: BSONDocument,
+                                    update: U,
+                                    writeConcern: GetLastError = defaultWriteConcern,
+                                    upsert: Boolean = false,
+                                    multi: Boolean = false): Future[LastError] = {
     collection.update(selector, update, writeConcern, upsert, multi)
+  }
+
+  def updateById[U: BSONDocumentWriter](id: ID,
+                                        update: U,
+                                        writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    collection.update($id(id), update, writeConcern)
   }
 
   def save(document: T, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {

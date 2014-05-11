@@ -60,7 +60,7 @@ class CustomIdJsonDaoSpec
     val customIdModels = CustomIdModel.random(100)
 
     val futureResult = for {
-      insertResult <- dao.insert(customIdModels)
+      insertResult <- dao.bulkInsert(customIdModels)
       models <- dao.findByIds(customIdModels.drop(5).map(_._id))
     } yield models
 

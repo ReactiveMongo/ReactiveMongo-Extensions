@@ -22,7 +22,7 @@ import scala.concurrent.duration._
 import play.api.libs.json.{ Json, JsObject, Format, Writes }
 import play.api.libs.json.Json.JsValueWrapper
 import reactivemongo.bson.BSONObjectID
-import reactivemongo.api.{ DB, QueryOpts }
+import reactivemongo.api.{ bulk, DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.modules.reactivemongo.json.collection.JSONCollection
@@ -31,10 +31,8 @@ import reactivemongo.extensions.dsl.functional.JsonDsl
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
 abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: String)
-    extends Dao[JSONCollection](db, collectionName)
+    extends Dao[JSONCollection, JsObject, T, ID, Writes](db, collectionName)
     with JsonDsl {
-
-  def autoIndexes: Traversable[Index] = Seq.empty
 
   def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
     autoIndexes map { index =>
@@ -90,25 +88,25 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
     collection.insert(document, writeConcern)
   }
 
-  def insert(documents: TraversableOnce[T]): Future[Int] = {
+  def bulkInsert(documents: TraversableOnce[T],
+                 bulkSize: Int = bulk.MaxDocs,
+                 bulkByteSize: Int = bulk.MaxBulkSize): Future[Int] = {
     val enumerator = Enumerator.enumerate(documents)
-    collection.bulkInsert(enumerator)
+    collection.bulkInsert(enumerator, bulkSize, bulkByteSize)
   }
 
-  def updateById(id: ID, query: JsObject): Future[LastError] = {
-    collection.update($id(id), query)
-  }
-
-  def updateById(id: ID, query: T): Future[LastError] = {
-    collection.update($id(id), query)
-  }
-
-  def update(selector: JsObject,
-             update: JsObject,
-             writeConcern: GetLastError = defaultWriteConcern,
-             upsert: Boolean = false,
-             multi: Boolean = false): Future[LastError] = {
+  def update[U: Writes](selector: JsObject,
+                        update: U,
+                        writeConcern: GetLastError = defaultWriteConcern,
+                        upsert: Boolean = false,
+                        multi: Boolean = false): Future[LastError] = {
     collection.update(selector, update, writeConcern, upsert, multi)
+  }
+
+  def updateById[U: Writes](id: ID,
+                            update: U,
+                            writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    collection.update($id(id), update, writeConcern)
   }
 
   def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
