@@ -38,6 +38,8 @@ As seen in the example above ```db``` and ```collectionName``` are the only requ
 If you want your indexes to be ensured on DAO load, you can modify the DAO definition like below.
 
 ```scala
+import reactivemongo.api.indexes.{ Index, IndexType }
+
 object PersonDao extends {
   override val autoIndexes = Seq(
     Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),
