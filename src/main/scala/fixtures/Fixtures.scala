@@ -47,27 +47,30 @@ trait Fixtures {
     collection.bulkInsert(enumerator)
   }
 
-  protected def foreach[T](resource: String)(f: (Config, String) => Future[T]): Future[Seq[T]] = {
-    val config = ConfigFactory.parseResources(resource).resolve
+  protected def foreach[T](resource: String, resources: String*)(f: (Config, String) => Future[T]): Future[Seq[T]] = {
+    val config = resources.foldLeft(ConfigFactory.parseResources(resource)) { (config, resource) =>
+      config.withFallback(ConfigFactory.parseResources(resource))
+    }.resolve
+
     Future.sequence { (config.root.keySet diff reserved).toSeq map (f(config, _)) }
   }
 
-  def load(db: () => DB, resource: String): Future[Seq[Int]] = {
-    foreach(resource) { (config, collectionName) =>
+  def load(db: () => DB, resource: String, resources: String*): Future[Seq[Int]] = {
+    foreach(resource, resources: _*) { (config, collectionName) =>
       Logger.debug(s"Processing ${collectionName}.")
       processCollection(db().collection[JSONCollection](collectionName), config.getConfig(collectionName))
     }
   }
 
-  def removeAll(db: () => DB, resource: String): Future[Seq[LastError]] = {
-    foreach(resource) { (config, collectionName) =>
+  def removeAll(db: () => DB, resource: String, resources: String*): Future[Seq[LastError]] = {
+    foreach(resource, resources: _*) { (config, collectionName) =>
       Logger.debug(s"Removing all documents from ${collectionName}.")
       db().collection[JSONCollection](collectionName).remove(query = Json.obj(), firstMatchOnly = false)
     }
   }
 
-  def dropAll(db: () => DB, resource: String): Future[Seq[Boolean]] = {
-    foreach(resource) { (config, collectionName) =>
+  def dropAll(db: () => DB, resource: String, resources: String*): Future[Seq[Boolean]] = {
+    foreach(resource, resources: _*) { (config, collectionName) =>
       Logger.debug(s"Removing all documents from ${collectionName}.")
       db().collection[JSONCollection](collectionName).drop()
     }

@@ -14,17 +14,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dao
+package reactivemongo.extensions.model
 
-import reactivemongo.extensions.model.Person
-import reactivemongo.api.indexes.{ Index, IndexType }
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson._
+import reactivemongo.extensions.dao.Handlers._
+import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats._
-import scala.concurrent.Future
 
-class PersonJsonDao extends JsonDao[Person, String](MongoContext.db, "persons") {
+case class Event(
+  _id: String,
+  title: String,
+  organizer: String,
+  location: Location)
 
-  def findByName(name: String): Future[Option[Person]] = {
-    findOne("name" $eq name)
-  }
+case class Location(city: String, place: String)
+
+object Event {
+  implicit val locationFormat = Json.format[Location]
+  implicit val eventFormat = Json.format[Event]
 }
