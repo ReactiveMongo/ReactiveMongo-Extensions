@@ -22,6 +22,9 @@ trait JsonDsl extends reactivemongo.extensions.dsl.JsonDsl {
 
   implicit class ElementBuilder(field: Field) {
     def $eq(value: Value): DefaultElementLike = new DefaultElementLike(field, value)
+    def $regex(value: String, options: String): DefaultElementLike = {
+      new DefaultElementLike(field, Json.obj("$regex" -> value, "$options" -> options))
+    }
     def $exists(exists: Boolean): DefaultElementLike = new DefaultElementLike(field, Json.obj("$exists" -> exists))
     def $ne(value: Value): AppendableElementLike = new AppendableElementLike(field, Json.obj("$ne" -> value))
     def $lt(value: Value): AppendableElementLike = new AppendableElementLike(field, Json.obj("$lt" -> value))

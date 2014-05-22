@@ -140,4 +140,10 @@ class JsonDslSpec extends FlatSpec with Matchers {
     dsl2 shouldBe expected2
   }
 
+  it should "create $regex" in {
+    val dsl: JsObject = "name" $regex ("^Al.*", "i")
+    val expected = Json.obj("name" -> Json.obj("$regex" -> "^Al.*", "$options" -> "i"))
+    dsl shouldBe expected
+  }
+
 }

@@ -122,6 +122,10 @@ trait JsonDsl {
     Json.obj("$or" -> expressions)
   }
 
+  def $regex(field: String, value: String, options: String) = {
+    Json.obj(field -> Json.obj("$regex" -> value, "$options" -> options))
+  }
+
 }
 
 object JsonDsl extends JsonDsl

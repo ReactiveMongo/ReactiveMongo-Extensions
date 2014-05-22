@@ -168,4 +168,10 @@ class BsonDslSpec extends FlatSpec with Matchers {
     dsl2 shouldBe expected2
   }
 
+  it should "create $regex" in {
+    val dsl: BSONDocument = "name" $regex ("^Al.*", "i")
+    val expected = BSONDocument("name" -> BSONRegex("^Al.*", "i"))
+    dsl shouldBe expected
+  }
+
 }

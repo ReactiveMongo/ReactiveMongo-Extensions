@@ -22,6 +22,7 @@ trait BsonDsl extends reactivemongo.bson.BsonDsl {
 
   implicit class ElementBuilder(field: String) {
     def $eq(value: Producer[BSONValue]): DefaultElementLike = new DefaultElementLike(field, produce(value))
+    def $regex(value: String, options: String): DefaultElementLike = new DefaultElementLike(field, BSONRegex(value, options))
     def $exists(exists: Boolean): DefaultElementLike = new DefaultElementLike(field, BSONDocument("$exists" -> produce(exists)))
     def $ne(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$ne" -> produce(value)))
     def $lt(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$lt" -> produce(value)))

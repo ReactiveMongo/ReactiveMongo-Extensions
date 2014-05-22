@@ -123,6 +123,10 @@ trait BsonDsl {
     BSONDocument("$or" -> expressions)
   }
 
+  def $regex(field: String, value: String, options: String) = {
+    BSONDocument(field -> BSONRegex(value, options))
+  }
+
 }
 
 object BsonDsl extends BsonDsl
