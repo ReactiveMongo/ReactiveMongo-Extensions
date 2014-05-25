@@ -65,13 +65,13 @@ lazy val settings = (
   ++ org.scalastyle.sbt.ScalastylePlugin.Settings)
 
 lazy val root = project.in(file("."))
-  .aggregate(bson, json)
+  .aggregate(bson, json, core)
   .settings(settings: _*)
   .settings(publishArtifact := false)
 
 lazy val core = project.in(file("core"))
   .settings(settings: _*)
-  .settings(publishArtifact := false)
+  .settings(publishSettings: _*)
 
 lazy val bson = project.in(file("bson"))
   .settings(settings: _*)
