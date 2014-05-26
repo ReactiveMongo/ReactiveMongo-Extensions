@@ -170,7 +170,7 @@ object BSONFormats {
   implicit object BSONIntegerFormat extends PartialFormat[BSONInteger] {
     def partialReads: PartialFunction[JsValue, JsResult[BSONInteger]] = {
       case JsObject(("$int", JsNumber(i)) +: Nil) => JsSuccess(BSONInteger(i.toInt))
-      case JsNumber(i) => JsSuccess(BSONInteger(i.toInt))
+      case JsNumber(i) if i.isValidInt => JsSuccess(BSONInteger(i.toInt))
     }
     val partialWrites: PartialFunction[BSONValue, JsValue] = {
       case int: BSONInteger => JsNumber(int.value)
@@ -179,7 +179,7 @@ object BSONFormats {
   implicit object BSONLongFormat extends PartialFormat[BSONLong] {
     def partialReads: PartialFunction[JsValue, JsResult[BSONLong]] = {
       case JsObject(("$long", JsNumber(long)) +: Nil) => JsSuccess(BSONLong(long.toLong))
-      case JsNumber(long) => JsSuccess(BSONLong(long.toLong))
+      case JsNumber(long) if long.isValidLong => JsSuccess(BSONLong(long.toLong))
     }
     val partialWrites: PartialFunction[BSONValue, JsValue] = {
       case long: BSONLong => JsNumber(long.value)
@@ -226,9 +226,9 @@ object BSONFormats {
       orElse(BSONTimestampFormat.partialReads).
       orElse(BSONBinaryFormat.partialReads).
       orElse(BSONRegexFormat.partialReads).
-      orElse(BSONDoubleFormat.partialReads).
       orElse(BSONIntegerFormat.partialReads).
       orElse(BSONLongFormat.partialReads).
+      orElse(BSONDoubleFormat.partialReads).
       orElse(BSONBooleanFormat.partialReads).
       orElse(BSONNullFormat.partialReads).
       orElse(BSONUndefinedFormat.partialReads).

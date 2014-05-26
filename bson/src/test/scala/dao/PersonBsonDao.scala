@@ -14,21 +14,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.json.model
+package reactivemongo.extensions.dao
 
-import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
-import play.api.libs.json.Json
-import play.modules.reactivemongo.json.BSONFormats._
+import reactivemongo.extensions.bson.model.Person
+import reactivemongo.api.DefaultDB
+import reactivemongo.api.indexes.{ Index, IndexType }
+import reactivemongo.bson.BSONObjectID
+import scala.concurrent.{ Future, Await }
+import scala.concurrent.duration._
 
-case class Person(
-  _id: String,
-  name: String,
-  surname: String,
-  fullname: String,
-  age: Int,
-  country: String)
+class PersonBsonDao(_db: DefaultDB) extends BsonDao[Person, String](() => _db, "persons") {
 
-object Person {
-  implicit val personFormat = Json.format[Person]
+  def findByName(name: String): Future[Option[Person]] = {
+    findOne("name" $eq name)
+  }
+
+  def dropDatabaseSync(): Boolean = {
+    Await.result(_db.drop(), 20 seconds)
+  }
 }

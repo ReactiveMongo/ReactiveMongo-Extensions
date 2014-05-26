@@ -16,13 +16,14 @@
 
 package reactivemongo.extensions.dao
 
-import reactivemongo.extensions.model.Event
+import reactivemongo.extensions.json.model.Event
+import reactivemongo.api.DB
 import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.bson.BSONObjectID
 import play.modules.reactivemongo.json.BSONFormats._
 import scala.concurrent.Future
 
-class EventJsonDao extends JsonDao[Event, String](MongoContext.db, "events") {
+class EventJsonDao(_db: DB) extends JsonDao[Event, String](() => _db, "events") {
 
   def findByTitle(title: String): Future[Option[Event]] = {
     findOne("title" $eq title)

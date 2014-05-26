@@ -14,12 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.json.model
+package reactivemongo.extensions.bson.model
 
 import reactivemongo.bson._
 import reactivemongo.extensions.dao.Handlers._
 import play.api.libs.json.Json
-import play.modules.reactivemongo.json.BSONFormats._
 
 case class Person(
   _id: String,
@@ -27,8 +26,10 @@ case class Person(
   surname: String,
   fullname: String,
   age: Int,
+  salary: Double,
+  time: Long,
   country: String)
 
 object Person {
-  implicit val personFormat = Json.format[Person]
+  implicit val personFormat = Macros.handler[Person]
 }

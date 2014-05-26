@@ -14,13 +14,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.json.fixtures
+package reactivemongo.extensions.bson.fixtures
 
 import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import reactivemongo.extensions.util.Logger
-import reactivemongo.extensions.dao.{ MongoContext, PersonJsonDao, EventJsonDao }
+import reactivemongo.extensions.dao.{ MongoContext, PersonBsonDao, EventBsonDao }
 import reactivemongo.extensions.Implicits._
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -29,8 +29,8 @@ class FixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeA
   override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
 
   val db = MongoContext.randomDb()
-  val personDao = new PersonJsonDao(db)
-  val eventDao = new EventJsonDao(db)
+  val personDao = new PersonBsonDao(db)
+  val eventDao = new EventBsonDao(db)
 
   after {
     db.drop()
@@ -38,26 +38,31 @@ class FixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeA
 
   "A Fixtures" should "load persons" in {
     val futureCount = for {
-      remove <- Fixtures.removeAll(() => db, "json/persons.conf")
+      remove <- Fixtures.removeAll(() => db, "bson/persons.conf")
       beforeCount <- personDao.count()
-      insert <- Fixtures.load(() => db, "json/persons.conf")
+      remove2 <- Fixtures.removeAll(() => db, "bson/persons.conf")
+      insert <- Fixtures.load(() => db, "bson/persons.conf")
       afterCount <- personDao.count()
       person1 <- ~personDao.findByName("Ali")
-    } yield (beforeCount, afterCount, person1)
+      person2 <- ~personDao.findByName("Haydar")
+    } yield (beforeCount, afterCount, person1, person2)
 
     whenReady(futureCount) {
-      case (beforeCount, afterCount, person1) =>
+      case (beforeCount, afterCount, person1, person2) =>
         beforeCount shouldBe 0
         afterCount shouldBe 2
         person1.fullname shouldBe "Ali Veli"
+        person1.salary shouldBe 999.85
+        person2.fullname shouldBe "Haydar Cabbar"
+        person2.salary shouldBe 1000.0
     }
   }
 
   it should "load persons and events" in {
     val futureCount = for {
-      remove <- Fixtures.removeAll(() => db, "json/persons.conf", "json/events.conf")
+      remove <- Fixtures.removeAll(() => db, "bson/persons.conf", "bson/events.conf")
       beforeCount <- eventDao.count()
-      insert <- Fixtures.load(() => db, "json/persons.conf", "json/events.conf")
+      insert <- Fixtures.load(() => db, "bson/persons.conf", "bson/events.conf")
       afterCount <- eventDao.count()
       event2 <- ~eventDao.findByTitle("Some movie")
     } yield (beforeCount, afterCount, event2)

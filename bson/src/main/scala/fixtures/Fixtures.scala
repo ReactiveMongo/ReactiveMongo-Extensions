@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.json.fixtures
+package reactivemongo.extensions.bson.fixtures
 
 import com.typesafe.config.{ Config, ConfigFactory, ConfigRenderOptions, ConfigResolveOptions }
 import scala.collection.JavaConversions._
@@ -22,15 +22,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import reactivemongo.extensions.util.Logger
 import reactivemongo.api.DB
+import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.LastError
-import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.bson.BSONDocument
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.{ Json, JsObject }
+import reactivemongo.extensions.json.BSONFormats
 
 trait Fixtures {
 
-  protected def renderOptions = ConfigRenderOptions.concise.setJson(true).setFormatted(true)
-  protected def resolveOptions = ConfigResolveOptions.defaults.setAllowUnresolved(true)
+  protected val renderOptions = ConfigRenderOptions.concise.setJson(true).setFormatted(true)
+  protected val resolveOptions = ConfigResolveOptions.defaults.setAllowUnresolved(true)
   protected val reserved = Set("_predef")
 
   protected def toString(config: Config): String = {
@@ -57,12 +59,14 @@ trait Fixtures {
     resolvedConfig
   }
 
-  protected def processCollection(collection: JSONCollection, collectionConfig: Config): Future[Int] = {
+  protected def processCollection(collection: BSONCollection, collectionConfig: Config): Future[Int] = {
     val documents = collectionConfig.root.keySet map { documentName =>
       val documentConfig = collectionConfig.getConfig(documentName)
       val document = toJson(documentConfig)
       Logger.debug(s"Processing ${documentName}: ${document}")
       document
+    } map { document =>
+      BSONFormats.BSONDocumentFormat.reads(document).get
     }
 
     val enumerator = Enumerator.enumerate(documents)
@@ -80,28 +84,27 @@ trait Fixtures {
   }
 
   def load(db: () => DB, resource: String, resources: String*): Future[Seq[Int]] = {
-    println(db())
     foreachCollection(resource, resources: _*) { (config, collectionName) =>
       Logger.debug(s"Processing ${collectionName}.")
-      processCollection(db().collection[JSONCollection](collectionName), config.getConfig(collectionName))
+      processCollection(db().collection[BSONCollection](collectionName), config.getConfig(collectionName))
     }
   }
 
   def removeAll(db: () => DB, resource: String, resources: String*): Future[Seq[LastError]] = {
-    println(db())
     foreachCollection(resource, resources: _*) { (config, collectionName) =>
       Logger.debug(s"Removing all documents from ${collectionName}.")
-      db().collection[JSONCollection](collectionName).remove(query = Json.obj(), firstMatchOnly = false)
+      db().collection[BSONCollection](collectionName).remove(query = BSONDocument.empty, firstMatchOnly = false)
     }
   }
 
   def dropAll(db: () => DB, resource: String, resources: String*): Future[Seq[Boolean]] = {
     foreachCollection(resource, resources: _*) { (config, collectionName) =>
       Logger.debug(s"Removing all documents from ${collectionName}.")
-      db().collection[JSONCollection](collectionName).drop()
+      db().collection[BSONCollection](collectionName).drop()
     }
   }
 
 }
 
 object Fixtures extends Fixtures
+

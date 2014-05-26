@@ -14,21 +14,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.json.model
+package reactivemongo.extensions.bson.model
 
 import reactivemongo.bson._
 import reactivemongo.extensions.dao.Handlers._
 import play.api.libs.json.Json
-import play.modules.reactivemongo.json.BSONFormats._
 
-case class Person(
+case class Event(
   _id: String,
-  name: String,
-  surname: String,
-  fullname: String,
-  age: Int,
-  country: String)
+  title: String,
+  organizer: String,
+  location: Location)
 
-object Person {
-  implicit val personFormat = Json.format[Person]
+case class Location(city: String, place: String)
+
+object Event {
+  implicit val locationFormat = Macros.handler[Location]
+  implicit val eventFormat = Macros.handler[Event]
 }
