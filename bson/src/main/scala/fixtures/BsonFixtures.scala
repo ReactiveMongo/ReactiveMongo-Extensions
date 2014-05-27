@@ -14,11 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.bson.fixtures
+package reactivemongo.extensions.fixtures
 
 import scala.concurrent.{ Future, ExecutionContext }
 import reactivemongo.extensions.util.Logger
-import reactivemongo.extensions.fixtures.Fixtures
 import reactivemongo.api.DB
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.LastError
