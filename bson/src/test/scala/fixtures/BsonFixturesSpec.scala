@@ -18,17 +18,18 @@ package reactivemongo.extensions.bson.fixtures
 
 import org.scalatest._
 import org.scalatest.concurrent._
-import org.scalatest.time.SpanSugar._
+import org.scalatest.time.{ Span, Seconds }
 import reactivemongo.extensions.util.Logger
 import reactivemongo.extensions.dao.{ MongoContext, PersonBsonDao, EventBsonDao }
 import reactivemongo.extensions.Implicits._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeAndAfter {
+class BsonFixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeAndAfter {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
+  override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
   val db = MongoContext.randomDb()
+  val fixtures = BsonFixtures(db)
   val personDao = new PersonBsonDao(db)
   val eventDao = new EventBsonDao(db)
 
@@ -36,12 +37,12 @@ class FixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeA
     db.drop()
   }
 
-  "A Fixtures" should "load persons" in {
+  "A BsonFixtures" should "load persons" in {
     val futureCount = for {
-      remove <- Fixtures.removeAll(() => db, "bson/persons.conf")
+      remove <- fixtures.removeAll("bson/persons.conf")
       beforeCount <- personDao.count()
-      remove2 <- Fixtures.removeAll(() => db, "bson/persons.conf")
-      insert <- Fixtures.load(() => db, "bson/persons.conf")
+      remove2 <- fixtures.removeAll("bson/persons.conf")
+      insert <- fixtures.load("bson/persons.conf")
       afterCount <- personDao.count()
       person1 <- ~personDao.findByName("Ali")
       person2 <- ~personDao.findByName("Haydar")
@@ -60,9 +61,9 @@ class FixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeA
 
   it should "load persons and events" in {
     val futureCount = for {
-      remove <- Fixtures.removeAll(() => db, "bson/persons.conf", "bson/events.conf")
+      remove <- fixtures.removeAll("bson/persons.conf", "bson/events.conf")
       beforeCount <- eventDao.count()
-      insert <- Fixtures.load(() => db, "bson/persons.conf", "bson/events.conf")
+      insert <- fixtures.load("bson/persons.conf", "bson/events.conf")
       afterCount <- eventDao.count()
       event2 <- ~eventDao.findByTitle("Some movie")
     } yield (beforeCount, afterCount, event2)

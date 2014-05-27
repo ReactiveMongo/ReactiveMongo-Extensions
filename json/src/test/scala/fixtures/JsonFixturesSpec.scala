@@ -18,17 +18,18 @@ package reactivemongo.extensions.json.fixtures
 
 import org.scalatest._
 import org.scalatest.concurrent._
-import org.scalatest.time.SpanSugar._
+import org.scalatest.time.{ Span, Seconds }
 import reactivemongo.extensions.util.Logger
 import reactivemongo.extensions.dao.{ MongoContext, PersonJsonDao, EventJsonDao }
 import reactivemongo.extensions.Implicits._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeAndAfter {
+class JsonFixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeAndAfter {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
+  override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
   val db = MongoContext.randomDb()
+  val fixtures = JsonFixtures(db)
   val personDao = new PersonJsonDao(db)
   val eventDao = new EventJsonDao(db)
 
@@ -36,11 +37,11 @@ class FixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeA
     db.drop()
   }
 
-  "A Fixtures" should "load persons" in {
+  "A JsonFixtures" should "load persons" in {
     val futureCount = for {
-      remove <- Fixtures.removeAll(() => db, "json/persons.conf")
+      remove <- fixtures.removeAll("json/persons.conf")
       beforeCount <- personDao.count()
-      insert <- Fixtures.load(() => db, "json/persons.conf")
+      insert <- fixtures.load("json/persons.conf")
       afterCount <- personDao.count()
       person1 <- ~personDao.findByName("Ali")
     } yield (beforeCount, afterCount, person1)
@@ -55,9 +56,9 @@ class FixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeA
 
   it should "load persons and events" in {
     val futureCount = for {
-      remove <- Fixtures.removeAll(() => db, "json/persons.conf", "json/events.conf")
+      remove <- fixtures.removeAll("json/persons.conf", "json/events.conf")
       beforeCount <- eventDao.count()
-      insert <- Fixtures.load(() => db, "json/persons.conf", "json/events.conf")
+      insert <- fixtures.load("json/persons.conf", "json/events.conf")
       afterCount <- eventDao.count()
       event2 <- ~eventDao.findByTitle("Some movie")
     } yield (beforeCount, afterCount, event2)

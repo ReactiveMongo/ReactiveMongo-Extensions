@@ -14,26 +14,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.bson.fixtures
+package reactivemongo.extensions.fixtures
 
 import com.typesafe.config.{ Config, ConfigFactory, ConfigRenderOptions, ConfigResolveOptions }
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import reactivemongo.extensions.util.Logger
-import reactivemongo.api.DB
-import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.LastError
-import reactivemongo.bson.BSONDocument
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.{ Json, JsObject }
-import reactivemongo.extensions.json.BSONFormats
 
-trait Fixtures {
+trait Fixtures[T] {
 
-  protected val renderOptions = ConfigRenderOptions.concise.setJson(true).setFormatted(true)
-  protected val resolveOptions = ConfigResolveOptions.defaults.setAllowUnresolved(true)
-  protected val reserved = Set("_predef")
+  protected lazy val renderOptions = ConfigRenderOptions.concise.setJson(true).setFormatted(true)
+  protected lazy val resolveOptions = ConfigResolveOptions.defaults.setAllowUnresolved(true)
+  protected lazy val reserved = Set("_predef")
+
+  def map(document: JsObject): T
+  def bulkInsert(collectionName: String, enumerator: Enumerator[T]): Future[Int]
+  def removeAll(collectionName: String): Future[LastError]
+  def drop(collectionName: String): Future[Boolean]
 
   protected def toString(config: Config): String = {
     config.root.render(renderOptions)
@@ -59,21 +60,19 @@ trait Fixtures {
     resolvedConfig
   }
 
-  protected def processCollection(collection: BSONCollection, collectionConfig: Config): Future[Int] = {
+  protected def processCollection(collectionName: String, collectionConfig: Config): Future[Int] = {
     val documents = collectionConfig.root.keySet map { documentName =>
       val documentConfig = collectionConfig.getConfig(documentName)
       val document = toJson(documentConfig)
       Logger.debug(s"Processing ${documentName}: ${document}")
-      document
-    } map { document =>
-      BSONFormats.BSONDocumentFormat.reads(document).get
+      map(document)
     }
 
     val enumerator = Enumerator.enumerate(documents)
-    collection.bulkInsert(enumerator)
+    bulkInsert(collectionName, enumerator)
   }
 
-  protected def foreachCollection[T](resource: String, resources: String*)(f: (Config, String) => Future[T]): Future[Seq[T]] = {
+  protected def foreachCollection[A](resource: String, resources: String*)(f: (Config, String) => Future[A]): Future[Seq[A]] = {
     val config = resources.foldLeft(ConfigFactory.parseResources(this.getClass.getClassLoader, resource)) { (config, resource) =>
       config.withFallback(ConfigFactory.parseResources(this.getClass.getClassLoader, resource))
     }
@@ -83,28 +82,26 @@ trait Fixtures {
     Future.sequence { (resolvedConfig.root.keySet diff reserved).toSeq map (f(resolvedConfig, _)) }
   }
 
-  def load(db: () => DB, resource: String, resources: String*): Future[Seq[Int]] = {
+  def load(resource: String, resources: String*): Future[Seq[Int]] = {
     foreachCollection(resource, resources: _*) { (config, collectionName) =>
       Logger.debug(s"Processing ${collectionName}.")
-      processCollection(db().collection[BSONCollection](collectionName), config.getConfig(collectionName))
+      processCollection(collectionName, config.getConfig(collectionName))
     }
   }
 
-  def removeAll(db: () => DB, resource: String, resources: String*): Future[Seq[LastError]] = {
-    foreachCollection(resource, resources: _*) { (config, collectionName) =>
+  def removeAll(resource: String, resources: String*): Future[Seq[LastError]] = {
+    foreachCollection(resource, resources: _*) { (_, collectionName) =>
       Logger.debug(s"Removing all documents from ${collectionName}.")
-      db().collection[BSONCollection](collectionName).remove(query = BSONDocument.empty, firstMatchOnly = false)
+      removeAll(collectionName)
     }
   }
 
-  def dropAll(db: () => DB, resource: String, resources: String*): Future[Seq[Boolean]] = {
-    foreachCollection(resource, resources: _*) { (config, collectionName) =>
+  def dropAll(resource: String, resources: String*): Future[Seq[Boolean]] = {
+    foreachCollection(resource, resources: _*) { (_, collectionName) =>
       Logger.debug(s"Removing all documents from ${collectionName}.")
-      db().collection[BSONCollection](collectionName).drop()
+      drop(collectionName)
     }
   }
 
 }
-
-object Fixtures extends Fixtures
 
