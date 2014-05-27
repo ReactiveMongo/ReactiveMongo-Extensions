@@ -215,14 +215,14 @@ Current version matrix is below:
 
 | reactivemongo-extensions-bson    | Target ReactiveMongo version |
 |----------------------------------|------------------------------|
-| 0.10.0.2                         | 0.10.0                       |
-| 0.10.0.3-SNAPSHOT                | 0.10.0                       |
+| 0.10.0.3                         | 0.10.0                       |
+| 0.10.0.4-SNAPSHOT                | 0.10.0                       |
 | 0.11.0.0-SNAPSHOT                | 0.11.0-SNAPSHOT              |
 
 | reactivemongo-extensions-json    | Target Play-ReactiveMongo version |
 |----------------------------------|-----------------------------------|
-| 0.10.0.2                         | 0.10.2                            |
-| 0.10.0.3-SNAPSHOT                | 0.10.2                            |
+| 0.10.0.3                         | 0.10.2                            |
+| 0.10.0.4-SNAPSHOT                | 0.10.2                            |
 | 0.11.0.0-SNAPSHOT                | 0.11.0-SNAPSHOT                   |
 
 Note: Only available for scala 2.10.
@@ -231,7 +231,7 @@ If you use SBT, you just have to edit build.sbt and add the following:
 
 ```scala
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.2"
+  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.3"
 )
 ```
 
@@ -241,7 +241,7 @@ Or if you want to be on the bleeding edge using snapshots:
 resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.3-SNAPSHOT"
+  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.4-SNAPSHOT"
 )
 ```
 
