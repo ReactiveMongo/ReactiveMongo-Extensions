@@ -107,6 +107,74 @@ object PersonDao extends BsonDao[Person, BSONObjectID](MongoContext.db, "persons
 }
 ```
 
+#### Fixtures for easy data loading
+
+You can define your fixtures using HOCON. Lexical scopes are supported in addition to HOCON spec.
+
+**persons.conf**
+```
+_predef {
+    country: TC
+}
+
+
+# "persons" collection
+persons {
+
+    person1 {
+        _id: _id_person1
+        name: Ali
+        surname: Veli
+        fullname: ${name} ${surname}
+        age: 32
+        salary: 999.85
+        time: 12345678900
+        country: ${_predef.country}
+    }
+
+    person2 {
+        _id: _id_person2
+        name: Haydar
+        surname: Cabbar
+        fullname: ${name} ${surname}
+        age: ${person1.age}
+        salary: { "$double": 1000.0 }
+        time: 12345678999
+        country: ${_predef.country}
+    }
+}
+```
+
+**events.conf**
+```
+# Predefined reusable values
+_predef {
+    location: {
+        city: Ankara
+        place: Salon
+    }
+}
+
+
+# "events" collection
+events {
+
+    event1 {
+        _id: _id_event1
+        title: Developer workshop
+        organizer: ${persons.person1.fullname}
+        location: ${_predef.location}
+    }
+}
+```
+
+```scala
+import reactivemongo.extensions.bson.fixtures.BsonFixtures
+
+val fixtures = BsonFixtures(db)
+fixtures.load("persons.conf", "events.conf")
+```
+
 #### ```~``` Operator for the Happy Path
 
 While composing futures with for comprehensions, handling option values can be cumbersome.
