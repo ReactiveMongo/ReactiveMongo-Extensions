@@ -4,14 +4,14 @@ name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
   organization := "net.fehmicansaglam",
-  version := "0.10.0.3",
+  version := "0.10.0.4-SNAPSHOT",
   scalaVersion  := "2.10.4",
-  crossScalaVersions := Seq("2.10.4", "2.11.0"),
   scalacOptions := Seq(
     "-unchecked",
     "-deprecation",
     "-encoding", "utf8",
     "-feature",
+    "-language:higherKinds",
     "-language:postfixOps",
     "-language:implicitConversions",
     "-language:existentials"),

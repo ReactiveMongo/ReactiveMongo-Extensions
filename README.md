@@ -6,7 +6,14 @@ This is a library providing DAO and DSL support for ReactiveMongo. The goal of *
 
 ## Introduction
 
-*ReactiveMongo Extensions* currently provides two DAO types, which are [BsonDao](src/main/scala/dao/BsonDao.scala) for BSONCollection and [JsonDao](src/main/scala/dao/JsonDao.scala) for JSONCollection. DAOs provide an abstraction layer on top of ReactiveMongo adding higher levels of APIs like findOne, findById, count, foreach, fold, etc.
+**ReactiveMongo Extensions** comes as 2 separate packages which are `reactivemongo-extensions-bson` and `reactivemongo-extensions-json`.
+*reactivemongo-extensions-bson* package targets ReactiveMongo, while *reactivemongo-extensions-json* targets Play-ReactiveMongo.
+
+#### DAOs to Serve You
+
+DAOs provide an abstraction layer on top of ReactiveMongo adding higher level APIs like findOne, findById, count, foreach, fold, etc.
+*ReactiveMongo Extensions* currently provides two DAO types: `reactivemongo.extensions.dao.BsonDao` for `BSONCollection` and
+`reactivemongo.extensions.dao.JsonDao` for `JSONCollection`.
 
 You will need to define a DAO for each of your models(case classes).
 
@@ -26,8 +33,6 @@ object Person {
   implicit val personHandler = Macros.handler[Person]
 }
 ```
-
-#### DAOs to Serve You
 
 To define a BsonDao for the Person model you just need to extend BsonDao.
 
@@ -63,7 +68,8 @@ PersonDao.findRandom(BSONDocument("age" -> BSONDocument("$ne" -> 16)))
 
 #### Easy Query Construction
 
-There are also DSL helpers for each DAO type, which are [BsonDsl](src/main/scala/dsl/BsonDsl.scala) and [JsonDsl](src/main/scala/dsl/JsonDsl.scala). DSL helpers provide utilities to easily construct JSON or BSON queries.
+There are also DSL helpers for each DAO type, which are `reactivemongo.extensions.dsl.BsonDsl` and `reactivemongo.extensions.dsl.JsonDsl`.
+DSL helpers provide utilities to easily construct JSON or BSON queries.
 
 By mixing or importing BsonDsl you could write the query above like this:
 
@@ -112,67 +118,64 @@ object PersonDao extends BsonDao[Person, BSONObjectID](MongoContext.db, "persons
 You can define your fixtures using HOCON. Lexical scopes are supported in addition to HOCON spec.
 
 **persons.conf**
-```
-_predef {
-    country: TC
-}
 
-
-# "persons" collection
-persons {
-
-    person1 {
-        _id: _id_person1
-        name: Ali
-        surname: Veli
-        fullname: ${name} ${surname}
-        age: 32
-        salary: 999.85
-        time: 12345678900
-        country: ${_predef.country}
+    _predef {
+        country: TC
     }
 
-    person2 {
-        _id: _id_person2
-        name: Haydar
-        surname: Cabbar
-        fullname: ${name} ${surname}
-        age: ${person1.age}
-        salary: { "$double": 1000.0 }
-        time: 12345678999
-        country: ${_predef.country}
+    # "persons" collection
+    persons {
+        person1 {
+            _id: _id_person1
+            name: Ali
+            surname: Veli
+            fullname: ${name} ${surname}
+            age: 32
+            salary: 999.85
+            time: 12345678900
+            country: ${_predef.country}
+        }
+
+        person2 {
+            _id: _id_person2
+            name: Haydar
+            surname: Cabbar
+            fullname: ${name} ${surname}
+            age: ${person1.age}
+            salary: { "$double": 1000.0 }
+            time: 12345678999
+            country: ${_predef.country}
+        }
     }
-}
-```
+
 
 **events.conf**
-```
-# Predefined reusable values
-_predef {
-    location: {
-        city: Ankara
-        place: Salon
+
+    # Predefined reusable values
+    _predef {
+        location: {
+            city: Ankara
+            place: Salon
+        }
     }
-}
 
-
-# "events" collection
-events {
-
-    event1 {
-        _id: _id_event1
-        title: Developer workshop
-        organizer: ${persons.person1.fullname}
-        location: ${_predef.location}
+    # "events" collection
+    events {
+        event1 {
+            _id: _id_event1
+            title: Developer workshop
+            organizer: ${persons.person1.fullname}
+            location: ${_predef.location}
+        }
     }
-}
-```
+
+After defining your fixtures you can load them using `BsonFixtures` or `JsonFixtures`.
+
 
 ```scala
 import reactivemongo.extensions.bson.fixtures.BsonFixtures
 
-val fixtures = BsonFixtures(db)
-fixtures.load("persons.conf", "events.conf")
+BsonFixtures(db).load("persons.conf", "events.conf")
 ```
 
 #### ```~``` Operator for the Happy Path
