@@ -206,7 +206,8 @@ object BSONFormats {
         val remaining = binary.value.readable
         Json.obj(
           "$binary" -> Converters.hex2Str(binary.value.slice(remaining).readArray(remaining)),
-          "$type" -> Converters.hex2Str(Array(binary.subtype.value.toByte)))
+          "$type" -> Converters.hex2Str(Array(binary.subtype.value.toByte))
+        )
       }
     }
   }

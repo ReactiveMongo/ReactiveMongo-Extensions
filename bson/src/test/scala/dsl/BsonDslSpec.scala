@@ -28,7 +28,8 @@ class BsonDslSpec extends FlatSpec with Matchers {
     val expected = BSONDocument(
       "name" -> "foo",
       "surname" -> "bar",
-      "age" -> 32)
+      "age" -> 32
+    )
 
     dsl shouldBe expected
   }
@@ -53,7 +54,9 @@ class BsonDslSpec extends FlatSpec with Matchers {
     val expected = BSONDocument(
       "$or" -> BSONArray(
         BSONDocument("qty" -> BSONDocument("$lt" -> 20)),
-        BSONDocument("sale" -> true)))
+        BSONDocument("sale" -> true)
+      )
+    )
     dsl shouldBe expected
   }
 
@@ -112,7 +115,9 @@ class BsonDslSpec extends FlatSpec with Matchers {
         BSONDocument(
           "name" -> "foo",
           "surname" -> "bar",
-          "age" -> 32))
+          "age" -> 32
+        )
+    )
 
     dsl shouldBe expected
   }
@@ -125,7 +130,9 @@ class BsonDslSpec extends FlatSpec with Matchers {
         BSONDocument(
           "name" -> "",
           "surname" -> "",
-          "age" -> ""))
+          "age" -> ""
+        )
+    )
 
     dsl shouldBe expected
   }
@@ -141,7 +148,10 @@ class BsonDslSpec extends FlatSpec with Matchers {
     val expected = BSONDocument(
       "$push" -> BSONDocument(
         "scores" -> BSONDocument(
-          "$each" -> BSONArray(89, 90, 91, 92))))
+          "$each" -> BSONArray(89, 90, 91, 92)
+        )
+      )
+    )
     dsl shouldBe expected
   }
 

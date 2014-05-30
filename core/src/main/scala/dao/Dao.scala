@@ -60,19 +60,22 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
   def findRandom(selector: Structure): Future[Option[Model]]
 
   /** Iteratee.fold */
-  def fold[A](selector: Structure,
+  def fold[A](
+    selector: Structure,
     sort: Structure,
     state: A)(f: (A, Model) => A): Future[A]
 
   /** Iteratee.foreach */
-  def foreach(selector: Structure,
+  def foreach(
+    selector: Structure,
     sort: Structure)(f: (Model) => Unit): Future[Unit]
 
   def insert(model: Model, writeConcern: GetLastError): Future[LastError]
 
   def listIndexes(): Future[List[Index]]
 
-  def remove(query: Structure,
+  def remove(
+    query: Structure,
     writeConcern: GetLastError,
     firstMatchOnly: Boolean): Future[LastError]
 
@@ -82,7 +85,8 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
 
   def save(model: Model, writeConcern: GetLastError): Future[LastError]
 
-  def update[U: Writer](selector: Structure,
+  def update[U: Writer](
+    selector: Structure,
     update: U,
     writeConcern: GetLastError,
     upsert: Boolean,

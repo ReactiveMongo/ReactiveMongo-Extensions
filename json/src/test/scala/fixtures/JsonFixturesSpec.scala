@@ -14,13 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.fixtures
+package reactivemongo.extensions.json.fixtures
 
 import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.{ Span, Seconds }
 import reactivemongo.extensions.util.Logger
-import reactivemongo.extensions.dao.{ MongoContext, PersonJsonDao, EventJsonDao }
+import reactivemongo.extensions.dao.MongoContext
+import reactivemongo.extensions.json.dao.{ PersonJsonDao, EventJsonDao }
 import reactivemongo.extensions.Implicits._
 import scala.concurrent.ExecutionContext.Implicits.global
 

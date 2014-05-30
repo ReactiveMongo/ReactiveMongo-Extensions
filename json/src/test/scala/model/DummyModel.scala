@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.model
+package reactivemongo.extensions.json.model
 
 import reactivemongo.bson._
 import reactivemongo.extensions.dao.Handlers._

@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dsl.functional
+package reactivemongo.extensions.json.dsl.functional
 
 import play.api.libs.json._
 
-trait JsonDsl extends reactivemongo.extensions.dsl.JsonDsl {
+trait JsonDsl extends reactivemongo.extensions.json.dsl.JsonDsl {
 
   implicit class ElementBuilder(field: Field) {
     def $eq(value: Value): DefaultElementLike = new DefaultElementLike(field, value)

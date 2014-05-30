@@ -29,76 +29,91 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
 import org.joda.time.DateTime
 import Handlers._
 
-abstract class BsonDao[T, ID](db: () => DB,
-  collectionName: String)(implicit domainReader: BSONDocumentReader[T],
-    domainWriter: BSONDocumentWriter[T],
-    idWriter: BSONWriter[ID, _ <: BSONValue])
-    extends Dao[BSONCollection, BSONDocument, T, ID, BSONDocumentWriter](db, collectionName)
+abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit domainReader: BSONDocumentReader[Model],
+  domainWriter: BSONDocumentWriter[Model],
+  idWriter: BSONWriter[ID, _ <: BSONValue],
+  lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID])
+    extends Dao[BSONCollection, BSONDocument, Model, ID, BSONDocumentWriter](db, collectionName)
     with BsonDsl {
 
   def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
     autoIndexes map { index =>
       collection.indexesManager.ensure(index)
     }
+  } map { results =>
+    lifeCycle.ensuredIndexes()
+    results
   }
 
   def listIndexes(): Future[List[Index]] = {
     collection.indexesManager.list()
   }
 
-  def findOne(selector: BSONDocument = BSONDocument.empty): Future[Option[T]] = {
-    collection.find(selector).one[T]
+  def findOne(selector: BSONDocument = BSONDocument.empty): Future[Option[Model]] = {
+    collection.find(selector).one[Model]
   }
 
-  def findById(id: ID): Future[Option[T]] = {
+  def findById(id: ID): Future[Option[Model]] = {
     findOne($id(id))
   }
 
-  def findByIds(ids: Traversable[ID]): Future[List[T]] = {
+  def findByIds(ids: Traversable[ID]): Future[List[Model]] = {
     findAll("_id" $in ids)
   }
 
   /**
    * @param page 1 based
    */
-  def find(selector: BSONDocument = BSONDocument.empty,
+  def find(
+    selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1),
     page: Int,
-    pageSize: Int): Future[List[T]] = {
+    pageSize: Int): Future[List[Model]] = {
     val from = (page - 1) * pageSize
     collection
       .find(selector)
       .sort(sort)
       .options(QueryOpts(skipN = from, batchSizeN = pageSize))
-      .cursor[T]
+      .cursor[Model]
       .collect[List](pageSize)
   }
 
-  def findAll(selector: BSONDocument = BSONDocument.empty,
-    sort: BSONDocument = BSONDocument("_id" -> 1)): Future[List[T]] = {
-    collection.find(selector).sort(sort).cursor[T].collect[List]()
+  def findAll(
+    selector: BSONDocument = BSONDocument.empty,
+    sort: BSONDocument = BSONDocument("_id" -> 1)): Future[List[Model]] = {
+    collection.find(selector).sort(sort).cursor[Model].collect[List]()
   }
 
-  def findRandom(selector: BSONDocument = BSONDocument.empty): Future[Option[T]] = {
+  def findRandom(selector: BSONDocument = BSONDocument.empty): Future[Option[Model]] = {
     for {
       count <- count(selector)
       index = Random.nextInt(count)
-      random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[T]
+      random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[Model]
     } yield random
   }
 
-  def insert(document: T, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
-    collection.insert(document, writeConcern)
+  def insert(model: Model, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    val mappedModel = lifeCycle.prePersist(model)
+    collection.insert(mappedModel, writeConcern) map { lastError =>
+      lifeCycle.postPersist(mappedModel)
+      lastError
+    }
   }
 
-  def bulkInsert(documents: TraversableOnce[T],
+  def bulkInsert(
+    documents: TraversableOnce[Model],
     bulkSize: Int = bulk.MaxDocs,
     bulkByteSize: Int = bulk.MaxBulkSize): Future[Int] = {
-    val enumerator = Enumerator.enumerate(documents)
-    collection.bulkInsert(enumerator, bulkSize, bulkByteSize)
+    val mappedDocuments = documents.map(lifeCycle.prePersist)
+    val enumerator = Enumerator.enumerate(mappedDocuments)
+    collection.bulkInsert(enumerator, bulkSize, bulkByteSize) map { result =>
+      mappedDocuments.map(lifeCycle.postPersist)
+      result
+    }
   }
 
-  def update[U: BSONDocumentWriter](selector: BSONDocument,
+  def update[U: BSONDocumentWriter](
+    selector: BSONDocument,
     update: U,
     writeConcern: GetLastError = defaultWriteConcern,
     upsert: Boolean = false,
@@ -106,14 +121,19 @@ abstract class BsonDao[T, ID](db: () => DB,
     collection.update(selector, update, writeConcern, upsert, multi)
   }
 
-  def updateById[U: BSONDocumentWriter](id: ID,
+  def updateById[U: BSONDocumentWriter](
+    id: ID,
     update: U,
     writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
     collection.update($id(id), update, writeConcern)
   }
 
-  def save(document: T, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
-    collection.save(document, writeConcern)
+  def save(model: Model, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    val mappedModel = lifeCycle.prePersist(model)
+    collection.save(mappedModel, writeConcern) map { lastError =>
+      lifeCycle.postPersist(mappedModel)
+      lastError
+    }
   }
 
   def count(selector: BSONDocument = BSONDocument.empty): Future[Int] = {
@@ -129,10 +149,15 @@ abstract class BsonDao[T, ID](db: () => DB,
   }
 
   def removeById(id: ID, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
-    collection.remove($id(id), writeConcern = defaultWriteConcern)
+    lifeCycle.preRemove(id)
+    collection.remove($id(id), writeConcern = defaultWriteConcern) map { lastError =>
+      lifeCycle.postRemove(id)
+      lastError
+    }
   }
 
-  def remove(query: BSONDocument,
+  def remove(
+    query: BSONDocument,
     writeConcern: GetLastError = defaultWriteConcern,
     firstMatchOnly: Boolean = false): Future[LastError] = {
     collection.remove(query, writeConcern, firstMatchOnly)
@@ -145,19 +170,21 @@ abstract class BsonDao[T, ID](db: () => DB,
   // Iteratee releated APIs
 
   /** Iteratee.foreach */
-  def foreach(selector: BSONDocument = BSONDocument.empty,
-    sort: BSONDocument = BSONDocument("_id" -> 1))(f: (T) => Unit): Future[Unit] = {
-    collection.find(selector).sort(sort).cursor[T]
+  def foreach(
+    selector: BSONDocument = BSONDocument.empty,
+    sort: BSONDocument = BSONDocument("_id" -> 1))(f: (Model) => Unit): Future[Unit] = {
+    collection.find(selector).sort(sort).cursor[Model]
       .enumerate()
       .apply(Iteratee.foreach(f))
       .flatMap(i => i.run)
   }
 
   /** Iteratee.fold */
-  def fold[A](selector: BSONDocument = BSONDocument.empty,
+  def fold[A](
+    selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1),
-    state: A)(f: (A, T) => A): Future[A] = {
-    collection.find(selector).sort(sort).cursor[T]
+    state: A)(f: (A, Model) => A): Future[A] = {
+    collection.find(selector).sort(sort).cursor[Model]
       .enumerate()
       .apply(Iteratee.fold(state)(f))
       .flatMap(i => i.run)

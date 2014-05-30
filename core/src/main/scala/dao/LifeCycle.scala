@@ -14,21 +14,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.model
+package reactivemongo.extensions.dao
 
-import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
+trait LifeCycle[Model, ID] {
+  def prePersist(model: Model): Model
+  def postPersist(model: Model): Unit
+  def preRemove(id: ID): Unit
+  def postRemove(id: ID): Unit
+  def ensuredIndexes(): Unit
+}
 
-case class Person(
-  _id: String,
-  name: String,
-  surname: String,
-  fullname: String,
-  age: Int,
-  salary: Double,
-  time: Long,
-  country: String)
-
-object Person {
-  implicit val personFormat = Macros.handler[Person]
+class ReflexiveLifeCycle[Model, ID] extends LifeCycle[Model, ID] {
+  def prePersist(model: Model): Model = model
+  def postPersist(model: Model): Unit = {}
+  def preRemove(id: ID): Unit = {}
+  def postRemove(id: ID): Unit = {}
+  def ensuredIndexes(): Unit = {}
 }

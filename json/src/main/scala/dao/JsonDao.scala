@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dao
+package reactivemongo.extensions.json.dao
 
 import scala.util.Random
 import scala.concurrent.{ Future, Await }
@@ -27,76 +27,92 @@ import reactivemongo.api.indexes.Index
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
-import reactivemongo.extensions.dsl.functional.JsonDsl
+import reactivemongo.extensions.dao.{ Dao, LifeCycle, ReflexiveLifeCycle }
+import reactivemongo.extensions.json.dsl.functional.JsonDsl
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
-abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: String)
-    extends Dao[JSONCollection, JsObject, T, ID, Writes](db, collectionName)
+abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: String)(
+  implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID]) extends Dao[JSONCollection, JsObject, Model, ID, Writes](db, collectionName)
     with JsonDsl {
 
   def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
     autoIndexes map { index =>
       collection.indexesManager.ensure(index)
     }
+  } map { results =>
+    lifeCycle.ensuredIndexes()
+    results
   }
 
   def listIndexes(): Future[List[Index]] = {
     collection.indexesManager.list()
   }
 
-  def findOne(selector: JsObject = Json.obj()): Future[Option[T]] = {
-    collection.find(selector).one[T]
+  def findOne(selector: JsObject = Json.obj()): Future[Option[Model]] = {
+    collection.find(selector).one[Model]
   }
 
-  def findById(id: ID): Future[Option[T]] = {
+  def findById(id: ID): Future[Option[Model]] = {
     findOne($id(id))
   }
 
-  def findByIds(ids: Traversable[ID]): Future[List[T]] = {
+  def findByIds(ids: Traversable[ID]): Future[List[Model]] = {
     findAll("_id" $in ids)
   }
 
   /**
    * @param page 1 based
    */
-  def find(selector: JsObject = Json.obj(),
+  def find(
+    selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1),
     page: Int,
-    pageSize: Int): Future[List[T]] = {
+    pageSize: Int): Future[List[Model]] = {
     val from = (page - 1) * pageSize
     collection
       .find(selector)
       .sort(sort)
       .options(QueryOpts(skipN = from, batchSizeN = pageSize))
-      .cursor[T]
+      .cursor[Model]
       .collect[List](pageSize)
   }
 
-  def findAll(selector: JsObject = Json.obj(),
-    sort: JsObject = Json.obj("_id" -> 1)): Future[List[T]] = {
-    collection.find(selector).sort(sort).cursor[T].collect[List]()
+  def findAll(
+    selector: JsObject = Json.obj(),
+    sort: JsObject = Json.obj("_id" -> 1)): Future[List[Model]] = {
+    collection.find(selector).sort(sort).cursor[Model].collect[List]()
   }
 
-  def findRandom(selector: JsObject = Json.obj()): Future[Option[T]] = {
+  def findRandom(selector: JsObject = Json.obj()): Future[Option[Model]] = {
     for {
       count <- count(selector)
       index = Random.nextInt(count)
-      random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[T]
+      random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[Model]
     } yield random
   }
 
-  def insert(document: T, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
-    collection.insert(document, writeConcern)
+  def insert(model: Model, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
+    val mappedModel = lifeCycle.prePersist(model)
+    collection.insert(mappedModel, writeConcern) map { lastError =>
+      lifeCycle.postPersist(mappedModel)
+      lastError
+    }
   }
 
-  def bulkInsert(documents: TraversableOnce[T],
+  def bulkInsert(
+    documents: TraversableOnce[Model],
     bulkSize: Int = bulk.MaxDocs,
     bulkByteSize: Int = bulk.MaxBulkSize): Future[Int] = {
-    val enumerator = Enumerator.enumerate(documents)
-    collection.bulkInsert(enumerator, bulkSize, bulkByteSize)
+    val mappedDocuments = documents.map(lifeCycle.prePersist)
+    val enumerator = Enumerator.enumerate(mappedDocuments)
+    collection.bulkInsert(enumerator, bulkSize, bulkByteSize) map { result =>
+      mappedDocuments.map(lifeCycle.postPersist)
+      result
+    }
   }
 
-  def update[U: Writes](selector: JsObject,
+  def update[U: Writes](
+    selector: JsObject,
     update: U,
     writeConcern: GetLastError = defaultWriteConcern,
     upsert: Boolean = false,
@@ -104,14 +120,19 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
     collection.update(selector, update, writeConcern, upsert, multi)
   }
 
-  def updateById[U: Writes](id: ID,
+  def updateById[U: Writes](
+    id: ID,
     update: U,
     writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
     collection.update($id(id), update, writeConcern)
   }
 
-  def save(document: T, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
-    collection.save(document, writeConcern)
+  def save(model: Model, writeConcern: GetLastError = GetLastError()): Future[LastError] = {
+    val mappedModel = lifeCycle.prePersist(model)
+    collection.save(mappedModel, writeConcern) map { lastError =>
+      lifeCycle.postPersist(mappedModel)
+      lastError
+    }
   }
 
   def count(selector: JsObject = Json.obj()): Future[Int] = {
@@ -127,10 +148,15 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
   }
 
   def removeById(id: ID, writeConcern: GetLastError = defaultWriteConcern): Future[LastError] = {
-    collection.remove($id(id), writeConcern = writeConcern)
+    lifeCycle.preRemove(id)
+    collection.remove($id(id), writeConcern = defaultWriteConcern) map { lastError =>
+      lifeCycle.postRemove(id)
+      lastError
+    }
   }
 
-  def remove(query: JsObject,
+  def remove(
+    query: JsObject,
     writeConcern: GetLastError = defaultWriteConcern,
     firstMatchOnly: Boolean = false): Future[LastError] = {
     collection.remove(query, writeConcern, firstMatchOnly)
@@ -143,19 +169,21 @@ abstract class JsonDao[T: Format, ID: Writes](db: () => DB, collectionName: Stri
   // Iteratee releated APIs
 
   /** Iteratee.foreach */
-  def foreach(selector: JsObject = Json.obj(),
-    sort: JsObject = Json.obj("_id" -> 1))(f: (T) => Unit): Future[Unit] = {
-    collection.find(selector).sort(sort).cursor[T]
+  def foreach(
+    selector: JsObject = Json.obj(),
+    sort: JsObject = Json.obj("_id" -> 1))(f: (Model) => Unit): Future[Unit] = {
+    collection.find(selector).sort(sort).cursor[Model]
       .enumerate()
       .apply(Iteratee.foreach(f))
       .flatMap(i => i.run)
   }
 
   /** Iteratee.fold */
-  def fold[A](selector: JsObject = Json.obj(),
+  def fold[A](
+    selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1),
-    state: A)(f: (A, T) => A): Future[A] = {
-    collection.find(selector).sort(sort).cursor[T]
+    state: A)(f: (A, Model) => A): Future[A] = {
+    collection.find(selector).sort(sort).cursor[Model]
       .enumerate()
       .apply(Iteratee.fold(state)(f))
       .flatMap(i => i.run)

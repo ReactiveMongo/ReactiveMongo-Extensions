@@ -14,21 +14,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.model
+package reactivemongo.extensions.dao
 
-import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
+import reactivemongo.extensions.model.TemporalModel
+import reactivemongo.api.DefaultDB
+import reactivemongo.api.indexes.{ Index, IndexType }
+import reactivemongo.bson.BSONObjectID
+import scala.concurrent.{ Future, Await }
+import scala.concurrent.duration._
+import reactivemongo.extensions.util.Misc.UUID
 
-case class Person(
-  _id: String,
-  name: String,
-  surname: String,
-  fullname: String,
-  age: Int,
-  salary: Double,
-  time: Long,
-  country: String)
+class TemporalModelDao
+  extends BsonDao[TemporalModel, BSONObjectID](MongoContext.db, "temporal_model_" + UUID())
 
-object Person {
-  implicit val personFormat = Macros.handler[Person]
-}

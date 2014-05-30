@@ -18,21 +18,42 @@ package reactivemongo.extensions.json.model
 
 import reactivemongo.bson._
 import reactivemongo.extensions.dao.Handlers._
+import reactivemongo.extensions.dao.LifeCycle
+import reactivemongo.extensions.util.Logger
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats._
-import reactivemongo.extensions.util.Misc.UUID
+import org.joda.time.DateTime
 
-case class CustomIdModel(
-  _id: String = UUID(),
+case class TemporalModel(
+  _id: BSONObjectID = BSONObjectID.generate,
   name: String,
   surname: String,
-  age: Int)
+  createdAt: DateTime = DateTime.now,
+  updatedAt: DateTime = DateTime.now)
 
-object CustomIdModel {
-  implicit val customIdModelHandler = Macros.handler[CustomIdModel]
-  implicit val customIdModelFormat = Json.format[CustomIdModel]
+object TemporalModel {
+  implicit val temporalModelFormat = Json.format[TemporalModel]
 
-  def random(n: Int): Seq[CustomIdModel] = 1 to n map { index =>
-    CustomIdModel(name = s"name$index", surname = "surname$index", age = index)
+  implicit object TemporalModelLifeCycle extends LifeCycle[TemporalModel, BSONObjectID] {
+    def prePersist(model: TemporalModel): TemporalModel = {
+      Logger.debug(s"prePersist $model")
+      model.copy(updatedAt = DateTime.now)
+    }
+
+    def postPersist(model: TemporalModel): Unit = {
+      Logger.debug(s"postPersist $model")
+    }
+
+    def preRemove(id: BSONObjectID): Unit = {
+      Logger.debug(s"preRemove $id")
+    }
+
+    def postRemove(id: BSONObjectID): Unit = {
+      Logger.debug(s"postRemove $id")
+    }
+
+    def ensuredIndexes(): Unit = {
+      Logger.debug("ensuredIndexes")
+    }
   }
 }

@@ -14,9 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dao
+package reactivemongo.extensions.json.dao
 
-import reactivemongo.extensions.model.CustomIdModel
+import reactivemongo.extensions.json.model.CustomIdModel
+import reactivemongo.extensions.dao.MongoContext
 import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.extensions.util.Misc.UUID
 

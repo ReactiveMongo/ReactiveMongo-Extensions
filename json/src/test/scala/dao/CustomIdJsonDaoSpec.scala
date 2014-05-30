@@ -14,15 +14,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dao
+package reactivemongo.extensions.json.dao
 
 import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats._
-import reactivemongo.extensions.model.CustomIdModel
-import reactivemongo.extensions.dsl.JsonDsl._
+import reactivemongo.extensions.json.model.CustomIdModel
+import reactivemongo.extensions.json.dsl.JsonDsl._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 

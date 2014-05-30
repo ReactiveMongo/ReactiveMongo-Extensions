@@ -112,7 +112,10 @@ trait BsonDsl {
     BSONDocument(
       "$push" -> BSONDocument(
         field -> BSONDocument(
-          "$each" -> BSONArray(values.map(_.produce.get)))))
+          "$each" -> BSONArray(values.map(_.produce.get))
+        )
+      )
+    )
   }
 
   def $pull(item: Producer[BSONElement]): BSONDocument = {

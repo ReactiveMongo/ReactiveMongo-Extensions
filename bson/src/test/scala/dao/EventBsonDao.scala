@@ -16,7 +16,7 @@
 
 package reactivemongo.extensions.dao
 
-import reactivemongo.extensions.bson.model.Event
+import reactivemongo.extensions.model.Event
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.bson.BSONObjectID

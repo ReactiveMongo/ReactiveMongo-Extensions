@@ -14,9 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dao
+package reactivemongo.extensions.json.dao
 
-import reactivemongo.extensions.model.DummyModel
+import reactivemongo.extensions.json.model.DummyModel
+import reactivemongo.extensions.dao.MongoContext
 import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.bson.BSONObjectID
 import play.modules.reactivemongo.json.BSONFormats._

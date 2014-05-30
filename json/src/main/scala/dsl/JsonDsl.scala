@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dsl
+package reactivemongo.extensions.json.dsl
 
 import play.api.libs.json._
 import play.api.libs.json.Json.{ JsValueWrapper, toJsFieldJsValueWrapper }
@@ -111,7 +111,10 @@ trait JsonDsl {
     Json.obj(
       "$push" -> Json.obj(
         field -> Json.obj(
-          "$each" -> Json.arr(values: _*))))
+          "$each" -> Json.arr(values: _*)
+        )
+      )
+    )
   }
 
   def $pull(element: Element): JsObject = {

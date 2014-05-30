@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dsl.functional
+package reactivemongo.extensions.json.dsl.functional
 
 import org.scalatest._
 import reactivemongo.extensions.util.Logger
@@ -31,7 +31,8 @@ class JsonDslSpec extends FlatSpec with Matchers {
     val expected = Json.obj(
       "name" -> "foo",
       "surname" -> "bar",
-      "age" -> 32)
+      "age" -> 32
+    )
 
     dsl shouldBe expected
   }
@@ -63,7 +64,9 @@ class JsonDslSpec extends FlatSpec with Matchers {
     val expected = Json.obj(
       "$or" -> Json.arr(
         Json.obj("qty" -> Json.obj("$lt" -> 20, "$gte" -> 10)),
-        Json.obj("sale" -> true)))
+        Json.obj("sale" -> true)
+      )
+    )
     dsl shouldBe expected
   }
 
