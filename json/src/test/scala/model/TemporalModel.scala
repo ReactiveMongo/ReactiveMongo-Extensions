@@ -1,4 +1,4 @@
-// Copyright (C) 2014 the original author or authors.
+// Copyright (C) 2014 Fehmi Can Saglam (@fehmicans) and contributors.
 // See the LICENCE.txt file distributed with this work for additional
 // information regarding copyright ownership.
 //
