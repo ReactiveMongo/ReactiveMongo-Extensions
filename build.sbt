@@ -67,6 +67,7 @@ lazy val settings = (
 lazy val root = project.in(file("."))
   .aggregate(bson, json, core)
   .settings(settings: _*)
+  .settings(unidocSettings: _*)
   .settings(publishArtifact := false)
 
 lazy val core = project.in(file("core"))

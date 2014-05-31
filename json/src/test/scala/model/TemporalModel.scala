@@ -16,8 +16,7 @@
 
 package reactivemongo.extensions.json.model
 
-import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
+import reactivemongo.bson.BSONObjectID
 import reactivemongo.extensions.dao.LifeCycle
 import reactivemongo.extensions.util.Logger
 import play.api.libs.json.Json

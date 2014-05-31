@@ -18,12 +18,13 @@ package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.Event
 import reactivemongo.api.DefaultDB
-import reactivemongo.api.indexes.{ Index, IndexType }
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.extensions.dsl.functional.BsonDsl
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 
-class EventBsonDao(_db: DefaultDB) extends BsonDao[Event, String](() => _db, "events") {
+class EventBsonDao(_db: DefaultDB)
+    extends BsonDao[Event, String](() => _db, "events")
+    with BsonDsl {
 
   def findByTitle(title: String): Future[Option[Event]] = {
     findOne("title" $eq title)

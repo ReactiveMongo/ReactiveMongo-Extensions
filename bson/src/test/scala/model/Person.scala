@@ -17,7 +17,6 @@
 package reactivemongo.extensions.model
 
 import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
 
 case class Person(
   _id: String,

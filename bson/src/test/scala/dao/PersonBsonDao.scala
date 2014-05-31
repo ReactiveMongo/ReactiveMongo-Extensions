@@ -18,12 +18,13 @@ package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.Person
 import reactivemongo.api.DefaultDB
-import reactivemongo.api.indexes.{ Index, IndexType }
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.extensions.dsl.functional.BsonDsl
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 
-class PersonBsonDao(_db: DefaultDB) extends BsonDao[Person, String](() => _db, "persons") {
+class PersonBsonDao(_db: DefaultDB)
+    extends BsonDao[Person, String](() => _db, "persons")
+    with BsonDsl {
 
   def findByName(name: String): Future[Option[Person]] = {
     findOne("name" $eq name)

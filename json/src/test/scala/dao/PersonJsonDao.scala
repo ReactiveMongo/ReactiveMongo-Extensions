@@ -18,12 +18,12 @@ package reactivemongo.extensions.json.dao
 
 import reactivemongo.extensions.json.model.Person
 import reactivemongo.api.DB
-import reactivemongo.api.indexes.{ Index, IndexType }
-import reactivemongo.bson.BSONObjectID
-import play.modules.reactivemongo.json.BSONFormats._
 import scala.concurrent.Future
+import reactivemongo.extensions.json.dsl.functional.JsonDsl
 
-class PersonJsonDao(_db: DB) extends JsonDao[Person, String](() => _db, "persons") {
+class PersonJsonDao(_db: DB)
+    extends JsonDao[Person, String](() => _db, "persons")
+    with JsonDsl {
 
   def findByName(name: String): Future[Option[Person]] = {
     findOne("name" $eq name)

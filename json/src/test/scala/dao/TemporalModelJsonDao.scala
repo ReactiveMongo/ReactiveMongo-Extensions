@@ -19,12 +19,8 @@ package reactivemongo.extensions.json.dao
 import reactivemongo.extensions.dao.MongoContext
 import reactivemongo.extensions.json.model.TemporalModel
 import reactivemongo.extensions.util.Misc.UUID
-import reactivemongo.api.DefaultDB
-import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.bson.BSONObjectID
 import play.modules.reactivemongo.json.BSONFormats._
-import scala.concurrent.{ Future, Await }
-import scala.concurrent.duration._
 
 class TemporalModelJsonDao
   extends JsonDao[TemporalModel, BSONObjectID](MongoContext.db, "temporal_model_" + UUID())

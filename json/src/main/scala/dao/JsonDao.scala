@@ -20,26 +20,71 @@ import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import play.api.libs.json.{ Json, JsObject, Format, Writes }
-import play.api.libs.json.Json.JsValueWrapper
-import reactivemongo.bson.BSONObjectID
 import reactivemongo.api.{ bulk, DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
 import reactivemongo.extensions.dao.{ Dao, LifeCycle, ReflexiveLifeCycle }
-import reactivemongo.extensions.json.dsl.functional.JsonDsl
+import reactivemongo.extensions.json.dsl.functional.JsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
-abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: String)(
-  implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID]) extends Dao[JSONCollection, JsObject, Model, ID, Writes](db, collectionName)
-    with JsonDsl {
+/**
+ * A DAO implementation that operates on JSONCollection using JsObject.
+ *
+ * To create a DAO for a concrete model extend this class.
+ *
+ * Below is a sample model.
+ * {{{
+ * import reactivemongo.bson.BSONObjectID
+ * import play.api.libs.json.Json
+ * import play.modules.reactivemongo.json.BSONFormats._
+ *
+ * case class Person(
+ *   _id: BSONObjectID = BSONObjectID.generate,
+ *   name: String,
+ *   surname: String,
+ *   age: Int)
+ *
+ * object Person {
+ *   implicit val personFormat = Json.format[Person]
+ * }
+ *
+ * }}}
+ *
+ * To define a JsonDao for the Person model you just need to extend JsonDao.
+ *
+ * {{{
+ * import reactivemongo.api.{ MongoDriver, DB }
+ * import reactivemongo.bson.BSONObjectID
+ * import play.modules.reactivemongo.json.BSONFormats._
+ * import reactivemongo.extensions.json.dao.JsonDao
+ * import scala.concurrent.ExecutionContext.Implicits.global
+ *
+ *
+ * object MongoContext {
+ *  val driver = new MongoDriver
+ *  val connection = driver.connection(List("localhost"))
+ *  def db(): DB = connection("reactivemongo-extensions")
+ * }
+ *
+ * object PersonDao extends JsonDao[Person, BSONObjectID](MongoContext.db, "persons")
+ * }}}
+ *
+ * @param db A parameterless function returning a [[reactivemongo.api.DB]] instance.
+ * @param collectionName Name of the collection this DAO is going to operate on.
+ * @param lifeCycle [[reactivemongo.extensions.dao.LifeCycle]] for the Model type.
+ * @tparam Model Type of the model that this DAO uses.
+ * @tparam ID Type of the ID field of the model.
+ */
+abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: String)(implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID])
+    extends Dao[JSONCollection, JsObject, Model, ID, Writes](db, collectionName) {
 
   def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
     autoIndexes map { index =>
       collection.indexesManager.ensure(index)
     }
-  } map { results =>
+  }.map { results =>
     lifeCycle.ensuredIndexes()
     results
   }
@@ -60,9 +105,6 @@ abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: 
     findAll("_id" $in ids)
   }
 
-  /**
-   * @param page 1 based
-   */
   def find(
     selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1),
@@ -166,9 +208,6 @@ abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: 
     collection.remove(query = Json.obj(), writeConcern = writeConcern, firstMatchOnly = false)
   }
 
-  // Iteratee releated APIs
-
-  /** Iteratee.foreach */
   def foreach(
     selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1))(f: (Model) => Unit): Future[Unit] = {
@@ -178,7 +217,6 @@ abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: 
       .flatMap(i => i.run)
   }
 
-  /** Iteratee.fold */
   def fold[A](
     selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1),

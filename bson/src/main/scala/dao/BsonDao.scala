@@ -20,27 +20,73 @@ import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import reactivemongo.bson._
-import reactivemongo.extensions.dsl.functional.BsonDsl
 import reactivemongo.api.{ bulk, DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
+import reactivemongo.extensions.dsl.functional.BsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
-import org.joda.time.DateTime
 import Handlers._
 
-abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit domainReader: BSONDocumentReader[Model],
-  domainWriter: BSONDocumentWriter[Model],
+/**
+ * A DAO implementation operates on BSONCollection using BSONDocument.
+ *
+ * To create a DAO for a concrete model extend this class.
+ *
+ * Below is a sample model.
+ * {{{
+ * import reactivemongo.bson._
+ * import reactivemongo.extensions.dao.Handlers._
+ *
+ * case class Person(
+ *   _id: BSONObjectID = BSONObjectID.generate,
+ *   name: String,
+ *   surname: String,
+ *   age: Int)
+ *
+ * object Person {
+ *   implicit val personHandler = Macros.handler[Person]
+ * }
+ * }}}
+ *
+ * To define a BsonDao for the Person model you just need to extend BsonDao.
+ *
+ * {{{
+ * import reactivemongo.api.{ MongoDriver, DB }
+ * import reactivemongo.bson.BSONObjectID
+ * import reactivemongo.bson.DefaultBSONHandlers._
+ * import reactivemongo.extensions.dao.BsonDao
+ * import scala.concurrent.ExecutionContext.Implicits.global
+ *
+ * object MongoContext {
+ *  val driver = new MongoDriver
+ *  val connection = driver.connection(List("localhost"))
+ *  def db(): DB = connection("reactivemongo-extensions")
+ * }
+ *
+ * object PersonDao extends BsonDao[Person, BSONObjectID](MongoContext.db, "persons")
+ * }}}
+ *
+ * @param db A parameterless function returning a [[reactivemongo.api.DB]] instance.
+ * @param collectionName Name of the collection this DAO is going to operate on.
+ * @param modelReader BSONDocumentReader for the Model type.
+ * @param modelWriter BSONDocumentWriter for the Model type.
+ * @param idWriter BSONDocumentWriter for the ID type.
+ * @param lifeCycle [[reactivemongo.extensions.dao.LifeCycle]] for the Model type.
+ * @tparam Model Type of the model that this DAO uses.
+ * @tparam ID Type of the ID field of the model.
+ */
+abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit modelReader: BSONDocumentReader[Model],
+  modelWriter: BSONDocumentWriter[Model],
   idWriter: BSONWriter[ID, _ <: BSONValue],
   lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID])
-    extends Dao[BSONCollection, BSONDocument, Model, ID, BSONDocumentWriter](db, collectionName)
-    with BsonDsl {
+    extends Dao[BSONCollection, BSONDocument, Model, ID, BSONDocumentWriter](db, collectionName) {
 
   def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
     autoIndexes map { index =>
       collection.indexesManager.ensure(index)
     }
-  } map { results =>
+  }.map { results =>
     lifeCycle.ensuredIndexes()
     results
   }
@@ -61,9 +107,6 @@ abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit
     findAll("_id" $in ids)
   }
 
-  /**
-   * @param page 1 based
-   */
   def find(
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1),
@@ -167,9 +210,6 @@ abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit
     collection.remove(query = BSONDocument.empty, writeConcern = writeConcern, firstMatchOnly = false)
   }
 
-  // Iteratee releated APIs
-
-  /** Iteratee.foreach */
   def foreach(
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1))(f: (Model) => Unit): Future[Unit] = {
@@ -179,7 +219,6 @@ abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit
       .flatMap(i => i.run)
   }
 
-  /** Iteratee.fold */
   def fold[A](
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1),
