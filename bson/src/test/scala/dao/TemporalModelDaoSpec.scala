@@ -20,9 +20,9 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import reactivemongo.bson._
-import reactivemongo.bson.BsonDsl._
 import reactivemongo.bson.Macros.Options.Verbose
 import reactivemongo.extensions.model.TemporalModel
+import reactivemongo.extensions.dsl.BsonDsl._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 

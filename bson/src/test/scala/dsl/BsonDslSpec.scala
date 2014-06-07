@@ -14,9 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.bson
+package reactivemongo.extensions.dsl
 
 import org.scalatest._
+import reactivemongo.bson._
 import reactivemongo.extensions.util.Logger
 import BsonDsl._
 
@@ -152,6 +153,9 @@ class BsonDslSpec extends FlatSpec with Matchers {
         )
       )
     )
+
+    Logger.debug(dsl)
+
     dsl shouldBe expected
   }
 
