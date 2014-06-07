@@ -210,6 +210,8 @@ Each type has its own dedicated documentation page, however API for all types ar
 
 [BsonDsl](guide/bsondsl.md)
 
+[Criteria](guide/criteria.md)
+
 [JsonDao](guide/jsondao.md)
 
 [JsonDsl](guide/jsondsl.md)
@@ -237,7 +239,7 @@ If you use SBT, you just have to edit build.sbt and add the following:
 
 ```scala
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.3"
+  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.10.0.3"
 )
 ```
 
@@ -247,7 +249,7 @@ Or if you want to be on the bleeding edge using snapshots:
 resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.4-SNAPSHOT"
+  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.10.0.4-SNAPSHOT"
 )
 ```
 
