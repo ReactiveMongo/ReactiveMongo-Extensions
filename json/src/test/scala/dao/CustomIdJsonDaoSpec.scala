@@ -61,7 +61,7 @@ class CustomIdJsonDaoSpec
 
     val futureResult = for {
       insertResult <- dao.bulkInsert(customIdModels)
-      models <- dao.findByIds(customIdModels.drop(5).map(_._id))
+      models <- dao.findByIds(customIdModels.drop(5).map(_._id): _*)
     } yield models
 
     whenReady(futureResult) { models =>

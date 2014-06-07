@@ -18,7 +18,7 @@ package reactivemongo.extensions.dao
 
 import reactivemongo.extensions.model.Person
 import reactivemongo.api.DefaultDB
-import reactivemongo.extensions.dsl.functional.BsonDsl
+import reactivemongo.extensions.dsl.BsonDsl
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 

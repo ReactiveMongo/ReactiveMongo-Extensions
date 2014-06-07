@@ -135,7 +135,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
   def findById(id: ID): Future[Option[Model]]
 
   /** Retrieves the models with the given `ids`. */
-  def findByIds(ids: Traversable[ID]): Future[List[Model]]
+  def findByIds(ids: ID*): Future[List[Model]]
 
   /** Retrieves at most one model matching the given selector. */
   def findOne(selector: Structure): Future[Option[Model]]
