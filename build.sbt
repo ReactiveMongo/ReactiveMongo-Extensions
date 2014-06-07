@@ -3,7 +3,7 @@ import scalariform.formatter.preferences._
 name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
-  organization := "net.fehmicansaglam",
+  organization := "org.reactivemongo",
   version := "0.10.0.4-SNAPSHOT",
   scalaVersion  := "2.10.4",
   scalacOptions := Seq(
@@ -55,6 +55,11 @@ lazy val publishSettings = Seq(
         <id>fehmicansaglam</id>
         <name>Fehmi Can Saglam</name>
         <url>http://github.com/fehmicansaglam</url>
+      </developer>
+      <developer>
+        <id>osxhacker</id>
+        <name>Steve Vickers</name>
+        <url>http://github.com/osxhacker</url>
       </developer>
     </developers>))
 
