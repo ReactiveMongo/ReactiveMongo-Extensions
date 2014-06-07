@@ -19,7 +19,7 @@ package reactivemongo.extensions.json.dao
 import reactivemongo.extensions.json.model.Person
 import reactivemongo.api.DB
 import scala.concurrent.Future
-import reactivemongo.extensions.json.dsl.functional.JsonDsl
+import reactivemongo.extensions.json.dsl.JsonDsl
 
 class PersonJsonDao(_db: DB)
     extends JsonDao[Person, String](() => _db, "persons")

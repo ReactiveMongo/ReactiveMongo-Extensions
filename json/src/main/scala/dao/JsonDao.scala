@@ -26,7 +26,7 @@ import reactivemongo.core.commands.{ LastError, GetLastError, Count }
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
 import reactivemongo.extensions.dao.{ Dao, LifeCycle, ReflexiveLifeCycle }
-import reactivemongo.extensions.json.dsl.functional.JsonDsl._
+import reactivemongo.extensions.json.dsl.JsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
 /**
@@ -101,8 +101,8 @@ abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: 
     findOne($id(id))
   }
 
-  def findByIds(ids: Traversable[ID]): Future[List[Model]] = {
-    findAll("_id" $in ids)
+  def findByIds(ids: ID*): Future[List[Model]] = {
+    findAll("_id" $in (ids: _*))
   }
 
   def find(

@@ -20,7 +20,7 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import reactivemongo.bson._
-import reactivemongo.extensions.dsl.functional.BsonDsl._
+import reactivemongo.extensions.dsl.BsonDsl._
 import reactivemongo.extensions.model.MapModel
 import reactivemongo.extensions.util.Logger
 import reactivemongo.extensions.Implicits._

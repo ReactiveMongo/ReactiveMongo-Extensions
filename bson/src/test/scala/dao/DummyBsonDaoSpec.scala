@@ -20,7 +20,7 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import reactivemongo.bson._
-import reactivemongo.extensions.dsl.functional.BsonDsl._
+import reactivemongo.extensions.dsl.BsonDsl._
 import reactivemongo.bson.Macros.Options.Verbose
 import reactivemongo.extensions.model.DummyModel
 import reactivemongo.extensions.util.Logger
@@ -134,7 +134,7 @@ class DummyBsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.bulkInsert(dummyModels)
-      models <- dao.findByIds(dummyModels.map(_._id))
+      models <- dao.findByIds(dummyModels.map(_._id): _*)
     } yield models
 
     whenReady(futureResult) { models =>
