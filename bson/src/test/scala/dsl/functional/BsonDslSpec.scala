@@ -153,6 +153,9 @@ class BsonDslSpec extends FlatSpec with Matchers {
         )
       )
     )
+
+    Logger.debug(dsl)
+
     dsl shouldBe expected
   }
 

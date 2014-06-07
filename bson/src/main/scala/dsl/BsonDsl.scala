@@ -14,17 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// In order to use Producer.produce we must be in this package.
-package reactivemongo.bson
+package reactivemongo.extensions.dsl
+
+import reactivemongo.bson._
 
 trait BsonDsl {
 
   implicit def bsonDocumentToPretty(document: BSONDocument): String = {
     BSONDocument.pretty(document)
-  }
-
-  protected def produce(producer: Producer[BSONValue]): BSONValue = {
-    producer.produce.get
   }
 
   def $doc(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
@@ -39,61 +36,61 @@ trait BsonDsl {
     BSONDocument(field -> BSONDocument((Seq(element) ++ elements)))
   }
 
-  def $id(id: Producer[BSONValue]): BSONDocument = {
-    BSONDocument("_id" -> id.produce.get)
+  def $id[T](id: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
+    BSONDocument("_id" -> id)
   }
 
   def $exists(field: String, exists: Boolean = true): BSONDocument = {
     $doc(field -> $doc("$exists" -> exists))
   }
 
-  def $ne(item: Producer[BSONElement]): BSONDocument = {
-    val (field, value) = item.produce.get
+  def $ne[T](item: (String, T))(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
+    val (field, value) = item
     BSONDocument(field -> BSONDocument("$ne" -> value))
   }
 
-  def $gt(item: Producer[BSONElement]): BSONDocument = {
-    val (field, value) = item.produce.get
+  def $gt[T](item: (String, T))(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
+    val (field, value) = item
     BSONDocument(field -> BSONDocument("$gt" -> value))
   }
 
-  def $gtx(value: Producer[BSONValue]): BSONElement = {
-    "$gt" -> value.produce.get
+  def $gtx[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONElement = {
+    "$gt" -> writer.write(value)
   }
 
-  def $gte(item: Producer[BSONElement]): BSONDocument = {
-    val (field, value) = item.produce.get
+  def $gte[T](item: (String, T))(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
+    val (field, value) = item
     BSONDocument(field -> BSONDocument("$gte" -> value))
   }
 
-  def $gtex(value: Producer[BSONValue]): BSONElement = {
-    "$gte" -> value.produce.get
+  def $gtex[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONElement = {
+    "$gte" -> writer.write(value)
   }
 
-  def $in(field: String, values: Producer[BSONValue]): BSONDocument = {
-    BSONDocument(field -> BSONDocument("$in" -> values.produce.get))
+  def $in[T <: TraversableOnce[_]](field: String, values: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
+    BSONDocument(field -> BSONDocument("$in" -> values))
   }
 
-  def $lt(item: Producer[BSONElement]): BSONDocument = {
-    val (field, value) = item.produce.get
+  def $lt[T](item: (String, T))(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
+    val (field, value) = item
     BSONDocument(field -> BSONDocument("$lt" -> value))
   }
 
-  def $ltx(value: Producer[BSONValue]): BSONElement = {
-    "$lt" -> value.produce.get
+  def $ltx[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONElement = {
+    "$lt" -> writer.write(value)
   }
 
-  def $lte(item: Producer[BSONElement]): BSONDocument = {
-    val (field, value) = item.produce.get
+  def $lte[T](item: (String, T))(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
+    val (field, value) = item
     BSONDocument(field -> BSONDocument("$lte" -> value))
   }
 
-  def $ltex(value: Producer[BSONValue]): BSONElement = {
-    "$lte" -> value.produce.get
+  def $ltex[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONElement = {
+    "$lte" -> writer.write(value)
   }
 
-  def $nin(field: String, values: Producer[BSONValue]): BSONDocument = {
-    BSONDocument(field -> BSONDocument("$nin" -> values.produce.get))
+  def $nin[T <: TraversableOnce[_]](field: String, values: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
+    BSONDocument(field -> BSONDocument("$nin" -> values))
   }
 
   def $set(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
@@ -108,11 +105,11 @@ trait BsonDsl {
     BSONDocument("$push" -> BSONDocument(item))
   }
 
-  def $pushEach(field: String, values: Producer[BSONValue]*): BSONDocument = {
+  def $pushEach[T](field: String, values: T*)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
     BSONDocument(
       "$push" -> BSONDocument(
         field -> BSONDocument(
-          "$each" -> BSONArray(values.map(_.produce.get))
+          "$each" -> values
         )
       )
     )

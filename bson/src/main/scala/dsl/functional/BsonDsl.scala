@@ -18,19 +18,49 @@ package reactivemongo.extensions.dsl.functional
 
 import reactivemongo.bson._
 
-trait BsonDsl extends reactivemongo.bson.BsonDsl {
+trait BsonDsl extends reactivemongo.extensions.dsl.BsonDsl {
 
   implicit class ElementBuilder(field: String) {
-    def $eq(value: Producer[BSONValue]): DefaultElementLike = new DefaultElementLike(field, produce(value))
-    def $regex(value: String, options: String): DefaultElementLike = new DefaultElementLike(field, BSONRegex(value, options))
-    def $exists(exists: Boolean): DefaultElementLike = new DefaultElementLike(field, BSONDocument("$exists" -> produce(exists)))
-    def $ne(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$ne" -> produce(value)))
-    def $lt(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$lt" -> produce(value)))
-    def $lte(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$lte" -> produce(value)))
-    def $gt(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$gt" -> produce(value)))
-    def $gte(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$gte" -> produce(value)))
-    def $in(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$in" -> produce(value)))
-    def $nin(value: Producer[BSONValue]): AppendableElementLike = new AppendableElementLike(field, BSONDocument("$nin" -> produce(value)))
+
+    def $eq[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): DefaultElementLike = {
+      new DefaultElementLike(field, writer.write(value))
+    }
+
+    def $regex(value: String, options: String): DefaultElementLike = {
+      new DefaultElementLike(field, BSONRegex(value, options))
+    }
+
+    def $exists(exists: Boolean): DefaultElementLike = {
+      new DefaultElementLike(field, BSONDocument("$exists" -> exists))
+    }
+
+    def $ne[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      new AppendableElementLike(field, BSONDocument("$ne" -> value))
+    }
+
+    def $lt[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      new AppendableElementLike(field, BSONDocument("$lt" -> value))
+    }
+
+    def $lte[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      new AppendableElementLike(field, BSONDocument("$lte" -> value))
+    }
+
+    def $gt[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      new AppendableElementLike(field, BSONDocument("$gt" -> value))
+    }
+
+    def $gte[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      new AppendableElementLike(field, BSONDocument("$gte" -> value))
+    }
+
+    def $in[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      new AppendableElementLike(field, BSONDocument("$in" -> value))
+    }
+
+    def $nin[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      new AppendableElementLike(field, BSONDocument("$nin" -> value))
+    }
   }
 
   trait ElementLike {
@@ -61,13 +91,33 @@ trait BsonDsl extends reactivemongo.bson.BsonDsl {
       new AppendableElementLike(field, value ++ BSONDocument(element))
     }
 
-    def $ne(value: Producer[BSONValue]): AppendableElementLike = append("$ne" -> produce(value))
-    def $lt(value: Producer[BSONValue]): AppendableElementLike = append("$lt" -> produce(value))
-    def $lte(value: Producer[BSONValue]): AppendableElementLike = append("$lte" -> produce(value))
-    def $gt(value: Producer[BSONValue]): AppendableElementLike = append("$gt" -> produce(value))
-    def $gte(value: Producer[BSONValue]): AppendableElementLike = append("$gte" -> produce(value))
-    def $in(value: Producer[BSONValue]): AppendableElementLike = append("$in" -> produce(value))
-    def $nin(value: Producer[BSONValue]): AppendableElementLike = append("$nin" -> produce(value))
+    def $ne[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      append("$ne" -> writer.write(value))
+    }
+
+    def $lt[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      append("$lt" -> writer.write(value))
+    }
+
+    def $lte[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      append("$lte" -> writer.write(value))
+    }
+
+    def $gt[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      append("$gt" -> writer.write(value))
+    }
+
+    def $gte[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      append("$gte" -> writer.write(value))
+    }
+
+    def $in[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      append("$in" -> writer.write(value))
+    }
+
+    def $nin[T](value: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): AppendableElementLike = {
+      append("$nin" -> writer.write(value))
+    }
   }
 
   implicit def toElement(elementLike: ElementLike): Producer[BSONElement] = {
