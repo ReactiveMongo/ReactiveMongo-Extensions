@@ -1,5 +1,8 @@
 # ReactiveMongo Extensions
 
+
+This project has moved to https://github.com/ReactiveMongo/ReactiveMongo-Extensions
+
 This is a library providing DAO and DSL support for ReactiveMongo. The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
 [![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=0.10.x)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
