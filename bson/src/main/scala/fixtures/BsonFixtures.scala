@@ -24,7 +24,7 @@ import reactivemongo.core.commands.LastError
 import reactivemongo.bson.BSONDocument
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.JsObject
-import reactivemongo.extensions.json.BSONFormats
+import reactivemongo.extensions.BSONFormats
 
 class BsonFixtures(db: DB)(implicit ec: ExecutionContext) extends Fixtures[BSONDocument] {
 

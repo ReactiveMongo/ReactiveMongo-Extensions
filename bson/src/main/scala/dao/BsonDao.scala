@@ -24,7 +24,7 @@ import reactivemongo.api.{ bulk, DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count }
-import reactivemongo.extensions.dsl.functional.BsonDsl._
+import reactivemongo.extensions.dsl.BsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 import Handlers._
 
@@ -103,8 +103,8 @@ abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit
     findOne($id(id))
   }
 
-  def findByIds(ids: Traversable[ID]): Future[List[Model]] = {
-    findAll("_id" $in ids)
+  def findByIds(ids: ID*): Future[List[Model]] = {
+    findAll("_id" $in (ids: _*))
   }
 
   def find(

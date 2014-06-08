@@ -22,7 +22,7 @@ import org.scalatest.time.SpanSugar._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.BSONFormats._
 import reactivemongo.extensions.json.model.DummyModel
-import reactivemongo.extensions.json.dsl.functional.JsonDsl._
+import reactivemongo.extensions.json.dsl.JsonDsl._
 import reactivemongo.extensions.util.Logger
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -119,7 +119,7 @@ class DummyJsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.bulkInsert(dummyModels)
-      models <- dao.findByIds(dummyModels.map(_._id))
+      models <- dao.findByIds(dummyModels.map(_._id): _*)
     } yield models
 
     whenReady(futureResult) { models =>
