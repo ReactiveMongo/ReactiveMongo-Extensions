@@ -1,6 +1,6 @@
 # ReactiveMongo Extensions
 
-This is a library providing DAO and DSL support for ReactiveMongo. The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
+The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
 [![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=0.10.x)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
 
@@ -66,28 +66,40 @@ PersonDao.findById(person1._id)
 PersonDao.findRandom(BSONDocument("age" -> BSONDocument("$ne" -> 16)))
 ```
 
-#### Easy Query Construction
+Read more about DAO [here](guide/dao.md).
 
-There are also DSL helpers for each DAO type, which are `reactivemongo.extensions.dsl.BsonDsl` and `reactivemongo.extensions.dsl.JsonDsl`.
+#### Query DSL for Easy Query Construction
+
+There are also DSL helpers for each DAO type, which are `reactivemongo.extensions.dsl.BsonDsl` and `reactivemongo.extensions.json.dsl.JsonDsl`.
 DSL helpers provide utilities to easily construct JSON or BSON queries.
 
-By mixing or importing BsonDsl you could write the query above like this:
+By mixing in or importing BsonDsl you could write the query above like this:
 
 ```scala
 import reactivemongo.extensions.dsl.BsonDsl._
 
-PersonDao.findRandom($ne("age" -> 16))
-```
-
-#### Functional DSL
-
-Even better there is also an infix version for each DSL type.
-
-```scala
-import reactivemongo.extensions.dsl.functional.BsonDsl._
-
 PersonDao.findRandom("age" $gt 16 $lt 32)
 ```
+
+Read more about Query DSL [here](guide/dsl.md).
+
+#### Criteria DSL
+
+Criteria DSL *does* provide is the ablity to formulate queries thusly:
+
+```scala
+  // Using an Untyped.criteria
+  {
+  import Untyped._
+
+  // The MongoDB properties referenced are not enforced by the compiler
+  // to belong to any particular type.  This is what is meant by "Untyped".
+  val adhoc = criteria.firstName === "Jack" && criteria.age >= 18;
+  val cursor = collection.find(adhoc).cursor[BSONDocument];
+  }
+```
+
+Read more about Criteria DSL [here](guide/criteria.md).
 
 #### Auto Indexes
 
@@ -198,20 +210,6 @@ import reactivemongo.extensions.Implicits._
 }
 
 ```
-
-## Further documentation
-
-Each type has its own dedicated documentation page, however API for all types are very similar.
-
-[BsonDao](guide/bsondao.md)
-
-[BsonDsl](guide/bsondsl.md)
-
-[Criteria](guide/criteria.md)
-
-[JsonDao](guide/jsondao.md)
-
-[JsonDsl](guide/jsondsl.md)
 
 ## Using ReactiveMongo Extensions in your project
 
