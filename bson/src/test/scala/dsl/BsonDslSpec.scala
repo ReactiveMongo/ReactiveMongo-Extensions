@@ -279,6 +279,16 @@ class BsonDslSpec extends FlatSpec with Matchers {
     dsl shouldBe expected
   }
 
+  it should "create $setOnInsert" in {
+    val dsl = $setOnInsert("defaultQty" -> 500, "inStock" -> true) ++ $set("item" -> "apple")
+
+    val expected = BSONDocument(
+      "$setOnInsert" -> BSONDocument("defaultQty" -> 500, "inStock" -> true),
+      "$set" -> BSONDocument("item" -> "apple"))
+
+    dsl shouldBe expected
+  }
+
   it should "create $set" in {
     val dsl = $set("name" -> "foo", "surname" -> "bar", "age" -> 32)
 
@@ -307,6 +317,37 @@ class BsonDslSpec extends FlatSpec with Matchers {
     )
 
     dsl shouldBe expected
+  }
+
+  it should "create $min" in {
+    val dsl = $min("lowScore" -> 150)
+    Logger.debug(dsl)
+    val expected = BSONDocument("$min" -> BSONDocument("lowScore" -> 150))
+    dsl shouldBe expected
+  }
+
+  it should "create $max" in {
+    val dsl = $max("highScore" -> 950)
+    Logger.debug(dsl)
+    val expected = BSONDocument("$max" -> BSONDocument("highScore" -> 950))
+    dsl shouldBe expected
+  }
+
+  it should "create $currentDate" in {
+    val dsl = $currentDate("lastModified" -> true, "lastModifiedTS" -> "timestamp")
+    Logger.debug(dsl)
+    val expected = BSONDocument(
+      "$currentDate" -> BSONDocument(
+        "lastModified" -> true,
+        "lastModifiedTS" -> BSONDocument(
+          "$type" -> "timestamp")))
+    dsl shouldBe expected
+  }
+
+  it should "throw IllegalArgumentException when $currentDate is called with an illegal param" in {
+    the[IllegalArgumentException] thrownBy {
+      $currentDate("lastModified" -> true, "lastModifiedTS" -> "illegal")
+    } should have message "illegal"
   }
   // End of Top Level Field Update Operators
   //**********************************************************************************************//

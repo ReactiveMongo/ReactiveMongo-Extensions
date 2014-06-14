@@ -155,6 +155,12 @@ $mul("price" -> 1.25)
 $rename("color" -> "colour", "realize" -> "realise")
 ```
 
+* **$setOnInsert** Sets the value of a field upon document creation during an upsert. Has no effect on update operations that modify existing documents.
+
+```scala
+$setOnInsert("defaultQty" -> 500, "inStock" -> true) ++ $set("item" -> "apple")
+```
+
 * **$set** Sets the value of a field in a document.
 
 ```scala
@@ -165,6 +171,24 @@ $set("name" -> "foo", "surname" -> "bar", "age" -> 32)
 
 ```scala
 $unset("name", "surname", "age")
+```
+
+* **$min** Only updates the field if the specified value is less than the existing field value.
+
+```scala
+$min("lowScore" -> 150)
+```
+
+* **$max** Only updates the field if the specified value is greater than the existing field value.
+
+```scala
+$max("highScore" -> 950)
+```
+
+* **$currentDate** Sets the value of a field to current date, either as a Date or a Timestamp.
+
+```scala
+$currentDate("lastModified" -> true, "lastModifiedTS" -> "timestamp")
 ```
 
 ### Array Update Operators
