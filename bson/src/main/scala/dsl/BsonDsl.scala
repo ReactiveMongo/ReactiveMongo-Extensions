@@ -90,12 +90,47 @@ trait BsonDsl {
     BSONDocument("$rename" -> BSONDocument((Seq(item) ++ items).map(Producer.nameValue2Producer[String]): _*))
   }
 
+  def $setOnInsert(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
+    BSONDocument("$setOnInsert" -> BSONDocument((Seq(item) ++ items): _*))
+  }
+
   def $set(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
     BSONDocument("$set" -> BSONDocument((Seq(item) ++ items): _*))
   }
 
   def $unset(field: String, fields: String*): BSONDocument = {
     BSONDocument("$unset" -> BSONDocument((Seq(field) ++ fields).map(_ -> BSONString(""))))
+  }
+
+  def $min(item: Producer[BSONElement]): BSONDocument = {
+    BSONDocument("$min" -> BSONDocument(item))
+  }
+
+  def $max(item: Producer[BSONElement]): BSONDocument = {
+    BSONDocument("$max" -> BSONDocument(item))
+  }
+
+  trait CurrentDateValueProducer[T] {
+    def produce: BSONValue
+  }
+
+  implicit class BooleanCurrentDateValueProducer(value: Boolean) extends CurrentDateValueProducer[Boolean] {
+    def produce: BSONValue = BSONBoolean(value)
+  }
+
+  implicit class StringCurrentDateValueProducer(value: String) extends CurrentDateValueProducer[String] {
+    def isValid: Boolean = Seq("date", "timestamp") contains value
+
+    def produce: BSONValue = {
+      if (!isValid)
+        throw new IllegalArgumentException(value)
+
+      BSONDocument("$type" -> value)
+    }
+  }
+
+  def $currentDate(items: (String, CurrentDateValueProducer[_])*): BSONDocument = {
+    BSONDocument("$currentDate" -> BSONDocument(items.map(item => item._1 -> item._2.produce)))
   }
   // End of Top Level Field Update Operators
   //**********************************************************************************************//

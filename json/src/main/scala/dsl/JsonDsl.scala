@@ -97,12 +97,47 @@ trait JsonDsl {
     }: _*))
   }
 
+  def $setOnInsert(element: Element, elements: Element*): JsObject = {
+    Json.obj("$setOnInsert" -> Json.obj((Seq(element) ++ elements): _*))
+  }
+
   def $set(element: Element, elements: Element*): JsObject = {
     Json.obj("$set" -> Json.obj((Seq(element) ++ elements): _*))
   }
 
   def $unset(field: String, fields: String*): JsObject = {
     Json.obj("$unset" -> Json.obj((Seq(field) ++ fields).map(_ -> toJsFieldJsValueWrapper("")): _*))
+  }
+
+  def $min(element: Element): JsObject = {
+    Json.obj("$min" -> Json.obj(element))
+  }
+
+  def $max(element: Element): JsObject = {
+    Json.obj("$max" -> Json.obj(element))
+  }
+
+  trait CurrentDateValueProducer[T] {
+    def produce: Value
+  }
+
+  implicit class BooleanCurrentDateValueProducer(value: Boolean) extends CurrentDateValueProducer[Boolean] {
+    def produce: Value = JsBoolean(value)
+  }
+
+  implicit class StringCurrentDateValueProducer(value: String) extends CurrentDateValueProducer[String] {
+    def isValid: Boolean = Seq("date", "timestamp") contains value
+
+    def produce: Value = {
+      if (!isValid)
+        throw new IllegalArgumentException(value)
+
+      Json.obj("$type" -> value)
+    }
+  }
+
+  def $currentDate(items: (String, CurrentDateValueProducer[_])*): JsObject = {
+    Json.obj("$currentDate" -> Json.obj(items.map(item => item._1 -> item._2.produce): _*))
   }
   // End of Top Level Field Update Operators
   //**********************************************************************************************//
