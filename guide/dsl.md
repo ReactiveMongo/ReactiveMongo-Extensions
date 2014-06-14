@@ -133,6 +133,8 @@ $where("function () { this.credits == this.debits }")
 "comments" $size 12
 ```
 
+## Update Operators
+
 ### Field Update Operators
 
 * **$inc** Increments the value of the field by the specified amount.
