@@ -30,15 +30,23 @@ trait JsonDsl {
 
   type Element = (Field, Value)
 
+  //**********************************************************************************************//
+  // Helpers
   def $empty: JsObject = Json.obj()
 
-  def $doc(element: Element, elements: Element*): JsObject = {
-    Json.obj((Seq(element) ++ elements): _*)
+  def $doc(elements: Element*): JsObject = {
+    Json.obj(elements: _*)
+  }
+
+  def $arr(elements: Value*): JsArray = {
+    Json.arr(elements: _*)
   }
 
   def $id(id: Value): JsObject = {
-    $doc("_id" -> id)
+    Json.obj("_id" -> id)
   }
+  // End of Helpers
+  //**********************************************************************************************//
 
   //**********************************************************************************************//
   // Top Level Logical Operators
