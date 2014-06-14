@@ -19,7 +19,9 @@ package reactivemongo.extensions.dsl
 import org.scalatest._
 import reactivemongo.bson._
 import reactivemongo.extensions.util.Logger
+import reactivemongo.extensions.dao.Handlers._
 import BsonDsl._
+import org.joda.time.DateTime
 
 class BsonDslSpec extends FlatSpec with Matchers {
 
@@ -28,6 +30,46 @@ class BsonDslSpec extends FlatSpec with Matchers {
     Logger.debug(dsl)
     val expected = BSONDocument("age" -> BSONDocument("$gt" -> 50, "$lt" -> 60))
     dsl shouldBe expected
+  }
+
+  it should "construct bson document" in {
+    val dateTime = DateTime.now
+
+    val document = $doc(
+      "name" -> "haydar",
+      "surname" -> "cabbar",
+      "age" -> 32,
+      "salary" -> 999.99,
+      "birthday" -> dateTime,
+      "prefs" -> $doc(
+        "pref1" -> "value1",
+        "pref2" -> 1341453453L
+      ),
+      "sizes" -> $arr("M", "L"),
+      "notices" -> $arr(
+        $doc("key1" -> "value1"),
+        $doc("key2" -> "value2")
+      )
+    )
+
+    val expected = BSONDocument(
+      "name" -> "haydar",
+      "surname" -> "cabbar",
+      "age" -> 32,
+      "salary" -> 999.99,
+      "birthday" -> BSONDateTime(dateTime.getMillis),
+      "prefs" -> BSONDocument(
+        "pref1" -> "value1",
+        "pref2" -> 1341453453L
+      ),
+      "sizes" -> BSONArray("M", "L"),
+      "notices" -> BSONArray(
+        BSONDocument("key1" -> "value1"),
+        BSONDocument("key2" -> "value2")
+      )
+    )
+
+    document shouldBe expected
   }
 
   //**********************************************************************************************//

@@ -22,6 +22,7 @@ import reactivemongo.bson._
 import play.api.libs.json._
 import play.modules.reactivemongo.json.BSONFormats._
 import JsonDsl._
+import org.joda.time.DateTime
 
 class JsonDslSpec extends FlatSpec with Matchers {
 
@@ -35,6 +36,46 @@ class JsonDslSpec extends FlatSpec with Matchers {
     )
 
     dsl shouldBe expected
+  }
+
+  it should "construct json document" in {
+    val dateTime = DateTime.now
+
+    val document = $doc(
+      "name" -> "haydar",
+      "surname" -> "cabbar",
+      "age" -> 32,
+      "salary" -> 999.99,
+      "birthday" -> dateTime,
+      "prefs" -> $doc(
+        "pref1" -> "value1",
+        "pref2" -> 1341453453L
+      ),
+      "sizes" -> $arr("M", "L"),
+      "notices" -> $arr(
+        $doc("key1" -> "value1"),
+        $doc("key2" -> "value2")
+      )
+    )
+
+    val expected = Json.obj(
+      "name" -> "haydar",
+      "surname" -> "cabbar",
+      "age" -> 32,
+      "salary" -> 999.99,
+      "birthday" -> dateTime.getMillis,
+      "prefs" -> Json.obj(
+        "pref1" -> "value1",
+        "pref2" -> 1341453453L
+      ),
+      "sizes" -> Json.arr("M", "L"),
+      "notices" -> Json.arr(
+        Json.obj("key1" -> "value1"),
+        Json.obj("key2" -> "value2")
+      )
+    )
+
+    document shouldBe expected
   }
 
   it should "create id document" in {

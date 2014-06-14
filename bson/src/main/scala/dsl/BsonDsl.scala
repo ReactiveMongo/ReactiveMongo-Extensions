@@ -26,13 +26,23 @@ trait BsonDsl {
     BSONDocument.pretty(document)
   }
 
-  def $doc(item: Producer[BSONElement], items: Producer[BSONElement]*): BSONDocument = {
-    BSONDocument((Seq(item) ++ items): _*)
+  //**********************************************************************************************//
+  // Helpers
+  def $empty: BSONDocument = BSONDocument.empty
+
+  def $doc(elements: Producer[BSONElement]*): BSONDocument = {
+    BSONDocument(elements: _*)
+  }
+
+  def $arr(elements: Producer[BSONValue]*): BSONArray = {
+    BSONArray(elements: _*)
   }
 
   def $id[T](id: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
     BSONDocument("_id" -> id)
   }
+  // End of Helpers
+  //**********************************************************************************************//
 
   //**********************************************************************************************//
   // Top Level Logical Operators
