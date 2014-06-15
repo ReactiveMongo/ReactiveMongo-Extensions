@@ -66,7 +66,7 @@ PersonDao.findById(person1._id)
 PersonDao.findRandom(BSONDocument("age" -> BSONDocument("$ne" -> 16)))
 ```
 
-Read more about DAO [here](guide/dao.md).
+Read more about BsonDao [here](guide/bsondao.md) and JsonDao [here](guide/jsondao.md).
 
 #### Query DSL for Easy Query Construction
 
