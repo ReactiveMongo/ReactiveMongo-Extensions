@@ -60,7 +60,10 @@ object PersonDao extends {
 * **bulkInsert** Bulk inserts multiple models.
 
 ```scala
-def bulkInsert(models: TraversableOnce[Model], bulkSize: Int, bulkByteSize: Int): Future[Int]
+def bulkInsert(
+  documents: TraversableOnce[Model],
+  bulkSize: Int = bulk.MaxDocs,
+  bulkByteSize: Int = bulk.MaxBulkSize): Future[Int]
 ```
 
 * **count** Returns the number of documents in this collection matching the given selector.
