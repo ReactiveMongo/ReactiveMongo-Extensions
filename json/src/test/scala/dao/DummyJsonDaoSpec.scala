@@ -24,6 +24,7 @@ import play.modules.reactivemongo.json.BSONFormats._
 import reactivemongo.extensions.json.model.DummyModel
 import reactivemongo.extensions.json.dsl.JsonDsl._
 import reactivemongo.extensions.util.Logger
+import reactivemongo.extensions.Implicits._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -54,6 +55,54 @@ class DummyJsonDaoSpec
       maybeDummyModel should be('defined)
       maybeDummyModel.get._id shouldBe dummyModel._id
       maybeDummyModel.get.age shouldBe dummyModel.age
+    }
+  }
+
+  it should "findAndUpdate one document and retreive the old document" in {
+    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
+
+    val futureResult = for {
+      insertResult <- dao.insert(dummyModel)
+      oldDocument <- ~dao.findAndUpdate("age" $eq dummyModel.age, $inc("age" -> 32))
+      newDocument <- ~dao.findOne("age" $eq 64)
+    } yield (oldDocument, newDocument)
+
+    whenReady(futureResult) {
+      case (oldDocument, newDocument) =>
+        oldDocument._id shouldBe dummyModel._id
+        oldDocument.age shouldBe dummyModel.age
+        newDocument.age shouldBe 64
+    }
+  }
+
+  it should "findAndUpdate one document and retreive the new document" in {
+    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
+
+    val futureResult = for {
+      insertResult <- dao.insert(dummyModel)
+      newDocument <- ~dao.findAndUpdate("age" $eq dummyModel.age, $inc("age" -> 32), fetchNewObject = true)
+    } yield newDocument
+
+    whenReady(futureResult) { newDocument =>
+      newDocument._id shouldBe dummyModel._id
+      newDocument.age shouldBe 64
+    }
+  }
+
+  it should "findAndRemove one document" in {
+    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
+
+    val futureResult = for {
+      insertResult <- dao.insert(dummyModel)
+      oldDocument <- ~dao.findAndRemove("age" $eq dummyModel.age)
+      afterCount <- dao.count()
+    } yield (oldDocument, afterCount)
+
+    whenReady(futureResult) {
+      case (oldDocument, afterCount) =>
+        oldDocument._id shouldBe dummyModel._id
+        oldDocument.age shouldBe dummyModel.age
+        afterCount shouldBe 0
     }
   }
 
