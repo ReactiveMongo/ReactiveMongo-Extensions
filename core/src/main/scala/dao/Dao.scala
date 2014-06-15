@@ -131,6 +131,32 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    */
   def findAll(selector: Structure, sort: Structure): Future[List[Model]]
 
+  /**
+   * Updates and returns a single model. It returns the old document by default.
+   *
+   * @param query The selection criteria for the update.
+   * @param update Performs an update of the selected model.
+   * @param sort Determines which model the operation updates if the query selects multiple models.
+   *             findAndUpdate() updates the first model in the sort order specified by this argument.
+   * @param fetchNewObject When true, returns the updated model rather than the original.
+   * @param upsert When true, findAndUpdate() creates a new model if no model matches the query.
+   */
+  def findAndUpdate(
+    query: Structure,
+    update: Structure,
+    sort: Structure,
+    fetchNewObject: Boolean,
+    upsert: Boolean): Future[Option[Model]]
+
+  /**
+   * Removes and returns a single model.
+   *
+   * @param query The selection criteria for the remove.
+   * @param sort Determines which model the operation removes if the query selects multiple models.
+   *             findAndRemove() removes the first model in the sort order specified by this argument.
+   */
+  def findAndRemove(query: Structure, sort: Structure): Future[Option[Model]]
+
   /** Retrieves the model with the given `id`. */
   def findById(id: ID): Future[Option[Model]]
 

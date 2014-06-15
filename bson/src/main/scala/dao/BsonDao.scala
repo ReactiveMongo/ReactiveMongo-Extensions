@@ -23,7 +23,7 @@ import reactivemongo.bson._
 import reactivemongo.api.{ bulk, DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.core.commands.{ LastError, GetLastError, Count }
+import reactivemongo.core.commands.{ LastError, GetLastError, Count, FindAndModify, Update, Remove }
 import reactivemongo.extensions.dsl.BsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 import Handlers._
@@ -125,6 +125,32 @@ abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1)): Future[List[Model]] = {
     collection.find(selector).sort(sort).cursor[Model].collect[List]()
+  }
+
+  def findAndUpdate(
+    query: BSONDocument,
+    update: BSONDocument,
+    sort: BSONDocument = BSONDocument.empty,
+    fetchNewObject: Boolean = false,
+    upsert: Boolean = false): Future[Option[Model]] = {
+    val command = FindAndModify(
+      collection = collectionName,
+      query = query,
+      modify = Update(update, fetchNewObject),
+      upsert = upsert,
+      sort = if (sort == BSONDocument.empty) None else Some(sort))
+
+    collection.db.command(command).map(_.map(modelReader.read))
+  }
+
+  def findAndRemove(query: BSONDocument, sort: BSONDocument = BSONDocument.empty): Future[Option[Model]] = {
+    val command = FindAndModify(
+      collection = collectionName,
+      query = query,
+      modify = Remove,
+      sort = if (sort == BSONDocument.empty) None else Some(sort))
+
+    collection.db.command(command).map(_.map(modelReader.read))
   }
 
   def findRandom(selector: BSONDocument = BSONDocument.empty): Future[Option[Model]] = {

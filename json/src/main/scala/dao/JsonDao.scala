@@ -20,11 +20,13 @@ import scala.util.Random
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import play.api.libs.json.{ Json, JsObject, Format, Writes }
+import reactivemongo.bson.BSONDocument
 import reactivemongo.api.{ bulk, DB, QueryOpts }
 import reactivemongo.api.indexes.Index
-import reactivemongo.core.commands.{ LastError, GetLastError, Count }
+import reactivemongo.core.commands.{ LastError, GetLastError, Count, FindAndModify, Update, Remove }
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
+import reactivemongo.extensions.BSONFormats
 import reactivemongo.extensions.dao.{ Dao, LifeCycle, ReflexiveLifeCycle }
 import reactivemongo.extensions.json.dsl.JsonDsl._
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
@@ -80,6 +82,14 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
 abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: String)(implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID])
     extends Dao[JSONCollection, JsObject, Model, ID, Writes](db, collectionName) {
 
+  private def toBSONDocument(document: JsObject): BSONDocument = {
+    BSONFormats.BSONDocumentFormat.reads(document).get
+  }
+
+  private def toJsObject(document: BSONDocument): JsObject = {
+    BSONFormats.BSONDocumentFormat.writes(document).as[JsObject]
+  }
+
   def ensureIndexes(): Future[Traversable[Boolean]] = Future sequence {
     autoIndexes map { index =>
       collection.indexesManager.ensure(index)
@@ -123,6 +133,32 @@ abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: 
     selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1)): Future[List[Model]] = {
     collection.find(selector).sort(sort).cursor[Model].collect[List]()
+  }
+
+  def findAndUpdate(
+    query: JsObject,
+    update: JsObject,
+    sort: JsObject = Json.obj(),
+    fetchNewObject: Boolean = false,
+    upsert: Boolean = false): Future[Option[Model]] = {
+    val command = FindAndModify(
+      collection = collectionName,
+      query = toBSONDocument(query),
+      modify = Update(toBSONDocument(update), fetchNewObject),
+      upsert = upsert,
+      sort = if (sort == Json.obj()) None else Some(toBSONDocument(sort)))
+
+    collection.db.command(command).map(_.map(bson => implicitly[Format[Model]].reads(toJsObject(bson)).get))
+  }
+
+  def findAndRemove(query: JsObject, sort: JsObject = Json.obj()): Future[Option[Model]] = {
+    val command = FindAndModify(
+      collection = collectionName,
+      query = toBSONDocument(query),
+      modify = Remove,
+      sort = if (sort == Json.obj()) None else Some(toBSONDocument(sort)))
+
+    collection.db.command(command).map(_.map(bson => implicitly[Format[Model]].reads(toJsObject(bson)).get))
   }
 
   def findRandom(selector: JsObject = Json.obj()): Future[Option[Model]] = {
