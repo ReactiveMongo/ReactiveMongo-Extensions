@@ -32,6 +32,21 @@ What the DSL *does* provide is the ablity to formulate queries thusly:
   }
 ```
 
+Another form which achieves the same result is to use one of the `where` methods available:
+
+```scala
+  // Using one of the Untyped.where overloads
+  {
+  import Untyped._
+
+  val cursor = collection.find(
+    where (_.firstName === "Jack" && _.age >= 18)
+	).cursor[BSONDocument];
+  }
+```
+
+There are overloads for between 1 and 22 place holders using the `where` method.  Should more than 22 be needed, then the 1 argument version should be used with a named parameter.  This allows an infinite number of property constraints to be specified.
+
 ### Roadmap
 
 This section details the functionality either currently or planned to be supported by ReactiveMongo-Criteria.
