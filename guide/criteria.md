@@ -76,10 +76,22 @@ With the majority of comparison operators, keep in mind that the definition of t
 criteria.aProperty === "value"
 ```
 
-* **<>**, **=/=** Matches properties which do not have the given value.
+```scala
+criteria.aProperty @== "value"
+```
+
+* **<>**, **=/=**, **!==** Matches properties which do not have the given value.
 
 ```scala
 criteria.aProperty <> "value"
+```
+
+```scala
+criteria.aProperty =/= "value"
+```
+
+```scala
+criteria.aProperty !== "value"
 ```
 
 * **<** Matches properties which compare "less than" a given value.

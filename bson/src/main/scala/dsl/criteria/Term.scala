@@ -60,6 +60,12 @@ case class Term[T](`_term$name`: String)
     <>[U](rhs);
 
   /**
+   * Logical inequality: '''$ne'''.
+   */
+  def !==[U <: T: ValueBuilder](rhs: U): Expression =
+    <>[U](rhs);
+
+  /**
    * Less-than comparison: '''$lt'''.
    */
   def <[U <: T: ValueBuilder](rhs: U): Expression =
