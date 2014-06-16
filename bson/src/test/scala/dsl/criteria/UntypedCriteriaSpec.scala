@@ -37,14 +37,50 @@ class UntypedCriteriaSpec
   /// Class Imports
   import Untyped._
 
-  "An Untyped criteria" should "support simple filtering" in
+  "An Untyped criteria" should "support equality comparisons" in
     {
-      val q = criteria.myField === "a value";
-
-      BSONDocument.pretty(q) shouldBe (
+      BSONDocument.pretty(criteria.myField === "a value") shouldBe (
         BSONDocument.pretty(
           BSONDocument(
             "myField" -> BSONString("a value")
+          )
+        )
+      );
+
+      BSONDocument.pretty(criteria.myField @== "a value") shouldBe (
+        BSONDocument.pretty(
+          BSONDocument(
+            "myField" -> BSONString("a value")
+          )
+        )
+      );
+    }
+
+  it should "support inequality comparisons" in
+    {
+      BSONDocument.pretty(criteria.myField !== "a value") shouldBe (
+        BSONDocument.pretty(
+          BSONDocument(
+            "myField" ->
+              BSONDocument("$ne" -> BSONString("a value"))
+          )
+        )
+      );
+
+      BSONDocument.pretty(criteria.myField =/= "a value") shouldBe (
+        BSONDocument.pretty(
+          BSONDocument(
+            "myField" ->
+              BSONDocument("$ne" -> BSONString("a value"))
+          )
+        )
+      );
+
+      BSONDocument.pretty(criteria.myField <> "a value") shouldBe (
+        BSONDocument.pretty(
+          BSONDocument(
+            "myField" ->
+              BSONDocument("$ne" -> BSONString("a value"))
           )
         )
       );
