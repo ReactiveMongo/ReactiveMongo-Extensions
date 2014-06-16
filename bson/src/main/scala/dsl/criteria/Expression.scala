@@ -152,14 +152,14 @@ case class Expression(name: Option[String], element: BSONElement) {
 
 object Expression {
   /**
-   * The empty property is provided so that ''monoid'' definitions for '''Expression''' can
-   * be easily provided.
+   * The empty property is provided so that ''monoid'' definitions for
+   * '''Expression''' can be easily provided.
    */
   val empty = new Expression(None, "" -> BSONDocument.empty);
 
   /**
    * The apply method provides functional-style creation syntax for
-   * [[reactivemongo.dsl.Expression]] instances.
+   * [[reactivemongo.extensions.dsl.criteria.Expression]] instances.
    */
   def apply(name: String, element: BSONElement): Expression =
     new Expression(Some(name), element);

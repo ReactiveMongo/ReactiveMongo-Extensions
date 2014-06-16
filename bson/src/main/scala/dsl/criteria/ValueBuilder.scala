@@ -34,7 +34,8 @@ trait ValueBuilder[T] {
  * The '''ValueBuilder''' companion object defines common
  * [[reactivemongo.extensions.dsl.criteria.ValueBuilder]] ''type classes''
  * available for any project.  Types not known to the library can define
- * [[reactivemongo.dsl.ValueBuilder]] instances as needed to extend the DSL.
+ * [[reactivemongo.extensions.dsl.criteria.ValueBuilder]] instances as needed
+ * to extend the DSL.
  */
 object ValueBuilder {
   implicit def bsonValueIdentityValue[T <: BSONValue]: ValueBuilder[T] =
