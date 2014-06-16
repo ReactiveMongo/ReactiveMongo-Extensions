@@ -24,9 +24,9 @@ import reactivemongo.bson._
 
 /**
  * The '''UntypedCriteriaSpec''' type unit tests the
- * [[reactivemongo.dsl.UntypedCriteria]] EDSL functionality and serves both
- * to verify fitness as well as an exemplar to how the
- * [[reactivemongo.dsl.UntypedCriteria]] functionality can be used.
+ * [[reactivemongo.extensions.dsl.criteria.Untyped]] EDSL functionality and
+ * serves both to verify fitness as well as an exemplar to how the
+ * [[reactivemongo.extensions.dsl.criteria.Untyped]] functionality can be used.
  *
  * @author svickers
  *
