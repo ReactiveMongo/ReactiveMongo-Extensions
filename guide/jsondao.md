@@ -54,7 +54,7 @@ object PersonDao extends {
 
 ### API
 
-* **bulkInsert** Bulk inserts multiple models.
+* **bulkInsert** Bulk inserts multiple models. `prePersist` life cycle event is called for each element *before* this function and `postPersist` is called for each element after this function.
 
 ```scala
 def bulkInsert(
@@ -159,7 +159,7 @@ def foreach(
   sort: JsObject = Json.obj("_id" -> 1))(f: (Model) => Unit): Future[Unit]
 ```
 
-* **insert** Inserts the given model.
+* **insert** Inserts the given model. `prePersist` life cycle event is called *before* this function and `postPersist` is called after this function.
 
 ```scala
 def insert(model: Model, writeConcern: GetLastError = defaultWriteConcern): Future[LastError]
@@ -186,13 +186,15 @@ def remove(
 def removeAll(writeConcern: GetLastError = defaultWriteConcern): Future[LastError]
 ```
 
-* **removeById** Removes the document with the given ID.
+* **removeById** Removes the document with the given ID. `preRemove` life cycle event is called *before* this function and `postRemove` is called after this function.
+
 
 ```scala
 def removeById(id: ID, writeConcern: GetLastError = defaultWriteConcern): Future[LastError]
 ```
 
-* **save** Inserts the document, or updates it if it already exists in the collection.
+* **save** Inserts the document, or updates it if it already exists in the collection. `prePersist` life cycle event is called *before* this function and `postPersist` is called after this function.
+
 
 ```scala
 def save(model: Model, writeConcern: GetLastError = GetLastError()): Future[LastError]
