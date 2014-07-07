@@ -47,7 +47,7 @@ object Typed {
         val tree = (c.prefix.tree, property.tree) match {
           case (
             TypeApply(
-              Select(a, b),
+              Select(_, _),
               List(parentType)
               ),
             st @ Literal(Constant(name: String))
