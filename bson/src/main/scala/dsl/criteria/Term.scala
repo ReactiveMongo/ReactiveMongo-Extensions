@@ -122,8 +122,8 @@ case class Term[T](`_term$name`: String)
       "$in" -> BSONArray(Seq(B.bson(head)) ++ tail.map(B.bson))
     );
 
-  def selectDynamic(field: String): Term[Any] =
-    Term[Any](`_term$name` + "." + field);
+  def selectDynamic[U <: T](field: String): Term[U] =
+    Term[U](`_term$name` + "." + field);
 }
 
 object Term {

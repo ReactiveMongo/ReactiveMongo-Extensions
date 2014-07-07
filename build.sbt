@@ -70,7 +70,7 @@ lazy val settings = (
   ++ org.scalastyle.sbt.ScalastylePlugin.Settings)
 
 lazy val root = project.in(file("."))
-  .aggregate(bson, json, core)
+  .aggregate(bson, json, core, samples)
   .settings(settings: _*)
   .settings(unidocSettings: _*)
   .settings(publishArtifact := false)
@@ -88,4 +88,9 @@ lazy val json = project.in(file("json"))
   .settings(settings: _*)
   .settings(publishSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
+
+lazy val samples = project.in(file("samples"))
+  .settings(settings: _*)
+  .settings(publishSettings: _*)
+  .dependsOn(core % "test->test;compile->compile", bson % "compile->compile")
 
