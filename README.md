@@ -85,7 +85,7 @@ Read more about Query DSL [here](guide/dsl.md).
 
 #### Criteria DSL
 
-Criteria DSL *does* provide is the ablity to formulate queries thusly:
+The Criteria DSL provides the ablity to formulate queries thusly:
 
 ```scala
   // Using an Untyped.criteria
@@ -96,6 +96,18 @@ Criteria DSL *does* provide is the ablity to formulate queries thusly:
   // to belong to any particular type.  This is what is meant by "Untyped".
   val adhoc = criteria.firstName === "Jack" && criteria.age >= 18;
   val cursor = collection.find(adhoc).cursor[BSONDocument];
+  }
+
+  {
+  // Using a Typed criteria which restricts properties to the
+  // given type.
+  import Typed._
+
+  case class ExampleDocument (aProperty : String, another : Int)
+
+  val byKnownProperties = criteria[ExampleDocument].aProperty =~ "^[A-Z]\\w+" &&
+    criteria[ExampleDocument].another > 0;
+  val cursor = collection.find(byKnownProperties).cursor[BSONDocument];
   }
 ```
 
