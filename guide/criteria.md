@@ -47,12 +47,30 @@ Another form which achieves the same result is to use one of the `where` methods
 
 There are overloads for between 1 and 22 place holders using the `where` method.  Should more than 22 be needed, then the 1 argument version should be used with a named parameter.  This allows an infinite number of property constraints to be specified.
 
+For situations where the MongoDB document structure is well known and a developer wishes enforce property existence, the `Typed` Criteria can be used:
+
+```scala
+  {
+  // Using a Typed criteria which restricts properties to the
+  // given type.
+  import Typed._
+
+  case class ExampleDocument (aProperty : String, another : Int)
+
+  val byKnownProperties = criteria[ExampleDocument].aProperty =~ "^[A-Z]\\w+" &&
+    criteria[ExampleDocument].another > 0;
+  val cursor = collection.find(byKnownProperties).cursor[BSONDocument];
+  }
+```
+
+Note that `Typed` and `Untyped` serve different needs.  When the structure of a document collection is both known ''and'' identified as static, `Typed` makes sense to employ.  However, `Untyped` is compelling when document structure can vary within a collection.  These are considerations which can easily vary between projects and even within different modules of one project.
+
 ### Roadmap
 
 This section details the functionality either currently or planned to be supported by ReactiveMongo-Criteria.
 
 - Ability to formulate queries without requiring knowledge of document structure. *COMPLETE*
-- Ability to ''type check'' query constraints by specifying a Scala type. *TBD*
+- Ability to ''type check'' query constraints by specifying a Scala type. *IN PROGRESS*
 - Define and add support for an [EDSL](http://scalamacros.org/usecases/advanced-domain-specific-languages.html) specific to [projections](https://github.com/ReactiveMongo/ReactiveMongo/blob/master/driver/src/test/scala/CommonUseCases.scala). *TBD*
 
 
