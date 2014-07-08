@@ -295,7 +295,7 @@ libraryDependencies ++= Seq(
 Or if you want to be on the bleeding edge using snapshots:
 
 ```scala
-resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
   "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.4-SNAPSHOT"
