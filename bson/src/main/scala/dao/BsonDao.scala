@@ -156,7 +156,7 @@ abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit
   def findRandom(selector: BSONDocument = BSONDocument.empty): Future[Option[Model]] = {
     for {
       count <- count(selector)
-      index = Random.nextInt(count)
+      index = if (count == 0) 0 else Random.nextInt(count)
       random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[Model]
     } yield random
   }
