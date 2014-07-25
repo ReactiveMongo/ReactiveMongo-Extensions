@@ -259,3 +259,30 @@ abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit
   ensureIndexes()
 }
 
+object BsonDao {
+  def apply[Model, ID](db: () => DB, collectionName: String)(
+    implicit modelReader: BSONDocumentReader[Model],
+    modelWriter: BSONDocumentWriter[Model],
+    idWriter: BSONWriter[ID, _ <: BSONValue],
+    lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
+    ec: ExecutionContext): BsonDao[Model, ID] = {
+    new BsonDao[Model, ID](db, collectionName) {}
+  }
+}
+
+class BsonDaoBuilder[Model, ID](db: () => DB) {
+  def apply(collectionName: String)(
+    implicit modelReader: BSONDocumentReader[Model],
+    modelWriter: BSONDocumentWriter[Model],
+    idWriter: BSONWriter[ID, _ <: BSONValue],
+    lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
+    ec: ExecutionContext): BsonDao[Model, ID] = {
+    BsonDao(db, collectionName)
+  }
+}
+
+object BsonDaoBuilder {
+  def apply[Model, ID](db: () => DB): BsonDaoBuilder[Model, ID] = {
+    new BsonDaoBuilder[Model, ID](db)
+  }
+}
