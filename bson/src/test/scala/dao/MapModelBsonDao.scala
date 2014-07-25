@@ -16,6 +16,7 @@
 
 package reactivemongo.extensions.dao
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import reactivemongo.extensions.model.MapModel
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.DefaultBSONHandlers._

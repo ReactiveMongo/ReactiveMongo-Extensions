@@ -16,6 +16,7 @@
 
 package reactivemongo.extensions.json.dao
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import reactivemongo.extensions.json.model.Person
 import reactivemongo.api.DB
 import scala.concurrent.Future

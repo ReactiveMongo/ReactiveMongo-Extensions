@@ -16,9 +16,10 @@
 
 package reactivemongo.extensions.json.dao
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import reactivemongo.extensions.json.model.Event
 import reactivemongo.api.DB
-import scala.concurrent.Future
 import reactivemongo.extensions.json.dsl.JsonDsl
 
 class EventJsonDao(_db: DB)

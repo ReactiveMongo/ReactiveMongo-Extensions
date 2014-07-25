@@ -16,6 +16,7 @@
 
 package reactivemongo.extensions.dao
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import reactivemongo.extensions.model.CustomIdModel
 import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.extensions.util.Misc.UUID

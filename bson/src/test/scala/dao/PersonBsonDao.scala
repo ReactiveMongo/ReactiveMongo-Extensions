@@ -21,6 +21,7 @@ import reactivemongo.api.DefaultDB
 import reactivemongo.extensions.dsl.BsonDsl
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class PersonBsonDao(_db: DefaultDB)
     extends BsonDao[Person, String](() => _db, "persons")

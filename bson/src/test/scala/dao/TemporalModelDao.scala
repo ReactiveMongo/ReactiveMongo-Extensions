@@ -16,12 +16,13 @@
 
 package reactivemongo.extensions.dao
 
+import scala.concurrent.{ Future, Await }
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 import reactivemongo.extensions.model.TemporalModel
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.bson.BSONObjectID
-import scala.concurrent.{ Future, Await }
-import scala.concurrent.duration._
 import reactivemongo.extensions.util.Misc.UUID
 
 class TemporalModelDao
