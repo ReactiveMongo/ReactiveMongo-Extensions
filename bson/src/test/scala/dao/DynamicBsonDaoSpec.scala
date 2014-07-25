@@ -23,7 +23,7 @@ import reactivemongo.bson.{ BSONObjectID, BSONDocument }
 import reactivemongo.extensions.dsl.BsonDsl._
 import reactivemongo.extensions.util.Logger
 import reactivemongo.extensions.Implicits._
-import scala.concurrent.Future
+import scala.concurrent.{ Future, Await }
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DynamicBsonDaoSpec
@@ -38,8 +38,9 @@ class DynamicBsonDaoSpec
   val builder = BsonDaoBuilder[BSONDocument, BSONObjectID](MongoContext.db)
 
   before {
-    builder("collection1").dropSync()
-    builder("collection2").dropSync()
+    import scala.concurrent.duration._
+    Await.ready(builder("collection1").removeAll(), 10 seconds)
+    Await.ready(builder("collection2").removeAll(), 10 seconds)
   }
 
   "A DynamicBsonDao" should "use different collections" in {

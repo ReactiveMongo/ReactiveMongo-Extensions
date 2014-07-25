@@ -26,7 +26,7 @@ import reactivemongo.extensions.dao.MongoContext
 import reactivemongo.extensions.json.dsl.JsonDsl._
 import reactivemongo.extensions.util.Logger
 import reactivemongo.extensions.Implicits._
-import scala.concurrent.Future
+import scala.concurrent.{ Future, Await }
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DynamicJsonDaoSpec
@@ -41,8 +41,9 @@ class DynamicJsonDaoSpec
   val builder = JsonDaoBuilder[JsObject, BSONObjectID](MongoContext.db)
 
   before {
-    builder("collection1").dropSync()
-    builder("collection2").dropSync()
+    import scala.concurrent.duration._
+    Await.ready(builder("collection1").removeAll(), 10 seconds)
+    Await.ready(builder("collection2").removeAll(), 10 seconds)
   }
 
   "A DynamicJsonDao" should "use different collections" in {
