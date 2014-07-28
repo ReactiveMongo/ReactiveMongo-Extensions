@@ -4,7 +4,7 @@ name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
   organization := "net.fehmicansaglam",
-  version := "0.10.0.4",
+  version := "0.10.0.4-SNAPSHOT",
   scalaVersion  := "2.10.4",
   scalacOptions := Seq(
     "-unchecked",
