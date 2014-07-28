@@ -7,6 +7,7 @@ This project will eventually move to https://github.com/ReactiveMongo/ReactiveMo
 Here is a complete example using Play 2.2, ReactiveMongo Extensions and Flight.js https://github.com/mertkavi/play-reactivemongo-extensions-sample
 
 [![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=0.10.x)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
+[!Progress](http://progressed.io/bar/70?title=stable)
 
 ## Introduction
 
