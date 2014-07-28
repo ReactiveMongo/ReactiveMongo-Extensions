@@ -16,12 +16,11 @@
 
 package reactivemongo.extensions.dao
 
-import scala.concurrent.{ Future, Await }
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 import reactivemongo.extensions.model.Event
 import reactivemongo.api.DefaultDB
-import reactivemongo.extensions.dsl.BsonDsl
+import reactivemongo.extensions.dsl.functional.BsonDsl
+import scala.concurrent.{ Future, Await }
+import scala.concurrent.duration._
 
 class EventBsonDao(_db: DefaultDB)
     extends BsonDao[Event, String](() => _db, "events")

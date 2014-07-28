@@ -47,6 +47,7 @@ Another form which achieves the same result is to use one of the `where` methods
 
 There are overloads for between 1 and 22 place holders using the `where` method.  Should more than 22 be needed, then the 1 argument version should be used with a named parameter.  This allows an infinite number of property constraints to be specified.
 
+<<<<<<< HEAD
 For situations where the MongoDB document structure is well known and a developer wishes enforce property existence, the `Typed` Criteria can be used:
 
 ```scala
@@ -65,12 +66,18 @@ For situations where the MongoDB document structure is well known and a develope
 
 Note that `Typed` and `Untyped` serve different needs.  When the structure of a document collection is both known ''and'' identified as static, `Typed` makes sense to employ.  However, `Untyped` is compelling when document structure can vary within a collection.  These are considerations which can easily vary between projects and even within different modules of one project.
 
+=======
+>>>>>>> origin/0.10.x
 ### Roadmap
 
 This section details the functionality either currently or planned to be supported by ReactiveMongo-Criteria.
 
 - Ability to formulate queries without requiring knowledge of document structure. *COMPLETE*
+<<<<<<< HEAD
 - Ability to ''type check'' query constraints by specifying a Scala type. *IN PROGRESS*
+=======
+- Ability to ''type check'' query constraints by specifying a Scala type. *TBD*
+>>>>>>> origin/0.10.x
 - Define and add support for an [EDSL](http://scalamacros.org/usecases/advanced-domain-specific-languages.html) specific to [projections](https://github.com/ReactiveMongo/ReactiveMongo/blob/master/driver/src/test/scala/CommonUseCases.scala). *TBD*
 
 

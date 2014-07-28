@@ -1,13 +1,8 @@
 # ReactiveMongo Extensions
 
-The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
-
-This project will eventually move to https://github.com/ReactiveMongo/ReactiveMongo-Extensions
-
-Here is a complete example using Play 2.2, ReactiveMongo Extensions and Flight.js https://github.com/mertkavi/play-reactivemongo-extensions-sample
+This is a library providing DAO and DSL support for ReactiveMongo. The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
 [![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=0.10.x)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
-![Progress](http://progressed.io/bar/70?title=stable)
 
 ## Introduction
 
@@ -71,93 +66,27 @@ PersonDao.findById(person1._id)
 PersonDao.findRandom(BSONDocument("age" -> BSONDocument("$ne" -> 16)))
 ```
 
-Read more about BsonDao [here](guide/bsondao.md) and JsonDao [here](guide/jsondao.md).
+#### Easy Query Construction
 
-#### Query DSL for Easy Query Construction
-
-There are also DSL helpers for each DAO type, which are `reactivemongo.extensions.dsl.BsonDsl` and `reactivemongo.extensions.json.dsl.JsonDsl`.
+There are also DSL helpers for each DAO type, which are `reactivemongo.extensions.dsl.BsonDsl` and `reactivemongo.extensions.dsl.JsonDsl`.
 DSL helpers provide utilities to easily construct JSON or BSON queries.
 
-By mixing in or importing BsonDsl you could write the query above like this:
+By mixing or importing BsonDsl you could write the query above like this:
 
 ```scala
 import reactivemongo.extensions.dsl.BsonDsl._
 
+PersonDao.findRandom($ne("age" -> 16))
+```
+
+#### Functional DSL
+
+Even better there is also an infix version for each DSL type.
+
+```scala
+import reactivemongo.extensions.dsl.functional.BsonDsl._
+
 PersonDao.findRandom("age" $gt 16 $lt 32)
-```
-
-Read more about Query DSL [here](guide/dsl.md).
-
-#### Criteria DSL
-
-The Criteria DSL provides the ablity to formulate queries thusly:
-
-```scala
-  // Using an Untyped.criteria
-  {
-  import Untyped._
-
-  // The MongoDB properties referenced are not enforced by the compiler
-  // to belong to any particular type.  This is what is meant by "Untyped".
-  val adhoc = criteria.firstName === "Jack" && criteria.age >= 18;
-  val cursor = collection.find(adhoc).cursor[BSONDocument];
-  }
-
-  {
-  // Using a Typed criteria which restricts properties to the
-  // given type.
-  import Typed._
-
-  case class ExampleDocument (aProperty : String, another : Int)
-
-  val byKnownProperties = criteria[ExampleDocument].aProperty =~ "^[A-Z]\\w+" &&
-    criteria[ExampleDocument].another > 0;
-  val cursor = collection.find(byKnownProperties).cursor[BSONDocument];
-  }
-```
-
-Read more about Criteria DSL [here](guide/criteria.md).
-
-#### Model Life Cyle
-
-By defining a life cycle object, one can preprocess all models before being persisted or perform specific actions after life cycle events. This can be useful for updating temporal fields on all model instances before persisting.
-
-```scala
-import reactivemongo.bson._
-import reactivemongo.extensions.dao.LifeCycle
-import reactivemongo.extensions.dao.Handlers._
-import reactivemongo.extensions.util.Logger
-import org.joda.time.DateTime
-
-case class TemporalModel(
-  _id: BSONObjectID = BSONObjectID.generate,
-  name: String,
-  surname: String,
-  createdAt: DateTime = DateTime.now,
-  updatedAt: DateTime = DateTime.now)
-
-object TemporalModel {
-  implicit val temporalModelFormat = Macros.handler[TemporalModel]
-
-  implicit object TemporalModelLifeCycle extends LifeCycle[TemporalModel, BSONObjectID] {
-    def prePersist(model: TemporalModel): TemporalModel = {
-      Logger.debug(s"prePersist $model")
-      model.copy(updatedAt = DateTime.now)
-    }
-    def postPersist(model: TemporalModel): Unit = {
-      Logger.debug(s"postPersist $model")
-    }
-    def preRemove(id: BSONObjectID): Unit = {
-      Logger.debug(s"preRemove $id")
-    }
-    def postRemove(id: BSONObjectID): Unit = {
-      Logger.debug(s"postRemove $id")
-    }
-    def ensuredIndexes(): Unit = {
-      Logger.debug("ensuredIndexes")
-    }
-  }
-}
 ```
 
 #### Auto Indexes
@@ -270,6 +199,18 @@ import reactivemongo.extensions.Implicits._
 
 ```
 
+## Further documentation
+
+Each type has its own dedicated documentation page, however API for all types are very similar.
+
+[BsonDao](guide/bsondao.md)
+
+[BsonDsl](guide/bsondsl.md)
+
+[JsonDao](guide/jsondao.md)
+
+[JsonDsl](guide/jsondsl.md)
+
 ## Using ReactiveMongo Extensions in your project
 
 The general format is that release a.b.c.d is compatible with ReactiveMongo a.b.c.
@@ -277,13 +218,15 @@ Current version matrix is below:
 
 | reactivemongo-extensions-bson    | Target ReactiveMongo version |
 |----------------------------------|------------------------------|
-| 0.10.0.4                         | 0.10.0                       |
-| 0.10.0.5-SNAPSHOT                | 0.10.0                       |
+| 0.10.0.3                         | 0.10.0                       |
+| 0.10.0.4-SNAPSHOT                | 0.10.0                       |
+| 0.11.0.0-SNAPSHOT                | 0.11.0-SNAPSHOT              |
 
 | reactivemongo-extensions-json    | Target Play-ReactiveMongo version |
 |----------------------------------|-----------------------------------|
-| 0.10.0.4                         | 0.10.2                            |
-| 0.10.0.5-SNAPSHOT                | 0.10.2                            |
+| 0.10.0.3                         | 0.10.2                            |
+| 0.10.0.4-SNAPSHOT                | 0.10.2                            |
+| 0.11.0.0-SNAPSHOT                | 0.11.0-SNAPSHOT                   |
 
 Note: Only available for scala 2.10.
 
@@ -291,17 +234,17 @@ If you use SBT, you just have to edit build.sbt and add the following:
 
 ```scala
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.4"
+  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.3"
 )
 ```
 
 Or if you want to be on the bleeding edge using snapshots:
 
 ```scala
-resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.5-SNAPSHOT"
+  "net.fehmicansaglam" %% "reactivemongo-extensions-bson" % "0.10.0.4-SNAPSHOT"
 )
 ```
 

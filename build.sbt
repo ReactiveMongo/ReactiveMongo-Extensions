@@ -4,7 +4,7 @@ name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
   organization := "net.fehmicansaglam",
-  version := "0.10.0.5-SNAPSHOT",
+  version := "0.10.0.4-SNAPSHOT",
   scalaVersion  := "2.10.4",
   scalacOptions := Seq(
     "-unchecked",
@@ -56,11 +56,6 @@ lazy val publishSettings = Seq(
         <name>Fehmi Can Saglam</name>
         <url>http://github.com/fehmicansaglam</url>
       </developer>
-      <developer>
-        <id>osxhacker</id>
-        <name>Steve Vickers</name>
-        <url>http://github.com/osxhacker</url>
-      </developer>
     </developers>))
 
 
@@ -70,7 +65,7 @@ lazy val settings = (
   ++ org.scalastyle.sbt.ScalastylePlugin.Settings)
 
 lazy val root = project.in(file("."))
-  .aggregate(bson, json, core, samples)
+  .aggregate(bson, json, core)
   .settings(settings: _*)
   .settings(unidocSettings: _*)
   .settings(publishArtifact := false)
@@ -88,9 +83,4 @@ lazy val json = project.in(file("json"))
   .settings(settings: _*)
   .settings(publishSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
-
-lazy val samples = project.in(file("samples"))
-  .settings(settings: _*)
-  .settings(publishSettings: _*)
-  .dependsOn(core % "test->test;compile->compile", bson % "compile->compile")
 
