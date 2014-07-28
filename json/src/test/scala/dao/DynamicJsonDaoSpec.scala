@@ -16,17 +16,17 @@
 
 package reactivemongo.extensions.json.dao
 
+import model.DynamicJsonModel
 import org.scalatest._
-import org.scalatest.concurrent.{ ScalaFutures }
-import org.scalatest.time.{ Span, Seconds }
-import play.api.libs.json.{ Json, JsObject }
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.time._
+import play.api.libs.json._
 import play.modules.reactivemongo.json.BSONFormats._
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.extensions.dao.MongoContext
 import reactivemongo.extensions.json.dsl.JsonDsl._
-import reactivemongo.extensions.util.Logger
 import reactivemongo.extensions.Implicits._
-import scala.concurrent.{ Future, Await }
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DynamicJsonDaoSpec
@@ -40,6 +40,9 @@ class DynamicJsonDaoSpec
 
   val builder = JsonDaoBuilder[JsObject, BSONObjectID](MongoContext.db)
 
+  val dao1 = builder("collection1")
+  val dao2 = builder("collection2")
+
   before {
     import scala.concurrent.duration._
     Await.ready(builder("collection1").removeAll(), 10 seconds)
@@ -47,9 +50,6 @@ class DynamicJsonDaoSpec
   }
 
   "A DynamicJsonDao" should "use different collections" in {
-    val dao1 = builder("collection1")
-    val dao2 = builder("collection2")
-
     val futureResult = for {
       insertResult1 <- dao1.insert($doc("name" -> "ali", "surname" -> "veli"))
       insertResult2 <- dao2.insert($doc("name" -> "haydar", "surname" -> "cabbar", "age" -> 18))
@@ -69,4 +69,62 @@ class DynamicJsonDaoSpec
     }
   }
 
+  it should "find documents by ids" in {
+    val dynamicJsonModels = DynamicJsonModel.random(100)
+
+    val futureResult = for {
+      insertResult1 <- dao1.bulkInsert(dynamicJsonModels)
+      insertResult2 <- dao2.bulkInsert(dynamicJsonModels)
+      models1 <- dao1.findByIds(dynamicJsonModels.drop(5).map(doc => (doc \ "_id").as[BSONObjectID]): _*)
+      models2 <- dao2.findByIds(dynamicJsonModels.drop(10).map(doc => (doc \ "_id").as[BSONObjectID]): _*)
+    } yield (models1, models2)
+
+    whenReady(futureResult) { collection =>
+      collection._1 should have size 95
+      collection._2 should have size 90
+    }
+  }
+
+  it should "findAndUpdate one document and retrieve the old document" in {
+    val dynamicJsonModel1 = DynamicJsonModel.one
+    val dynamicJsonModel2 = DynamicJsonModel.one
+
+    val futureResult = for {
+      insertResult1 <- dao1.insert(dynamicJsonModel1)
+      oldDocument1 <- ~dao1.findAndUpdate("age" $eq (dynamicJsonModel1 \ "age").as[Int], $inc("age" -> 32))
+      newDocument1 <- ~dao1.findOne("age" $eq 33)
+      insertResult2 <- dao2.insert(dynamicJsonModel2)
+      oldDocument2 <- ~dao2.findAndUpdate("age" $eq (dynamicJsonModel2 \ "age").as[Int], $inc("age" -> 42))
+      newDocument2 <- ~dao2.findOne("age" $eq 43)
+    } yield (oldDocument1, newDocument1, oldDocument2, newDocument2)
+
+    whenReady(futureResult) {
+      case (oldDocument1, newDocument1, oldDocument2, newDocument2) =>
+        (oldDocument1 \ "_id").as[BSONObjectID] shouldBe (dynamicJsonModel1 \ "_id").as[BSONObjectID]
+        (oldDocument2 \ "_id").as[BSONObjectID] shouldBe (dynamicJsonModel2 \ "_id").as[BSONObjectID]
+        (oldDocument1 \ "age").as[Int] shouldBe (dynamicJsonModel1 \ "age").as[Int]
+        (oldDocument2 \ "age").as[Int] shouldBe (dynamicJsonModel2 \ "age").as[Int]
+        (newDocument1 \ "age").as[Int] shouldBe 33
+        (newDocument2 \ "age").as[Int] shouldBe 43
+    }
+  }
+
+  it should "findAndUpdate one document and retrieve the new document" in {
+    val dynamicJsonModel1 = DynamicJsonModel.one
+    val dynamicJsonModel2 = DynamicJsonModel.one
+
+    val futureResult = for {
+      insertResult1 <- dao1.insert(dynamicJsonModel1)
+      newDocument1 <- ~dao1.findAndUpdate("age" $eq (dynamicJsonModel1 \ "age").as[Int], $inc("age" -> 32), fetchNewObject = true)
+      insertResult2 <- dao2.insert(dynamicJsonModel2)
+      newDocument2 <- ~dao2.findAndUpdate("age" $eq (dynamicJsonModel2 \ "age").as[Int], $inc("age" -> 42), fetchNewObject = true)
+    } yield (newDocument1, newDocument2)
+
+    whenReady(futureResult) { case (newDocument1, newDocument2) =>
+      (newDocument1 \ "_id").as[BSONObjectID] shouldBe (dynamicJsonModel1 \ "_id").as[BSONObjectID]
+      (newDocument2 \ "_id").as[BSONObjectID] shouldBe (dynamicJsonModel2 \ "_id").as[BSONObjectID]
+      (newDocument1 \ "age").as[Int] shouldBe 33
+      (newDocument2 \ "age").as[Int] shouldBe 43
+    }
+  }
 }

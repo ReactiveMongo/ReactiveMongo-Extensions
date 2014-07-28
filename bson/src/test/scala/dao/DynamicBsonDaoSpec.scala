@@ -16,14 +16,14 @@
 
 package reactivemongo.extensions.dao
 
+import model.DynamicBsonModel
 import org.scalatest._
-import org.scalatest.concurrent.{ ScalaFutures }
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Span, Seconds }
 import reactivemongo.bson.{ BSONObjectID, BSONDocument }
 import reactivemongo.extensions.dsl.BsonDsl._
-import reactivemongo.extensions.util.Logger
 import reactivemongo.extensions.Implicits._
-import scala.concurrent.{ Future, Await }
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DynamicBsonDaoSpec
@@ -37,6 +37,9 @@ class DynamicBsonDaoSpec
 
   val builder = BsonDaoBuilder[BSONDocument, BSONObjectID](MongoContext.db)
 
+  val dao1 = builder("collection1")
+  val dao2 = builder("collection2")
+
   before {
     import scala.concurrent.duration._
     Await.ready(builder("collection1").removeAll(), 10 seconds)
@@ -44,9 +47,6 @@ class DynamicBsonDaoSpec
   }
 
   "A DynamicBsonDao" should "use different collections" in {
-    val dao1 = builder("collection1")
-    val dao2 = builder("collection2")
-
     val futureResult = for {
       insertResult1 <- dao1.insert($doc("name" -> "ali", "surname" -> "veli"))
       insertResult2 <- dao2.insert($doc("name" -> "haydar", "surname" -> "cabbar", "age" -> 18))
@@ -66,4 +66,62 @@ class DynamicBsonDaoSpec
     }
   }
 
+  it should "find documents by ids" in {
+    val dynamicBsonModels = DynamicBsonModel.random(100)
+
+    val futureResult = for {
+      insertResult1 <- dao1.bulkInsert(dynamicBsonModels)
+      insertResult2 <- dao2.bulkInsert(dynamicBsonModels)
+      models1 <- dao1.findByIds(dynamicBsonModels.drop(5).map(_.getAs[BSONObjectID]("_id").get): _*)
+      models2 <- dao2.findByIds(dynamicBsonModels.drop(10).map(_.getAs[BSONObjectID]("_id").get): _*)
+    } yield (models1, models2)
+
+    whenReady(futureResult) { collection =>
+      collection._1 should have size 95
+      collection._2 should have size 90
+    }
+  }
+
+  it should "findAndUpdate one document and retrieve the old document" in {
+    val dynamicBsonModel1 = DynamicBsonModel.one
+    val dynamicBsonModel2 = DynamicBsonModel.one
+
+    val futureResult = for {
+      insertResult1 <- dao1.insert(dynamicBsonModel1)
+      oldDocument1 <- ~dao1.findAndUpdate("age" $eq dynamicBsonModel1.getAs[Int]("age"), $inc("age" -> 32))
+      newDocument1 <- ~dao1.findOne("age" $eq 33)
+      insertResult2 <- dao2.insert(dynamicBsonModel2)
+      oldDocument2 <- ~dao2.findAndUpdate("age" $eq dynamicBsonModel2.getAs[Int]("age"), $inc("age" -> 42))
+      newDocument2 <- ~dao2.findOne("age" $eq 43)
+    } yield (oldDocument1, newDocument1, oldDocument2, newDocument2)
+
+    whenReady(futureResult) {
+      case (oldDocument1, newDocument1, oldDocument2, newDocument2) =>
+        oldDocument1.getAs[BSONObjectID]("_id") shouldBe dynamicBsonModel1.getAs[BSONObjectID]("_id")
+        oldDocument2.getAs[BSONObjectID]("_id") shouldBe dynamicBsonModel2.getAs[BSONObjectID]("_id")
+        oldDocument1.getAs[Int]("age") shouldBe dynamicBsonModel1.getAs[Int]("age")
+        oldDocument2.getAs[Int]("age") shouldBe dynamicBsonModel2.getAs[Int]("age")
+        newDocument1.getAs[Int]("age") shouldBe 33
+        newDocument2.getAs[Int]("age") shouldBe 43
+    }
+  }
+
+  it should "findAndUpdate one document and retrieve the new document" in {
+    val dynamicBsonModel1 = DynamicBsonModel.one
+    val dynamicBsonModel2 = DynamicBsonModel.one
+
+    val futureResult = for {
+      insertResult1 <- dao1.insert(dynamicBsonModel1)
+      newDocument1 <- ~dao1.findAndUpdate("age" $eq dynamicBsonModel1.getAs[Int]("age"), $inc("age" -> 32), fetchNewObject = true)
+      insertResult2 <- dao2.insert(dynamicBsonModel2)
+      newDocument2 <- ~dao2.findAndUpdate("age" $eq dynamicBsonModel2.getAs[Int]("age"), $inc("age" -> 42), fetchNewObject = true)
+    } yield (newDocument1, newDocument2)
+
+    whenReady(futureResult) { case (newDocument1, newDocument2) =>
+      newDocument1.getAs[BSONObjectID]("_id") shouldBe dynamicBsonModel1.getAs[BSONObjectID]("_id")
+      newDocument2.getAs[BSONObjectID]("_id") shouldBe dynamicBsonModel2.getAs[BSONObjectID]("_id")
+      newDocument1.getAs[Int]("age") shouldBe 33
+      newDocument2.getAs[Int]("age") shouldBe 43
+    }
+  }
 }
