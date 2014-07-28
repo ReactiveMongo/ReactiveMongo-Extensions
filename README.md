@@ -2,7 +2,10 @@
 
 The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
-[![Build Status](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions.svg?branch=0.10.x)](https://travis-ci.org/fehmicansaglam/reactivemongo-extensions)
+Here is a complete example using Play 2.2, ReactiveMongo Extensions and Flight.js https://github.com/mertkavi/play-reactivemongo-extensions-sample
+
+[![Build Status](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions.svg?branch=0.10.x)](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions)
+![Progress](http://progressed.io/bar/70?title=stable)
 
 ## Introduction
 
@@ -283,10 +286,20 @@ Note: Only available for scala 2.10.
 If you use SBT, you just have to edit build.sbt and add the following:
 
 ```scala
-resolvers += "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.10.0.0-SNAPSHOT"
+)
+```
+
+or
+
+```scala
+resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
+libraryDependencies ++= Seq(
+  "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.10.0.0-SNAPSHOT"
 )
 ```
 
@@ -297,9 +310,3 @@ Contributions are always welcome. Good ways to contribute include:
 * Fixing bugs
 * Improving the performance
 * Adding to the documentation
-
-
-
-
-
-

@@ -38,13 +38,6 @@ import scala.concurrent.duration.Duration
 abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Writer[_]](db: () => DB, collectionName: String) {
 
   /**
-   * Defines the [[scala.concurrent.ExecutionContext]] for this DAO.
-   *
-   * Defaults to [[scala.concurrent.ExecutionContext.Implicits.global]].
-   */
-  implicit def ec: ExecutionContext = ExecutionContext.Implicits.global
-
-  /**
    * The list of indexes to be ensured on DAO load.
    *
    * Because of Scala initialization order there are exactly 2 ways
@@ -81,7 +74,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param bulkByteSize
    * @return The number of successful insertions.
    */
-  def bulkInsert(models: TraversableOnce[Model], bulkSize: Int, bulkByteSize: Int): Future[Int]
+  def bulkInsert(models: TraversableOnce[Model], bulkSize: Int, bulkByteSize: Int)(implicit ec: ExecutionContext): Future[Int]
 
   /** Reference to the collection this DAO operates on. */
   def collection: C = db().collection[C](collectionName)
@@ -91,7 +84,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    *
    * @param selector Selector document which may be empty.
    */
-  def count(selector: Structure): Future[Int]
+  def count(selector: Structure)(implicit ec: ExecutionContext): Future[Int]
 
   /**
    * Defines the default write concern for this Dao which defaults to `GetLastError()`.
@@ -101,17 +94,17 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
   def defaultWriteConcern: GetLastError = GetLastError()
 
   /** Drops this collection */
-  def drop(): Future[Boolean]
+  def drop()(implicit ec: ExecutionContext): Future[Boolean]
 
   /**
    * Drops this collection and awaits until it has been dropped or a timeout has occured.
    * @param timeout Maximum amount of time to await until this collection has been dropped.
    * @return true if the collection has been successfully dropped, otherwise false.
    */
-  def dropSync(timeout: Duration): Boolean
+  def dropSync(timeout: Duration)(implicit ec: ExecutionContext): Boolean
 
   /** Ensures indexes defined by `autoIndexes`. */
-  def ensureIndexes(): Future[Traversable[Boolean]]
+  def ensureIndexes()(implicit ec: ExecutionContext): Future[Traversable[Boolean]]
 
   /**
    * Retrieves models by page matching the given selector.
@@ -121,7 +114,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param page 1 based page number.
    * @param pageSize Maximum number of elements in each page.
    */
-  def find(selector: Structure, sort: Structure, page: Int, pageSize: Int): Future[List[Model]]
+  def find(selector: Structure, sort: Structure, page: Int, pageSize: Int)(implicit ec: ExecutionContext): Future[List[Model]]
 
   /**
    * Retrieves all models matching the given selector.
@@ -129,7 +122,33 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param selector Selector document.
    * @param sort Sorting document.
    */
-  def findAll(selector: Structure, sort: Structure): Future[List[Model]]
+  def findAll(selector: Structure, sort: Structure)(implicit ec: ExecutionContext): Future[List[Model]]
+
+  /**
+   * Updates and returns a single model. It returns the old document by default.
+   *
+   * @param query The selection criteria for the update.
+   * @param update Performs an update of the selected model.
+   * @param sort Determines which model the operation updates if the query selects multiple models.
+   *             findAndUpdate() updates the first model in the sort order specified by this argument.
+   * @param fetchNewObject When true, returns the updated model rather than the original.
+   * @param upsert When true, findAndUpdate() creates a new model if no model matches the query.
+   */
+  def findAndUpdate(
+    query: Structure,
+    update: Structure,
+    sort: Structure,
+    fetchNewObject: Boolean,
+    upsert: Boolean)(implicit ec: ExecutionContext): Future[Option[Model]]
+
+  /**
+   * Removes and returns a single model.
+   *
+   * @param query The selection criteria for the remove.
+   * @param sort Determines which model the operation removes if the query selects multiple models.
+   *             findAndRemove() removes the first model in the sort order specified by this argument.
+   */
+  def findAndRemove(query: Structure, sort: Structure)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /**
    * Updates and returns a single model. It returns the old document by default.
@@ -158,20 +177,20 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
   def findAndRemove(query: Structure, sort: Structure): Future[Option[Model]]
 
   /** Retrieves the model with the given `id`. */
-  def findById(id: ID): Future[Option[Model]]
+  def findById(id: ID)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /** Retrieves the models with the given `ids`. */
-  def findByIds(ids: ID*): Future[List[Model]]
+  def findByIds(ids: ID*)(implicit ec: ExecutionContext): Future[List[Model]]
 
   /** Retrieves at most one model matching the given selector. */
-  def findOne(selector: Structure): Future[Option[Model]]
+  def findOne(selector: Structure)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /**
    * Retrieves a random model matching the given selector.
    *
    * This API may require more than one query.
    */
-  def findRandom(selector: Structure): Future[Option[Model]]
+  def findRandom(selector: Structure)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /**
    * Folds the documents matching the given selector by applying the function `f`.
@@ -182,7 +201,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param f Folding function.
    * @tparam A Type of fold result.
    */
-  def fold[A](selector: Structure, sort: Structure, state: A)(f: (A, Model) => A): Future[A]
+  def fold[A](selector: Structure, sort: Structure, state: A)(f: (A, Model) => A)(implicit ec: ExecutionContext): Future[A]
 
   /**
    * Iterates over the documents matching the given selector and applies the function `f`.
@@ -191,17 +210,17 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param sort Sorting document.
    * @param f function to be applied.
    */
-  def foreach(selector: Structure, sort: Structure)(f: (Model) => Unit): Future[Unit]
+  def foreach(selector: Structure, sort: Structure)(f: (Model) => Unit)(implicit ec: ExecutionContext): Future[Unit]
 
   /** Inserts the given model. */
-  def insert(model: Model, writeConcern: GetLastError): Future[LastError]
+  def insert(model: Model, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
 
   /**
    * Lists indexes that are currently ensured in this collection.
    *
    * This list may not be equal to `autoIndexes` in case of index creation failure.
    */
-  def listIndexes(): Future[List[Index]]
+  def listIndexes()(implicit ec: ExecutionContext): Future[List[Index]]
 
   /**
    * Removes model(s) matching the given selector.
@@ -215,13 +234,13 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
   def remove(
     selector: Structure,
     writeConcern: GetLastError,
-    firstMatchOnly: Boolean): Future[LastError]
+    firstMatchOnly: Boolean)(implicit ec: ExecutionContext): Future[LastError]
 
   /** Removes all documents in this collection. */
-  def removeAll(writeConcern: GetLastError): Future[LastError]
+  def removeAll(writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
 
   /** Removes the document with the given ID. */
-  def removeById(id: ID, writeConcern: GetLastError): Future[LastError]
+  def removeById(id: ID, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
 
   /**
    * Inserts the document, or updates it if it already exists in the collection.
@@ -230,7 +249,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param writeConcern the [[reactivemongo.core.commands.GetLastError]] command message to send in order to control
    *                     how the document is inserted. Defaults to defaultWriteConcern.
    */
-  def save(model: Model, writeConcern: GetLastError): Future[LastError]
+  def save(model: Model, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
 
   /**
    * Updates the documents matching the given selector.
@@ -247,7 +266,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
     update: U,
     writeConcern: GetLastError,
     upsert: Boolean,
-    multi: Boolean): Future[LastError]
+    multi: Boolean)(implicit ec: ExecutionContext): Future[LastError]
 
   /**
    * Updates the document with the given `id`.
@@ -257,5 +276,5 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param writeConcern Write concern which defaults to defaultWriteConcern.
    * @tparam U Type of the update query.
    */
-  def updateById[U: Writer](id: ID, update: U, writeConcern: GetLastError): Future[LastError]
+  def updateById[U: Writer](id: ID, update: U, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
 }

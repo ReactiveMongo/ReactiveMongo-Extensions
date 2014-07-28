@@ -121,6 +121,19 @@ class DummyBsonDaoSpec
     }
   }
 
+  it should "return None when findRandom does not match any documents" in {
+    val dummyModel = DummyModel(name = "foo", surname = "bar", age = 32)
+
+    val futureResult = for {
+      insertCount <- dao.insert(dummyModel)
+      random <- dao.findRandom("age" $gt 50 $lt 60)
+    } yield random
+
+    whenReady(futureResult) { random =>
+      random should be('empty)
+    }
+  }
+
   it should "find all of the selected documents" in {
     val dummyModels = DummyModel.random(100)
 
