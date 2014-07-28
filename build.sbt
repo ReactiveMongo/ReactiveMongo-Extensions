@@ -3,8 +3,8 @@ import scalariform.formatter.preferences._
 name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
-  organization := "net.fehmicansaglam",
-  version := "0.10.0.4-SNAPSHOT",
+  organization := "org.reactivemongo",
+  version := "0.10.0.0-SNAPSHOT",
   scalaVersion  := "2.10.4",
   scalacOptions := Seq(
     "-unchecked",
