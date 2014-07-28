@@ -14,7 +14,8 @@ lazy val commonSettings = Seq(
     "-language:higherKinds",
     "-language:postfixOps",
     "-language:implicitConversions",
-    "-language:existentials"),
+    "-language:existentials",
+    "-target:jvm-1.6"),
   resolvers ++= Seq(
     "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/"),
   parallelExecution in Test := true,
@@ -72,8 +73,9 @@ lazy val settings = (
 lazy val root = project.in(file("."))
   .aggregate(bson, json, core, samples)
   .settings(settings: _*)
-  .settings(unidocSettings: _*)
+  .settings(publishSettings: _*)
   .settings(publishArtifact := false)
+  .settings(unidocSettings: _*)
 
 lazy val core = project.in(file("core"))
   .settings(settings: _*)
@@ -92,5 +94,6 @@ lazy val json = project.in(file("json"))
 lazy val samples = project.in(file("samples"))
   .settings(settings: _*)
   .settings(publishSettings: _*)
+  .settings(publishArtifact := false)
   .dependsOn(core % "test->test;compile->compile", bson % "compile->compile")
 
