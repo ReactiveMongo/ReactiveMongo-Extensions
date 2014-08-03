@@ -61,7 +61,7 @@ object Typed {
 
             Apply(
               Select(
-                New(TypeTree().setType(typeOf[Term[Any]])),
+                New(TypeTree(c.universe.typeOf[Term[Any]])),
                 nme.CONSTRUCTOR
               ),
               List(st)
