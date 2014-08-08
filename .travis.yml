@@ -1,8 +1,14 @@
 language: scala
 scala:
-  - 2.10.4
+- 2.10.4
 jdk:
-  - oraclejdk7
-  - openjdk7
+- oraclejdk7
+- openjdk7
 services:
-  - mongodb
+- mongodb
+env:
+  global:
+  - secure: a+TF5tTj1Nb6knida4xcf/IWVF5gF29PQ2hg0XTSM/2JZ0qQEl+xm01P1K+rzO/nO8bQ5G4BXPhNYv7ReS9otKvdPf2ya6iOjYJ1ZPA1QyUSulzq5DUHEWWBww+vV6HR0tAEtLSFqx05u0Igx9f33/kxtzrabgm/zQqGFu+B+lY=
+  - secure: RCIIIn5IERegftnUMww+azwWxDTe8pDy256LbLO/7n8WN06DGVZPeZmQY33WQdTg4Qz/Mri1QlAF8YnG+TeNKooXHlkFXlBIq00bM6Dab9QRvbZEll2NV5agZ112kcL0IOL7Yw5cY3knjsWpT3IttChMopLxPGGV1YzvExW4B5Y=
+after_success:
+- .travis_scripts/publishSnapshots.sh

@@ -64,9 +64,14 @@ lazy val publishSettings = Seq(
       </developer>
     </developers>))
 
+val travisSettings = Seq(
+  Travis.travisSnapshotBranches := Seq("0.10.x", "0.10.5.akka23-SNAPSHOT"),
+  commands += Travis.travisCommand
+)
 
 lazy val settings = (
   commonSettings
+  ++ travisSettings
   ++ scalariformSettings
   ++ org.scalastyle.sbt.ScalastylePlugin.Settings)
 
@@ -96,4 +101,3 @@ lazy val samples = project.in(file("samples"))
   .settings(publishSettings: _*)
   .settings(publishArtifact := false)
   .dependsOn(core % "test->test;compile->compile", bson % "compile->compile")
-
