@@ -273,18 +273,3 @@ object JsonDao {
     new JsonDao[Model, ID](db, collectionName) {}
   }
 }
-
-class JsonDaoBuilder[Model: Format, ID: Writes](db: () => DB) {
-  def apply(collectionName: String)(
-    implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
-    ec: ExecutionContext): JsonDao[Model, ID] = {
-    JsonDao(db, collectionName)
-  }
-}
-
-object JsonDaoBuilder {
-  def apply[Model: Format, ID: Writes](db: () => DB): JsonDaoBuilder[Model, ID] = {
-    new JsonDaoBuilder[Model, ID](db)
-  }
-}
-
