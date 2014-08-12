@@ -2,7 +2,7 @@
 
 The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
-Here is a complete example using Play 2.2, ReactiveMongo Extensions and Flight.js https://github.com/mertkavi/play-reactivemongo-extensions-sample
+Here is a complete example using Play 2.3, ReactiveMongo Extensions and Flight.js https://github.com/mertkavi/play-reactivemongo-extensions-sample/tree/0.10.5.akka23
 
 [![Build Status](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions.svg?branch=0.10.5.akka23-SNAPSHOT)](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions)
 ![Progress](http://progressed.io/bar/70?title=stable)
