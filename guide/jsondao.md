@@ -31,7 +31,7 @@ object Person {
 }
 
 object PersonDao
-  extends JsonDao[Person, BSONObjectID](() => ReactiveMongoPlugin.db, "persons"){
+  extends JsonDao[Person, BSONObjectID](ReactiveMongoPlugin.db, "persons"){
   // some high level db functions
 }
 ```

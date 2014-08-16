@@ -76,7 +76,7 @@ import Handlers._
  * @tparam Model Type of the model that this DAO uses.
  * @tparam ID Type of the ID field of the model.
  */
-abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit modelReader: BSONDocumentReader[Model],
+abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit modelReader: BSONDocumentReader[Model],
   modelWriter: BSONDocumentWriter[Model],
   idWriter: BSONWriter[ID, _ <: BSONValue],
   lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
@@ -260,7 +260,7 @@ abstract class BsonDao[Model, ID](db: () => DB, collectionName: String)(implicit
 }
 
 object BsonDao {
-  def apply[Model, ID](db: () => DB, collectionName: String)(
+  def apply[Model, ID](db: => DB, collectionName: String)(
     implicit modelReader: BSONDocumentReader[Model],
     modelWriter: BSONDocumentWriter[Model],
     idWriter: BSONWriter[ID, _ <: BSONValue],

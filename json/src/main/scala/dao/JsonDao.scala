@@ -79,7 +79,7 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
  * @tparam Model Type of the model that this DAO uses.
  * @tparam ID Type of the ID field of the model.
  */
-abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: String)(implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID], ec: ExecutionContext)
+abstract class JsonDao[Model: Format, ID: Writes](db: => DB, collectionName: String)(implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID], ec: ExecutionContext)
     extends Dao[JSONCollection, JsObject, Model, ID, Writes](db, collectionName) {
 
   private def toBSONDocument(document: JsObject): BSONDocument = {
@@ -267,7 +267,7 @@ abstract class JsonDao[Model: Format, ID: Writes](db: () => DB, collectionName: 
 }
 
 object JsonDao {
-  def apply[Model: Format, ID: Writes](db: () => DB, collectionName: String)(
+  def apply[Model: Format, ID: Writes](db: => DB, collectionName: String)(
     implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
     ec: ExecutionContext): JsonDao[Model, ID] = {
     new JsonDao[Model, ID](db, collectionName) {}

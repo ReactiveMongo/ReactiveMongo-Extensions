@@ -23,6 +23,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object MongoContext {
   val driver = new MongoDriver
   val connection = driver.connection(List("localhost"))
-  def db(): DefaultDB = connection("test-reactivemongo-extensions")
-  def randomDb(): DefaultDB = connection(UUID())
+  def db: DefaultDB = connection("test-reactivemongo-extensions")
+  def randomDb: DefaultDB = connection(UUID())
 }
