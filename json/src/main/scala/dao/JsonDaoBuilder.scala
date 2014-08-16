@@ -22,7 +22,7 @@ import reactivemongo.extensions.dao.{ ReflexiveLifeCycle, LifeCycle }
 
 import scala.concurrent.ExecutionContext
 
-class JsonDaoBuilder[Model: Format, ID: Writes](db: () => DB) {
+class JsonDaoBuilder[Model: Format, ID: Writes](db: => DB) {
   def apply(collectionName: String)(
     implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
     ec: ExecutionContext): JsonDao[Model, ID] = {
@@ -31,7 +31,7 @@ class JsonDaoBuilder[Model: Format, ID: Writes](db: () => DB) {
 }
 
 object JsonDaoBuilder {
-  def apply[Model: Format, ID: Writes](db: () => DB): JsonDaoBuilder[Model, ID] = {
+  def apply[Model: Format, ID: Writes](db: => DB): JsonDaoBuilder[Model, ID] = {
     new JsonDaoBuilder[Model, ID](db)
   }
 }

@@ -26,7 +26,7 @@ import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.JsObject
 import reactivemongo.extensions.BSONFormats
 
-class BsonFixtures(db: DB)(implicit ec: ExecutionContext) extends Fixtures[BSONDocument] {
+class BsonFixtures(db: => DB)(implicit ec: ExecutionContext) extends Fixtures[BSONDocument] {
 
   def map(document: JsObject): BSONDocument = BSONFormats.BSONDocumentFormat.reads(document).get
 

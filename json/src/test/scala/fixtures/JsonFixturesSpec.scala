@@ -29,7 +29,7 @@ class JsonFixturesSpec extends FlatSpec with Matchers with ScalaFutures with Bef
 
   override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
-  val db = MongoContext.randomDb()
+  val db = MongoContext.randomDb
   val fixtures = JsonFixtures(db)
   val personDao = new PersonJsonDao(db)
   val eventDao = new EventJsonDao(db)

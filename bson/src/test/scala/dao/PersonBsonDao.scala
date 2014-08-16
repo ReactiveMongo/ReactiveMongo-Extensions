@@ -24,7 +24,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PersonBsonDao(_db: DefaultDB)
-    extends BsonDao[Person, String](() => _db, "persons")
+    extends BsonDao[Person, String](_db, "persons")
     with BsonDsl {
 
   def findByName(name: String): Future[Option[Person]] = {

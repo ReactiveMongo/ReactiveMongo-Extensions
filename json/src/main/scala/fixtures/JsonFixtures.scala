@@ -25,7 +25,7 @@ import play.modules.reactivemongo.json.collection.JSONCollection
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.{ Json, JsObject }
 
-class JsonFixtures(db: DB)(implicit ec: ExecutionContext) extends Fixtures[JsObject] {
+class JsonFixtures(db: => DB)(implicit ec: ExecutionContext) extends Fixtures[JsObject] {
 
   def map(document: JsObject): JsObject = document
 

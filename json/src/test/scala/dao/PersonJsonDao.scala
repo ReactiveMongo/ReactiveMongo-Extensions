@@ -23,7 +23,7 @@ import scala.concurrent.Future
 import reactivemongo.extensions.json.dsl.JsonDsl
 
 class PersonJsonDao(_db: DB)
-    extends JsonDao[Person, String](() => _db, "persons")
+    extends JsonDao[Person, String](_db, "persons")
     with JsonDsl {
 
   def findByName(name: String): Future[Option[Person]] = {
