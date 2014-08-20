@@ -1,0 +1,1 @@
+name := "reactivemongo-extensions-samples"

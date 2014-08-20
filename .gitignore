@@ -1,7 +1,8 @@
 # Ignore all dotfiles...
 .*
-# except for .gitignore
+# except for .gitignore and .travis_scripts
 !.gitignore
+!.travis_scripts
 
 *.log
 
@@ -14,3 +15,4 @@ project/boot/
 project/plugins/project/
 
 *.sublime-*
+*.iml

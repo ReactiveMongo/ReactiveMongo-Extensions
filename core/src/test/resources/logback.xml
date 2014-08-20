@@ -1,0 +1,17 @@
+<configuration>
+
+  <conversionRule conversionWord="coloredLevel" converterClass="reactivemongo.extensions.util.ColoredLevel" />
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%coloredLevel %logger{15} - %message%n%xException{5}%caller{3}</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="reactivemongo.extensions" level="DEBUG"/>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+</configuration>
