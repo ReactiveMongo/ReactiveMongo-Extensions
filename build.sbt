@@ -24,6 +24,8 @@ lazy val commonSettings = Seq(
   javaOptions in Test ++= Seq("-Xmx512m", "-XX:MaxPermSize=512m"),
   testOptions in Test += Tests.Argument("-oDS"),
   shellPrompt in ThisBuild := Common.prompt,
+  scapegoatConsoleOutput := false,
+  scapegoatDisabledInspections := Seq("MethodNames"),
   ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(AlignParameters, true)
   .setPreference(DoubleIndentClassDeclaration, true)
