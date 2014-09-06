@@ -15,8 +15,7 @@ Here is a complete example using Play 2.2, ReactiveMongo Extensions and Flight.j
 #### DAOs to Serve You
 
 DAOs provide an abstraction layer on top of ReactiveMongo adding higher level APIs like findOne, findById, count, foreach, fold, etc.
-*ReactiveMongo Extensions* currently provides two DAO types: `reactivemongo.extensions.dao.BsonDao` for `BSONCollection` and
-`reactivemongo.extensions.dao.JsonDao` for `JSONCollection`.
+*ReactiveMongo Extensions* currently provides two DAO types for collections of documents: `reactivemongo.extensions.dao.BsonDao` for `BSONCollection` and `reactivemongo.extensions.dao.JsonDao` for `JSONCollection`. There are also two other DAO types operating on GridFS: `reactivemongo.extensions.dao.BsonFileDao` and `reactivemongo.extensions.dao.JsonFileDao`.
 
 You will need to define a DAO for each of your models(case classes).
 
