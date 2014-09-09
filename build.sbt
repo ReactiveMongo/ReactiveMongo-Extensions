@@ -4,9 +4,9 @@ name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
   organization := "org.reactivemongo",
-  version := "0.11.0.0-SNAPSHOT",
+  version := "0.10.5.akka23-SNAPSHOT",
   scalaVersion  := "2.11.2",
-  crossScalaVersions := Seq("2.10.4", "2.11.1"),
+  crossScalaVersions := Seq("2.10.4", "2.11.2"),
   scalacOptions := Seq(
     "-unchecked",
     "-deprecation",
