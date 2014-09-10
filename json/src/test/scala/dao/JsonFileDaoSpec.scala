@@ -125,7 +125,7 @@ class JsonFileDaoSpec
     val result = for {
       save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
       id = save.id.asInstanceOf[BSONObjectID]
-      read <- dao.findOne(Json.obj("filename" -> save.filename)).readToOutputStream(out)
+      read <- dao.findOne(Json.obj("filename" -> save.filename)).read(out)
       remove <- dao.removeById(id)
     } yield read
 
@@ -142,7 +142,7 @@ class JsonFileDaoSpec
     val result = for {
       save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
       id = save.id.asInstanceOf[BSONObjectID]
-      read <- dao.findById(id).readToOutputStream(out)
+      read <- dao.findById(id).read(out)
       remove <- dao.removeById(id)
     } yield read
 
