@@ -87,7 +87,7 @@ object FileDao {
       readFile.map(_.map(gfs.enumerate(_)))
     }
 
-    def readToOutputStream(out: OutputStream)(implicit ec: ExecutionContext): Future[Option[Unit]] = {
+    def read(out: OutputStream)(implicit ec: ExecutionContext): Future[Option[Unit]] = {
       readFile.flatMap {
         case Some(readFile) => gfs.readToOutputStream(readFile, out).map(Some(_))
         case None => Future.successful(None)
