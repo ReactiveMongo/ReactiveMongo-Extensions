@@ -2,7 +2,7 @@ name := "reactivemongo-extensions-core"
 
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % Common.reactiveMongoVersion,
-  "com.typesafe.play" %% "play-json" % "2.3.3",
+  "com.typesafe.play" %% "play-json" % Common.playJsonVersion,
   "com.typesafe" % "config" % "1.2.1",
   "joda-time" % "joda-time" % "2.3",
   "org.joda" % "joda-convert" % "1.6",

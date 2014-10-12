@@ -11,6 +11,7 @@ object Common {
     }.getOrElse("> ")
   }
 
-  val reactiveMongoVersion = "0.10.5.0.akka23"
-  val playReactiveMongoVersion = "0.10.5.0.akka23"
+  val reactiveMongoVersion = "0.10.5.0.akka22"
+  val playReactiveMongoVersion = "0.10.5.0.akka22"
+  val playJsonVersion = "2.2.5"
 }

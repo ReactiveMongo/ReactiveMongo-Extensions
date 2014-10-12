@@ -275,11 +275,11 @@ Current version matrix is below:
 
 | reactivemongo-extensions-bson    | Target ReactiveMongo version |
 |----------------------------------|------------------------------|
-| 0.10.5.0.0.akka23                | 0.10.5.0.akka23              |
+| 0.10.5.0.0.akka22                | 0.10.5.0.akka22              |
 
 | reactivemongo-extensions-json    | Target Play-ReactiveMongo version |
 |----------------------------------|-----------------------------------|
-| 0.10.5.0.0.akka23                | 0.10.5.0.akka23                   |
+| 0.10.5.0.0.akka22                | 0.10.5.0.akka22                   |
 
 Note: Available for Scala 2.10 and Scala 2.11.
 
@@ -289,7 +289,7 @@ If you use SBT, you just have to edit build.sbt and add the following:
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.10.5.0.0.akka23"
+  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.10.5.0.0.akka22"
 )
 ```
 
@@ -299,7 +299,7 @@ or
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.10.5.0.0.akka23"
+  "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.10.5.0.0.akka22"
 )
 ```
 
