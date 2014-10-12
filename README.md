@@ -4,7 +4,7 @@ The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for
 
 Here is a complete example using Play 2.3, ReactiveMongo Extensions and Flight.js https://github.com/mertkavi/play-reactivemongo-extensions-sample/tree/0.10.5.akka23
 
-[![Build Status](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions.svg?branch=0.10.5.akka23-SNAPSHOT)](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions)
+[![Build Status](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions.svg?branch=0.10.5.x.akka23)](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions)
 ![Progress](http://progressed.io/bar/70?title=stable)
 
 ## Introduction
@@ -275,11 +275,11 @@ Current version matrix is below:
 
 | reactivemongo-extensions-bson    | Target ReactiveMongo version |
 |----------------------------------|------------------------------|
-| 0.10.5.akka23-SNAPSHOT           | 0.10.5.akka23-SNAPSHOT       |
+| 0.10.5.0.0.akka23                | 0.10.5.0.akka23              |
 
 | reactivemongo-extensions-json    | Target Play-ReactiveMongo version |
 |----------------------------------|-----------------------------------|
-| 0.10.5.akka23-SNAPSHOT           | 0.10.5.akka23-SNAPSHOT            |
+| 0.10.5.0.0.akka23                | 0.10.5.0.akka23                   |
 
 Note: Available for Scala 2.10 and Scala 2.11.
 
@@ -289,7 +289,7 @@ If you use SBT, you just have to edit build.sbt and add the following:
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.10.5.akka23-SNAPSHOT"
+  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.10.5.0.0.akka23"
 )
 ```
 
@@ -299,7 +299,7 @@ or
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.10.5.akka23-SNAPSHOT"
+  "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.10.5.0.0.akka23"
 )
 ```
 

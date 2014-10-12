@@ -179,11 +179,12 @@ abstract class JsonDao[Model: Format, ID: Writes](db: => DB, collectionName: Str
 
   def bulkInsert(
     documents: TraversableOnce[Model],
+    writeConcern: GetLastError = defaultWriteConcern,
     bulkSize: Int = bulk.MaxDocs,
     bulkByteSize: Int = bulk.MaxBulkSize)(implicit ec: ExecutionContext): Future[Int] = {
     val mappedDocuments = documents.map(lifeCycle.prePersist)
     val enumerator = Enumerator.enumerate(mappedDocuments)
-    collection.bulkInsert(enumerator, bulkSize, bulkByteSize) map { result =>
+    collection.bulkInsert(enumerator, writeConcern, bulkSize, bulkByteSize) map { result =>
       mappedDocuments.map(lifeCycle.postPersist)
       result
     }

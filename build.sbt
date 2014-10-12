@@ -4,7 +4,7 @@ name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
   organization := "org.reactivemongo",
-  version := "0.10.5.akka23-SNAPSHOT",
+  version := "0.10.5.0.0.akka23",
   scalaVersion  := "2.11.2",
   crossScalaVersions := Seq("2.10.4", "2.11.2"),
   scalacOptions := Seq(
@@ -41,7 +41,7 @@ lazy val publishSettings = Seq(
       Some("releases"  at nexus + "service/local/staging/deploy/maven2")
   },
   pomExtra := (
-    <url>http://github.com/fehmicansaglam/reactivemongo-extensions</url>
+    <url>http://github.com/ReactiveMongo/ReactiveMongo-Extensions</url>
     <licenses>
       <license>
         <name>Apache 2</name>
@@ -50,8 +50,8 @@ lazy val publishSettings = Seq(
       </license>
     </licenses>
     <scm>
-      <url>git@github.com:fehmicansaglam/reactivemongo-extensions.git</url>
-      <connection>scm:git@github.com:fehmicansaglam/reactivemongo-extensions.git</connection>
+      <url>git@github.com:ReactiveMongo/ReactiveMongo-Extensions.git</url>
+      <connection>scm:git@github.com:ReactiveMongo/ReactiveMongo-Extensions.git</connection>
     </scm>
     <developers>
       <developer>
@@ -67,7 +67,7 @@ lazy val publishSettings = Seq(
     </developers>))
 
 val travisSettings = Seq(
-  Travis.travisSnapshotBranches := Seq("master", "0.10.x", "0.10.5.akka23-SNAPSHOT"),
+  Travis.travisSnapshotBranches := Seq("master", "0.10.x", "0.10.5.x.akka23", "0.10.5.x.akka22"),
   commands += Travis.travisCommand
 )
 

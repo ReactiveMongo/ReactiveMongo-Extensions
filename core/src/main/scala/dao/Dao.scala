@@ -74,7 +74,11 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param bulkByteSize
    * @return The number of successful insertions.
    */
-  def bulkInsert(models: TraversableOnce[Model], bulkSize: Int, bulkByteSize: Int)(implicit ec: ExecutionContext): Future[Int]
+  def bulkInsert(
+    models: TraversableOnce[Model],
+    writeConcern: GetLastError,
+    bulkSize: Int,
+    bulkByteSize: Int)(implicit ec: ExecutionContext): Future[Int]
 
   /** Reference to the collection this DAO operates on. */
   def collection: C = db.collection[C](collectionName)
