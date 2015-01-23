@@ -16,7 +16,7 @@ class DBExtensionsTest
   with OptionValues
   with BeforeAndAfter {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = 20.seconds, interval = 1.seconds)
+  override implicit val patienceConfig = PatienceConfig(timeout = 20.seconds, interval = 1.seconds)
 
   val collection = MongoContext.db :> "collection"
 
@@ -40,6 +40,19 @@ class DBExtensionsTest
       all shouldBe 2
       one shouldBe 1
       none shouldBe 0
+    }
+  }
+
+  it should "find" in {
+    val documents = 1 to 100 map { index => BSONDocument("key" -> index)}
+
+    val result = for {
+      _ <- collection.bulkInsert(documents.toStream, ordered = false)
+      some <- collection.find(selector = BSONDocument("key" -> BSONDocument("$gt" -> 50)), page = 4, pageSize = 16)
+    } yield some
+
+    whenReady(result) { some =>
+      some should have size 2
     }
   }
 
@@ -67,4 +80,37 @@ class DBExtensionsTest
     }
   }
 
+  it should "fold" in {
+    val documents = 1 to 100 map { index => BSONDocument("key" -> index)}
+
+    val result = for {
+      _ <- collection.bulkInsert(documents.toStream, ordered = false)
+      total <- collection.fold(0) { (total, doc: BSONDocument) =>
+        total + doc.getAs[Int]("key").getOrElse(0)
+      }
+    } yield total
+
+    whenReady(result) { total =>
+      total shouldBe 5050
+    }
+  }
+
+  it should "update" in {
+    val documents = 1 to 100 map { index => BSONDocument("key" -> index)}
+
+    val result = for {
+      _ <- collection.bulkInsert(documents.toStream, ordered = false)
+      before <- collection.count(BSONDocument("key" -> 100))
+      _ <- collection.update(selector = BSONDocument("key" -> BSONDocument("$gt" -> 50)),
+        update = BSONDocument("$set" -> BSONDocument("key" -> 100)),
+        upsert = false,
+        multi = true)
+      after <- collection.count(BSONDocument("key" -> 100))
+    } yield (before, after)
+
+    whenReady(result) { case (before, after) =>
+      before shouldBe 1
+      after shouldBe 50
+    }
+  }
 }

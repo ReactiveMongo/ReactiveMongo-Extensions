@@ -80,9 +80,9 @@ class DBExtensions(collection: BSONCollection) {
       .flatMap(i => i.run)
   }
 
-  def fold[A, Model: BSONDocumentReader](selector: BSONDocument = BSONDocument.empty,
-                                         sort: BSONDocument = BSONDocument("_id" -> 1),
-                                         state: A)
+  def fold[A, Model: BSONDocumentReader](state: A,
+                                         selector: BSONDocument = BSONDocument.empty,
+                                         sort: BSONDocument = BSONDocument("_id" -> 1))
                                         (f: (A, Model) => A)
                                         (implicit ec: ExecutionContext): Future[A] = {
     collection.find(selector).sort(sort).cursor[Model]
