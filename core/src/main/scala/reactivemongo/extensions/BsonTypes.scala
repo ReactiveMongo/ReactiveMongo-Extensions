@@ -1,11 +1,12 @@
 package reactivemongo.extensions
 
 import reactivemongo.bson._
-import scala.reflect.runtime.universe.{ TypeTag, typeOf }
+
+import scala.reflect.runtime.universe.{TypeTag, typeOf}
 
 object BsonTypes {
 
-  def numberOf[T <: BSONValue: TypeTag]: Int = typeOf[T] match {
+  def numberOf[T <: BSONValue : TypeTag]: Int = typeOf[T] match {
     case t if t =:= typeOf[BSONDouble] => 1
     case t if t =:= typeOf[BSONString] => 2
     case t if t =:= typeOf[BSONDocument] => 3

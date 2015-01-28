@@ -1,4 +1,4 @@
-package reactivemongo.extensions.dao
+package reactivemongo.extensions
 
 import play.api.libs.iteratee.Iteratee
 import reactivemongo.api.QueryOpts

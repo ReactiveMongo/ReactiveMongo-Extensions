@@ -1,15 +1,14 @@
-package dao
+package reactivemongo.extensions
 
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers, OptionValues}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.extensions.Implicits._
-import reactivemongo.extensions.dao.MongoContext
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-class DBExtensionsTest
+class DBExtensionsSpec
   extends FlatSpec
   with Matchers
   with ScalaFutures

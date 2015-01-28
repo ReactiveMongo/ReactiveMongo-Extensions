@@ -14,15 +14,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dao
+package reactivemongo.extensions
 
-import reactivemongo.api.{ MongoDriver, DefaultDB }
+import reactivemongo.api.{DefaultDB, MongoDriver}
 import reactivemongo.extensions.util.Misc.UUID
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object MongoContext {
   val driver = new MongoDriver
   val connection = driver.connection(List("localhost"))
+
   def db: DefaultDB = connection("test-reactivemongo-extensions")
+
   def randomDb: DefaultDB = connection(UUID())
 }

@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dao
+package reactivemongo.extensions
 
 import org.joda.time.DateTime
 import reactivemongo.bson._
@@ -22,8 +22,8 @@ import reactivemongo.bson._
 object Handlers {
 
   implicit object BSONDateTimeHandler
-      extends BSONReader[BSONDateTime, DateTime]
-      with BSONWriter[DateTime, BSONDateTime] {
+    extends BSONReader[BSONDateTime, DateTime]
+    with BSONWriter[DateTime, BSONDateTime] {
 
     def read(bson: BSONDateTime): DateTime = new DateTime(bson.value)
 
