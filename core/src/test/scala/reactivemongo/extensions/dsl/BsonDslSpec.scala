@@ -24,4 +24,15 @@ class BsonDslSpec extends FlatSpec with Matchers {
     actual shouldBe expected
   }
 
+  it should "create a query including $gt, $gte, $lt and $lte" in {
+    val expected = BSONDocument(
+      "age" -> BSONDocument("$gt" -> 50, "$lt" -> 60),
+      "salary" -> BSONDocument("$gte" -> 500.0, "$lte" -> 1000.0)
+    )
+
+    val actual = ("age" := ($gt := 50) ~ ($lt := 60)) ~ ("salary" := ($gte := 500.0) ~ ($lte := 1000.0))
+
+    actual shouldBe expected
+  }
+
 }
