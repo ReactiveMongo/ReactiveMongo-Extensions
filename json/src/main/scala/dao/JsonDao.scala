@@ -111,7 +111,7 @@ abstract class JsonDao[Model: Format, ID: Writes](db: => DB, collectionName: Str
     findOne($id(id), readPreference)
   }
 
-  def findByIds(ids: Seq[ID], readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[List[Model]] = {
+  def findByIds(ids: ID*)(implicit ec: ExecutionContext, readPreference: ReadPreference = defaultReadPreference): Future[List[Model]] = {
     findAll("_id" $in (ids: _*), readPreference = readPreference)
   }
 

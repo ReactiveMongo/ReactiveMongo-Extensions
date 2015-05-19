@@ -106,7 +106,7 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
     findOne($id(id), readPreference)
   }
 
-  def findByIds(ids: Seq[ID], readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[List[Model]] = {
+  def findByIds(ids: ID*)(implicit ec: ExecutionContext, readPreference: ReadPreference = defaultReadPreference): Future[List[Model]] = {
     findAll("_id" $in (ids: _*), readPreference = readPreference)
   }
 

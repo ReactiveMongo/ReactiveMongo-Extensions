@@ -167,7 +167,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
   def findById(id: ID, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /** Retrieves the models with the given `ids`. */
-  def findByIds(ids: Seq[ID], readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[List[Model]]
+  def findByIds(ids: ID*)(implicit ec: ExecutionContext, readPreference: ReadPreference): Future[List[Model]]
 
   /** Retrieves at most one model matching the given selector. */
   def findOne(selector: Structure, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]]

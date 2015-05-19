@@ -168,7 +168,7 @@ class DummyJsonDaoSpec
 
     val futureResult = for {
       insertCount <- dao.bulkInsert(dummyModels)
-      models <- dao.findByIds(dummyModels.map(_._id))
+      models <- dao.findByIds(dummyModels.map(_._id): _*)
     } yield models
 
     whenReady(futureResult) { models =>
