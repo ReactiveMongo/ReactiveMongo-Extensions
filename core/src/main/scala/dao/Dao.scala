@@ -16,7 +16,7 @@
 
 package reactivemongo.extensions.dao
 
-import reactivemongo.api.{ DB, Collection, CollectionProducer }
+import reactivemongo.api.{ ReadPreference, DB, Collection, CollectionProducer }
 import reactivemongo.api.indexes.Index
 import reactivemongo.core.commands.{ LastError, GetLastError }
 import scala.concurrent.{ Future, ExecutionContext }
@@ -83,8 +83,9 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * Returns the number of documents in this collection matching the given selector.
    *
    * @param selector Selector document which may be empty.
+   * @param readPreference mongo read preference to use.
    */
-  def count(selector: Structure)(implicit ec: ExecutionContext): Future[Int]
+  def count(selector: Structure, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Int]
 
   /**
    * Defines the default write concern for this Dao which defaults to `GetLastError()`.
@@ -92,6 +93,13 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * Related API functions should allow overriding this value.
    */
   def defaultWriteConcern: GetLastError = GetLastError()
+
+  /**
+   * Defines the default read preference for this Dao which defaults to [[ReadPreference.primary]].
+   *
+   * Related API functions should allow overriding this value.
+   */
+  def defaultReadPreference: ReadPreference = ReadPreference.primary
 
   /** Drops this collection */
   def drop()(implicit ec: ExecutionContext): Future[Boolean]
@@ -113,16 +121,18 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param sort Sorting document.
    * @param page 1 based page number.
    * @param pageSize Maximum number of elements in each page.
+   * @param readPreference mongo read preference to use.
    */
-  def find(selector: Structure, sort: Structure, page: Int, pageSize: Int)(implicit ec: ExecutionContext): Future[List[Model]]
+  def find(selector: Structure, sort: Structure, page: Int, pageSize: Int, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[List[Model]]
 
   /**
    * Retrieves all models matching the given selector.
    *
    * @param selector Selector document.
    * @param sort Sorting document.
+   * @param readPreference mongo read preference to use.
    */
-  def findAll(selector: Structure, sort: Structure)(implicit ec: ExecutionContext): Future[List[Model]]
+  def findAll(selector: Structure, sort: Structure, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[List[Model]]
 
   /**
    * Updates and returns a single model. It returns the old document by default.
@@ -133,13 +143,15 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    *             findAndUpdate() updates the first model in the sort order specified by this argument.
    * @param fetchNewObject When true, returns the updated model rather than the original.
    * @param upsert When true, findAndUpdate() creates a new model if no model matches the query.
+   * @param readPreference mongo read preference to use.
    */
   def findAndUpdate(
     query: Structure,
     update: Structure,
     sort: Structure,
     fetchNewObject: Boolean,
-    upsert: Boolean)(implicit ec: ExecutionContext): Future[Option[Model]]
+    upsert: Boolean,
+    readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /**
    * Removes and returns a single model.
@@ -147,24 +159,25 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param query The selection criteria for the remove.
    * @param sort Determines which model the operation removes if the query selects multiple models.
    *             findAndRemove() removes the first model in the sort order specified by this argument.
+   * @param readPreference mongo read preference to use.
    */
-  def findAndRemove(query: Structure, sort: Structure)(implicit ec: ExecutionContext): Future[Option[Model]]
+  def findAndRemove(query: Structure, sort: Structure, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /** Retrieves the model with the given `id`. */
-  def findById(id: ID)(implicit ec: ExecutionContext): Future[Option[Model]]
+  def findById(id: ID, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /** Retrieves the models with the given `ids`. */
-  def findByIds(ids: ID*)(implicit ec: ExecutionContext): Future[List[Model]]
+  def findByIds(ids: Seq[ID], readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[List[Model]]
 
   /** Retrieves at most one model matching the given selector. */
-  def findOne(selector: Structure)(implicit ec: ExecutionContext): Future[Option[Model]]
+  def findOne(selector: Structure, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /**
    * Retrieves a random model matching the given selector.
    *
    * This API may require more than one query.
    */
-  def findRandom(selector: Structure)(implicit ec: ExecutionContext): Future[Option[Model]]
+  def findRandom(selector: Structure, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]]
 
   /**
    * Folds the documents matching the given selector by applying the function `f`.
@@ -173,18 +186,20 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param sort Sorting document.
    * @param state Initial state for the fold operation.
    * @param f Folding function.
+   * @param readPreference mongo read preference to use.
    * @tparam A Type of fold result.
    */
-  def fold[A](selector: Structure, sort: Structure, state: A)(f: (A, Model) => A)(implicit ec: ExecutionContext): Future[A]
+  def fold[A](selector: Structure, sort: Structure, state: A, readPreference: ReadPreference)(f: (A, Model) => A)(implicit ec: ExecutionContext): Future[A]
 
   /**
    * Iterates over the documents matching the given selector and applies the function `f`.
    *
    * @param selector Selector document.
    * @param sort Sorting document.
+   * @param readPreference mongo read preference to use.
    * @param f function to be applied.
    */
-  def foreach(selector: Structure, sort: Structure)(f: (Model) => Unit)(implicit ec: ExecutionContext): Future[Unit]
+  def foreach(selector: Structure, sort: Structure, readPreference: ReadPreference)(f: (Model) => Unit)(implicit ec: ExecutionContext): Future[Unit]
 
   /** Inserts the given model. */
   def insert(model: Model, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
