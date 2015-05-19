@@ -20,7 +20,7 @@ import scala.util.Random
 import scala.concurrent.{ Future, Await, ExecutionContext }
 import scala.concurrent.duration._
 import reactivemongo.bson._
-import reactivemongo.api.{ bulk, DB, QueryOpts }
+import reactivemongo.api.{ ReadPreference, bulk, DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.core.commands.{ LastError, GetLastError, Count, FindAndModify, Update, Remove }
@@ -96,36 +96,40 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
     collection.indexesManager.list()
   }
 
-  def findOne(selector: BSONDocument = BSONDocument.empty)(implicit ec: ExecutionContext): Future[Option[Model]] = {
-    collection.find(selector).one[Model]
+  def findOne(
+    selector: BSONDocument = BSONDocument.empty,
+    readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]] = {
+    collection.find(selector).one[Model](readPreference)
   }
 
-  def findById(id: ID)(implicit ec: ExecutionContext): Future[Option[Model]] = {
-    findOne($id(id))
+  def findById(id: ID, readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]] = {
+    findOne($id(id), readPreference)
   }
 
-  def findByIds(ids: ID*)(implicit ec: ExecutionContext): Future[List[Model]] = {
-    findAll("_id" $in (ids: _*))
+  def findByIds(ids: ID*)(implicit ec: ExecutionContext, readPreference: ReadPreference = defaultReadPreference): Future[List[Model]] = {
+    findAll("_id" $in (ids: _*), readPreference = readPreference)
   }
 
   def find(
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1),
     page: Int,
-    pageSize: Int)(implicit ec: ExecutionContext): Future[List[Model]] = {
+    pageSize: Int,
+    readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[List[Model]] = {
     val from = (page - 1) * pageSize
     collection
       .find(selector)
       .sort(sort)
       .options(QueryOpts(skipN = from, batchSizeN = pageSize))
-      .cursor[Model]
+      .cursor[Model](readPreference)
       .collect[List](pageSize)
   }
 
   def findAll(
     selector: BSONDocument = BSONDocument.empty,
-    sort: BSONDocument = BSONDocument("_id" -> 1))(implicit ec: ExecutionContext): Future[List[Model]] = {
-    collection.find(selector).sort(sort).cursor[Model].collect[List]()
+    sort: BSONDocument = BSONDocument("_id" -> 1),
+    readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[List[Model]] = {
+    collection.find(selector).sort(sort).cursor[Model](readPreference).collect[List]()
   }
 
   def findAndUpdate(
@@ -133,7 +137,8 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
     update: BSONDocument,
     sort: BSONDocument = BSONDocument.empty,
     fetchNewObject: Boolean = false,
-    upsert: Boolean = false)(implicit ec: ExecutionContext): Future[Option[Model]] = {
+    upsert: Boolean = false,
+    readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]] = {
     val command = FindAndModify(
       collection = collectionName,
       query = query,
@@ -141,24 +146,29 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
       upsert = upsert,
       sort = if (sort == BSONDocument.empty) None else Some(sort))
 
-    collection.db.command(command).map(_.map(modelReader.read))
+    collection.db.command(command, readPreference).map(_.map(modelReader.read))
   }
 
-  def findAndRemove(query: BSONDocument, sort: BSONDocument = BSONDocument.empty)(implicit ec: ExecutionContext): Future[Option[Model]] = {
+  def findAndRemove(
+    query: BSONDocument,
+    sort: BSONDocument = BSONDocument.empty,
+    readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]] = {
     val command = FindAndModify(
       collection = collectionName,
       query = query,
       modify = Remove,
       sort = if (sort == BSONDocument.empty) None else Some(sort))
 
-    collection.db.command(command).map(_.map(modelReader.read))
+    collection.db.command(command, readPreference).map(_.map(modelReader.read))
   }
 
-  def findRandom(selector: BSONDocument = BSONDocument.empty)(implicit ec: ExecutionContext): Future[Option[Model]] = {
+  def findRandom(
+    selector: BSONDocument = BSONDocument.empty,
+    readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[Option[Model]] = {
     for {
       count <- count(selector)
       index = if (count == 0) 0 else Random.nextInt(count)
-      random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[Model]
+      random <- collection.find(selector).options(QueryOpts(skipN = index, batchSizeN = 1)).one[Model](readPreference)
     } yield random
   }
 
@@ -206,8 +216,10 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
     }
   }
 
-  def count(selector: BSONDocument = BSONDocument.empty)(implicit ec: ExecutionContext): Future[Int] = {
-    collection.db.command(Count(collectionName, Some(selector)))
+  def count(
+    selector: BSONDocument = BSONDocument.empty,
+    readPreference: ReadPreference = defaultReadPreference)(implicit ec: ExecutionContext): Future[Int] = {
+    collection.db.command(Count(collectionName, Some(selector)), readPreference)
   }
 
   def drop()(implicit ec: ExecutionContext): Future[Boolean] = {
@@ -239,8 +251,9 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
 
   def foreach(
     selector: BSONDocument = BSONDocument.empty,
-    sort: BSONDocument = BSONDocument("_id" -> 1))(f: (Model) => Unit)(implicit ec: ExecutionContext): Future[Unit] = {
-    collection.find(selector).sort(sort).cursor[Model]
+    sort: BSONDocument = BSONDocument("_id" -> 1),
+    readPreference: ReadPreference = defaultReadPreference)(f: (Model) => Unit)(implicit ec: ExecutionContext): Future[Unit] = {
+    collection.find(selector).sort(sort).cursor[Model](readPreference)
       .enumerate()
       .apply(Iteratee.foreach(f))
       .flatMap(i => i.run)
@@ -249,8 +262,9 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
   def fold[A](
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1),
-    state: A)(f: (A, Model) => A)(implicit ec: ExecutionContext): Future[A] = {
-    collection.find(selector).sort(sort).cursor[Model]
+    state: A,
+    readPreference: ReadPreference = defaultReadPreference)(f: (A, Model) => A)(implicit ec: ExecutionContext): Future[A] = {
+    collection.find(selector).sort(sort).cursor[Model](readPreference)
       .enumerate()
       .apply(Iteratee.fold(state)(f))
       .flatMap(i => i.run)
