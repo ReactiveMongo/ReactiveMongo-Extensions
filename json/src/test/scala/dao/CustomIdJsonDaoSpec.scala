@@ -20,7 +20,7 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.SpanSugar._
 import play.api.libs.json.Json
-import play.modules.reactivemongo.json.BSONFormats._
+import play.modules.reactivemongo.json._
 import reactivemongo.extensions.json.model.CustomIdModel
 import reactivemongo.extensions.json.dsl.JsonDsl._
 import scala.concurrent.Future

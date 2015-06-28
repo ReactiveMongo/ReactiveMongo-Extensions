@@ -24,14 +24,10 @@ import reactivemongo.api.DefaultDB
 import reactivemongo.extensions.dsl.BsonDsl
 
 class EventBsonDao(_db: DefaultDB)
-    extends BsonDao[Event, String](_db, "events")
-    with BsonDsl {
+    extends BsonDao[Event, String](_db, "events") with BsonDsl {
 
-  def findByTitle(title: String): Future[Option[Event]] = {
+  def findByTitle(title: String): Future[Option[Event]] =
     findOne("title" $eq title)
-  }
 
-  def dropDatabaseSync(): Boolean = {
-    Await.result(_db.drop(), 20 seconds)
-  }
+  def dropDatabaseSync(): Unit = Await.result(_db.drop(), 20 seconds)
 }

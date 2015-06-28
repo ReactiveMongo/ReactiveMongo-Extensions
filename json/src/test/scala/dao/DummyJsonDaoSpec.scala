@@ -339,5 +339,4 @@ class DummyJsonDaoSpec
         afterCount shouldBe 0
     }
   }
-
 }

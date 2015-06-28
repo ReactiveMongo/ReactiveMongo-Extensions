@@ -17,34 +17,35 @@
 package reactivemongo.extensions.fixtures
 
 import scala.concurrent.{ Future, ExecutionContext }
-import reactivemongo.extensions.util.Logger
-import reactivemongo.api.DB
-import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.core.commands.LastError
-import reactivemongo.bson.BSONDocument
+
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.JsObject
-import reactivemongo.extensions.BSONFormats
+
+import reactivemongo.bson.BSONDocument
+import reactivemongo.api.DB
+import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.collections.bson.BSONCollection
+import play.modules.reactivemongo.json.BSONFormats
+import reactivemongo.extensions.util.Logger
 
 class BsonFixtures(db: => DB)(implicit ec: ExecutionContext) extends Fixtures[BSONDocument] {
+  def map(document: JsObject): BSONDocument =
+    BSONFormats.BSONDocumentFormat.reads(document).get
 
-  def map(document: JsObject): BSONDocument = BSONFormats.BSONDocumentFormat.reads(document).get
+  def bulkInsert(collectionName: String, documents: Stream[BSONDocument]): Future[Int] = db.collection[BSONCollection](
+    collectionName).bulkInsert(documents, ordered = true).map(_.n)
 
-  def bulkInsert(collectionName: String, enumerator: Enumerator[BSONDocument]): Future[Int] = {
-    db.collection[BSONCollection](collectionName).bulkInsert(enumerator)
-  }
+  def removeAll(collectionName: String): Future[WriteResult] =
+    db.collection[BSONCollection](collectionName).
+      remove(query = BSONDocument.empty, firstMatchOnly = false)
 
-  def removeAll(collectionName: String): Future[LastError] = {
-    db.collection[BSONCollection](collectionName).remove(query = BSONDocument.empty, firstMatchOnly = false)
-  }
-
-  def drop(collectionName: String): Future[Boolean] = {
+  def drop(collectionName: String): Future[Unit] =
     db.collection[BSONCollection](collectionName).drop()
-  }
 
 }
 
 object BsonFixtures {
-  def apply(db: DB)(implicit ec: ExecutionContext): BsonFixtures = new BsonFixtures(db)
+  def apply(db: DB)(implicit ec: ExecutionContext): BsonFixtures =
+    new BsonFixtures(db)
 }
 

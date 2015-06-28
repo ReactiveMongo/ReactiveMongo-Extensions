@@ -4,8 +4,9 @@ name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
   organization := "org.reactivemongo",
-  version := "0.10.0.0-SNAPSHOT",
-  scalaVersion  := "2.10.4",
+  version := "0.11.1",
+  scalaVersion  := "2.11.6",
+  crossScalaVersions  := Seq("2.11.6", "2.10.4"),
   scalacOptions := Seq(
     "-unchecked",
     "-deprecation",
@@ -17,10 +18,11 @@ lazy val commonSettings = Seq(
     "-language:existentials",
     "-target:jvm-1.6"),
   resolvers ++= Seq(
-    "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/"),
-  parallelExecution in Test := true,
+    "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/",
+    "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"),
   javaOptions in Test ++= Seq("-Xmx512m", "-XX:MaxPermSize=512m"),
   testOptions in Test += Tests.Argument("-oDS"),
+  parallelExecution in Test := true,
   shellPrompt in ThisBuild := Common.prompt,
   ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(AlignParameters, true)
