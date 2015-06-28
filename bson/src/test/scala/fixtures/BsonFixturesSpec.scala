@@ -20,12 +20,16 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.{ Span, Seconds }
 import reactivemongo.extensions.util.Logger
-import reactivemongo.extensions.dao.{ MongoContext, PersonBsonDao, EventBsonDao }
-import reactivemongo.extensions.Implicits._
+import reactivemongo.extensions.dao.{
+  MongoContext,
+  PersonBsonDao,
+  EventBsonDao,
+  Handlers
+}, Handlers._ // extension BSON handler
+import reactivemongo.extensions.Implicits.FutureOption // ~
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class BsonFixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeAndAfter {
-
   override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
   val db = MongoContext.randomDb
@@ -76,5 +80,4 @@ class BsonFixturesSpec extends FlatSpec with Matchers with ScalaFutures with Bef
         event2.location.city shouldBe "Ankara"
     }
   }
-
 }

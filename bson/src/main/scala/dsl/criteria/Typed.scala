@@ -33,46 +33,45 @@ import scala.reflect.runtime.universe._
  */
 object Typed {
   /// Class Types
-  class PropertyAccess[T]
-      extends Dynamic {
-    def selectDynamic(property: String) = macro PropertyAccess.select[T];
+  class PropertyAccess[T] extends Dynamic {
+    def selectDynamic(property: String) = macro PropertyAccess.select[T]
   }
 
   object PropertyAccess {
-    def select[T: c.WeakTypeTag](c: Context)(property: c.Expr[String]) =
-      {
-        import c.universe._
-        import c.mirror._
+    def select[T: c.WeakTypeTag](c: Context)(property: c.Expr[String]) = {
+      import c.universe._
+      import c.universe.typeOf
+      import c.mirror._
 
-        val tree = (c.prefix.tree, property.tree) match {
-          case (
-            TypeApply(
-              Select(_, _),
-              List(parentType)
-              ),
-            st @ Literal(Constant(name: String))
-            ) =>
-            val accessor = parentType.tpe.member(newTermName(name)) orElse {
-              c.abort(
-                c.enclosingPosition,
-                s"$name is not a member of ${parentType.tpe}"
-              );
-            }
-
-            Apply(
-              Select(
-                New(TypeTree().setType(typeOf[Term[Any]])),
-                nme.CONSTRUCTOR
-              ),
-              List(st)
+      val tree = (c.prefix.tree, property.tree) match {
+        case (
+          TypeApply(
+            Select(_, _),
+            List(parentType)
+            ),
+          st @ Literal(Constant(name: String))
+          ) =>
+          val accessor = parentType.tpe.member(newTermName(name)) orElse {
+            c.abort(
+              c.enclosingPosition,
+              s"$name is not a member of ${parentType.tpe}"
             );
+          }
 
-          case other =>
-            c.abort(c.enclosingPosition, s"only property access is supported: $other");
-        }
+          Apply(
+            Select(
+              New(TypeTree(typeOf[Term[Any]])),
+              nme.CONSTRUCTOR
+            ),
+            List(st)
+          );
 
-        c.Expr[Any](tree);
+        case other =>
+          c.abort(c.enclosingPosition, s"only property access is supported: $other");
       }
+
+      c.Expr[Any](tree);
+    }
   }
 
   /**

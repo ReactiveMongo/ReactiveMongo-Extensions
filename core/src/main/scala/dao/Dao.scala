@@ -16,11 +16,12 @@
 
 package reactivemongo.extensions.dao
 
-import reactivemongo.api.{ DB, Collection, CollectionProducer }
-import reactivemongo.api.indexes.Index
-import reactivemongo.core.commands.{ LastError, GetLastError }
 import scala.concurrent.{ Future, ExecutionContext }
 import scala.concurrent.duration.Duration
+
+import reactivemongo.api.{ DB, Collection, CollectionProducer }
+import reactivemongo.api.indexes.Index
+import reactivemongo.api.commands.{ GetLastError, WriteResult }
 
 /**
  * Base class for all DAO implementations. This class defines the API for all DAOs.
@@ -33,7 +34,7 @@ import scala.concurrent.duration.Duration
  * @tparam Structure The type that C operates on. `BSONDocument` or `JsObject`.
  * @tparam Model Type of the model that this DAO uses.
  * @tparam ID Type of the ID field of the model.
- * @tparam Writer
+ * @tparam Writer the `Structure` writer
  */
 abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Writer[_]](db: => DB, collectionName: String) {
 
@@ -91,17 +92,17 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    *
    * Related API functions should allow overriding this value.
    */
-  def defaultWriteConcern: GetLastError = GetLastError()
+  def defaultWriteConcern: GetLastError = GetLastError.Default
 
   /** Drops this collection */
-  def drop()(implicit ec: ExecutionContext): Future[Boolean]
+  def drop()(implicit ec: ExecutionContext): Future[Unit]
 
   /**
    * Drops this collection and awaits until it has been dropped or a timeout has occured.
    * @param timeout Maximum amount of time to await until this collection has been dropped.
    * @return true if the collection has been successfully dropped, otherwise false.
    */
-  def dropSync(timeout: Duration)(implicit ec: ExecutionContext): Boolean
+  def dropSync(timeout: Duration)(implicit ec: ExecutionContext): Unit
 
   /** Ensures indexes defined by `autoIndexes`. */
   def ensureIndexes()(implicit ec: ExecutionContext): Future[Traversable[Boolean]]
@@ -187,7 +188,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
   def foreach(selector: Structure, sort: Structure)(f: (Model) => Unit)(implicit ec: ExecutionContext): Future[Unit]
 
   /** Inserts the given model. */
-  def insert(model: Model, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
+  def insert(model: Model, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[WriteResult]
 
   /**
    * Lists indexes that are currently ensured in this collection.
@@ -208,13 +209,13 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
   def remove(
     selector: Structure,
     writeConcern: GetLastError,
-    firstMatchOnly: Boolean)(implicit ec: ExecutionContext): Future[LastError]
+    firstMatchOnly: Boolean)(implicit ec: ExecutionContext): Future[WriteResult]
 
   /** Removes all documents in this collection. */
-  def removeAll(writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
+  def removeAll(writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[WriteResult]
 
   /** Removes the document with the given ID. */
-  def removeById(id: ID, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
+  def removeById(id: ID, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[WriteResult]
 
   /**
    * Inserts the document, or updates it if it already exists in the collection.
@@ -223,7 +224,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param writeConcern the [[reactivemongo.core.commands.GetLastError]] command message to send in order to control
    *                     how the document is inserted. Defaults to defaultWriteConcern.
    */
-  def save(model: Model, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
+  def save(model: Model, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[WriteResult]
 
   /**
    * Updates the documents matching the given selector.
@@ -240,7 +241,7 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
     update: U,
     writeConcern: GetLastError,
     upsert: Boolean,
-    multi: Boolean)(implicit ec: ExecutionContext): Future[LastError]
+    multi: Boolean)(implicit ec: ExecutionContext): Future[WriteResult]
 
   /**
    * Updates the document with the given `id`.
@@ -250,5 +251,5 @@ abstract class Dao[C <: Collection: CollectionProducer, Structure, Model, ID, Wr
    * @param writeConcern Write concern which defaults to defaultWriteConcern.
    * @tparam U Type of the update query.
    */
-  def updateById[U: Writer](id: ID, update: U, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[LastError]
+  def updateById[U: Writer](id: ID, update: U, writeConcern: GetLastError)(implicit ec: ExecutionContext): Future[WriteResult]
 }

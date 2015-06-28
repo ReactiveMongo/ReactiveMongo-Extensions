@@ -22,9 +22,8 @@ import org.scalatest._
 import org.scalatest.concurrent._
 import org.scalatest.time.{ Seconds, Span }
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
-import play.api.libs.json.Json
-import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
-import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
+import play.api.libs.json.{ Json, JsObject }
+import play.modules.reactivemongo.json._, ImplicitBSONHandlers._
 import reactivemongo.api.gridfs.Implicits.DefaultReadFileReader
 import reactivemongo.bson.BSONObjectID
 
@@ -39,14 +38,16 @@ class JsonFileDaoSpec
 
   override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
-  val dao = new JsonFileDao[BSONObjectID](MongoContext.db, "json-files") {}
+  import JsonFileDao._
+
+  val dao = new JsonFileDao[JsObject](MongoContext.db, "json-files") {}
 
   "A JsonFileDao" should "save and remove file" in {
     val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
 
     val result = for {
       save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
+      id = Json.toJson(save.id).asInstanceOf[JsObject]
       findBefore <- dao.findById(id)
       remove <- dao.removeById(id)
       findAfter <- dao.findById(id)
@@ -55,7 +56,7 @@ class JsonFileDaoSpec
     whenReady(result) {
       case (id, findBefore, findAfter) =>
         import org.scalatest.OptionValues._
-        findBefore.value.id should be(id)
+        Json.toJson(findBefore.value.id) should be(id)
         findBefore.value.length should be(200007)
         findAfter should be('empty)
     }
@@ -66,7 +67,7 @@ class JsonFileDaoSpec
 
     val result = for {
       save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
+      id = Json.toJson(save.id).asInstanceOf[JsObject]
       find <- dao.findOne(Json.obj("filename" -> save.filename))
       remove <- dao.removeById(id)
     } yield (id, find)
@@ -74,7 +75,7 @@ class JsonFileDaoSpec
     whenReady(result) {
       case (id, find) =>
         import org.scalatest.OptionValues._
-        find.value.id should be(id)
+        Json.toJson(find.value.id) should be(id)
     }
   }
 
@@ -87,7 +88,7 @@ class JsonFileDaoSpec
 
     val result = for {
       save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
+      id = Json.toJson(save.id).asInstanceOf[JsObject]
       enumerator <- dao.findOne(Json.obj("filename" -> save.filename)).enumerate
       len <- enumerator.get |>>> length
       remove <- dao.removeById(id)
@@ -107,7 +108,7 @@ class JsonFileDaoSpec
 
     val result = for {
       save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
+      id = Json.toJson(save.id).asInstanceOf[JsObject]
       enumerator <- dao.findById(id).enumerate
       len <- enumerator.get |>>> length
       remove <- dao.removeById(id)
@@ -124,7 +125,7 @@ class JsonFileDaoSpec
 
     val result = for {
       save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
+      id = Json.toJson(save.id).asInstanceOf[JsObject]
       read <- dao.findOne(Json.obj("filename" -> save.filename)).read(out)
       remove <- dao.removeById(id)
     } yield read
@@ -141,7 +142,7 @@ class JsonFileDaoSpec
 
     val result = for {
       save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
+      id = Json.toJson(save.id).asInstanceOf[JsObject]
       read <- dao.findById(id).read(out)
       remove <- dao.removeById(id)
     } yield read
@@ -151,5 +152,4 @@ class JsonFileDaoSpec
       out.size() shouldBe 200007
     }
   }
-
 }
