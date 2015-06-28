@@ -1,9 +1,18 @@
 language: scala
+script: sbt ++$TRAVIS_SCALA_VERSION 'test-only'
 scala:
-  - 2.11.5
+- 2.11.6
 jdk:
-  - oraclejdk7
-  - oraclejdk8
-services:
-  - mongodb
-
+- oraclejdk8
+before_install:
+- sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+- echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' |
+  sudo tee /etc/apt/sources.list.d/mongodb.list
+- sudo apt-get update
+- sudo apt-get install mongodb-org-server
+env:
+  global:
+  - secure: a+TF5tTj1Nb6knida4xcf/IWVF5gF29PQ2hg0XTSM/2JZ0qQEl+xm01P1K+rzO/nO8bQ5G4BXPhNYv7ReS9otKvdPf2ya6iOjYJ1ZPA1QyUSulzq5DUHEWWBww+vV6HR0tAEtLSFqx05u0Igx9f33/kxtzrabgm/zQqGFu+B+lY=
+  - secure: RCIIIn5IERegftnUMww+azwWxDTe8pDy256LbLO/7n8WN06DGVZPeZmQY33WQdTg4Qz/Mri1QlAF8YnG+TeNKooXHlkFXlBIq00bM6Dab9QRvbZEll2NV5agZ112kcL0IOL7Yw5cY3knjsWpT3IttChMopLxPGGV1YzvExW4B5Y=
+after_success:
+- .travis_scripts/publishSnapshots.sh

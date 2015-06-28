@@ -1,34 +1,34 @@
+import scalariform.formatter.preferences._
+
 name := "reactivemongo-extensions"
 
 lazy val commonSettings = Seq(
   organization := "org.reactivemongo",
-  version := "0.11.0.0-SNAPSHOT",
-  scalaVersion  := "2.11.5",
+  version := "0.11.1",
+  scalaVersion  := "2.11.6",
+  crossScalaVersions  := Seq("2.11.6", "2.10.4"),
   scalacOptions := Seq(
-    "-deprecation",
-    "-encoding", "UTF-8",       // yes, this is 2 args
-    "-feature",
-    "-language:existentials",
-    "-language:higherKinds",
-    "-language:implicitConversions",
-    "-language:postfixOps",
     "-unchecked",
-    "-Xfatal-warnings",
-    "-Xlint",
-    "-Yno-adapted-args",
-    "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
-    "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard",
-    "-Xfuture",
-    "-Ywarn-unused-import"     // 2.11 only
-  ),
+    "-deprecation",
+    "-encoding", "utf8",
+    "-feature",
+    "-language:higherKinds",
+    "-language:postfixOps",
+    "-language:implicitConversions",
+    "-language:existentials",
+    "-target:jvm-1.6"),
   resolvers ++= Seq(
-    "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
-    "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/"),
-  parallelExecution in Test := false,
+    "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/",
+    "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"),
   javaOptions in Test ++= Seq("-Xmx512m", "-XX:MaxPermSize=512m"),
   testOptions in Test += Tests.Argument("-oDS"),
-  shellPrompt in ThisBuild := Common.prompt)
+  parallelExecution in Test := true,
+  shellPrompt in ThisBuild := Common.prompt,
+  ScalariformKeys.preferences := ScalariformKeys.preferences.value
+  .setPreference(AlignParameters, true)
+  .setPreference(DoubleIndentClassDeclaration, true)
+  .setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
+  .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true))
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
@@ -66,18 +66,40 @@ lazy val publishSettings = Seq(
       </developer>
     </developers>))
 
+val travisSettings = Seq(
+  Travis.travisSnapshotBranches := Seq("0.10.x", "0.10.5.akka23-SNAPSHOT"),
+  commands += Travis.travisCommand
+)
+
+lazy val settings = (
+  commonSettings
+  ++ travisSettings
+  ++ scalariformSettings
+  ++ org.scalastyle.sbt.ScalastylePlugin.Settings)
+
 lazy val root = project.in(file("."))
-  .aggregate(bson, core)
-  .settings(commonSettings: _*)
+  .aggregate(bson, json, core, samples)
+  .settings(settings: _*)
   .settings(publishSettings: _*)
   .settings(publishArtifact := false)
   .settings(unidocSettings: _*)
 
 lazy val core = project.in(file("core"))
-  .settings(commonSettings: _*)
+  .settings(settings: _*)
   .settings(publishSettings: _*)
 
 lazy val bson = project.in(file("bson"))
-  .settings(commonSettings: _*)
+  .settings(settings: _*)
   .settings(publishSettings: _*)
   .dependsOn(core % "test->test;compile->compile")
+
+lazy val json = project.in(file("json"))
+  .settings(settings: _*)
+  .settings(publishSettings: _*)
+  .dependsOn(core % "test->test;compile->compile")
+
+lazy val samples = project.in(file("samples"))
+  .settings(settings: _*)
+  .settings(publishSettings: _*)
+  .settings(publishArtifact := false)
+  .dependsOn(core % "test->test;compile->compile", bson % "compile->compile")

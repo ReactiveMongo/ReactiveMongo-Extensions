@@ -14,22 +14,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reactivemongo.extensions.dao
+package reactivemongo.extensions.json.dao
 
-import scala.concurrent.{ Future, Await }
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.json.{ Writes, OFormat }
+import reactivemongo.api.DB
+import reactivemongo.extensions.dao.{ ReflexiveLifeCycle, LifeCycle }
 
-import reactivemongo.extensions.model.Person
-import reactivemongo.api.DefaultDB
-import reactivemongo.extensions.dsl.BsonDsl
-import reactivemongo.extensions.dao.Handlers._
+import scala.concurrent.ExecutionContext
 
-class PersonBsonDao(_db: DefaultDB)
-    extends BsonDao[Person, String](_db, "persons") with BsonDsl {
+class JsonDaoBuilder[Model: OFormat, ID: Writes](db: => DB) {
+  def apply(collectionName: String)(
+    implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
+    ec: ExecutionContext): JsonDao[Model, ID] = {
+    JsonDao(db, collectionName)
+  }
+}
 
-  def findByName(name: String): Future[Option[Person]] =
-    findOne("name" $eq name)
-
-  def dropDatabaseSync(): Unit = Await.result(_db.drop(), 20 seconds)
+object JsonDaoBuilder {
+  def apply[Model: OFormat, ID: Writes](db: => DB): JsonDaoBuilder[Model, ID] = {
+    new JsonDaoBuilder[Model, ID](db)
+  }
 }
