@@ -16,18 +16,29 @@
 
 package reactivemongo.extensions.dao
 
-import play.api.libs.json.{ JsObject, Json, Writes }
-import play.modules.reactivemongo.json.ImplicitBSONHandlers.JsObjectWriter
+import play.api.libs.json.{ JsObject, Json, JsValue, Writes }
+import play.modules.reactivemongo.json._, ImplicitBSONHandlers._
 import reactivemongo.api.{ DB, DBMetaCommands }
+import reactivemongo.api.gridfs.IdProducer
 import reactivemongo.bson.BSONValue
 import reactivemongo.extensions.dao.FileDao.ReadFileWrapper
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-abstract class JsonFileDao[Id <: BSONValue: Writes](db: => DB with DBMetaCommands, collectionName: String)
+/**
+ * {{{
+ * import reactivemongo.extensions.dao.JsonFileDao, JsonFileDao._
+ * }}}
+ */
+abstract class JsonFileDao[Id <: JsValue: IdProducer](db: => DB with DBMetaCommands, collectionName: String)(implicit gridFsId: Id => BSONValue)
     extends FileDao[Id, JsObject](db, collectionName) {
 
-  def findById(id: Id)(implicit ec: ExecutionContext): ReadFileWrapper = {
+  def findById(id: Id)(implicit ec: ExecutionContext): ReadFileWrapper =
     findOne(Json.obj("_id" -> id))
-  }
+}
+
+object JsonFileDao {
+  // !! unsafe
+  implicit def defaultGridFSBSONId[T <: JsValue](json: T): BSONValue =
+    BSONFormats.toBSON(json).getOrElse(sys.error(s"fails to convert $json"))
 }

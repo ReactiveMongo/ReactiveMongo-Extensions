@@ -21,7 +21,7 @@ import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import reactivemongo.extensions.util.Logger
-import reactivemongo.core.commands.LastError
+import reactivemongo.api.commands.WriteResult
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.{ Json, JsObject }
 
@@ -32,17 +32,15 @@ trait Fixtures[T] {
   protected lazy val reserved = Set("_predef")
 
   def map(document: JsObject): T
-  def bulkInsert(collectionName: String, enumerator: Enumerator[T]): Future[Int]
-  def removeAll(collectionName: String): Future[LastError]
-  def drop(collectionName: String): Future[Boolean]
+  def bulkInsert(collectionName: String, documents: Stream[T]): Future[Int]
+  def removeAll(collectionName: String): Future[WriteResult]
+  def drop(collectionName: String): Future[Unit]
 
-  protected def toString(config: Config): String = {
+  protected def toString(config: Config): String =
     config.root.render(renderOptions)
-  }
 
-  protected def toJson(config: Config): JsObject = {
+  protected def toJson(config: Config): JsObject =
     Json.parse(toString(config)).as[JsObject]
-  }
 
   protected def resolveConfig(config: Config): Config = {
     val resolvedConfig = (config.root.keySet diff reserved).foldLeft(config) { (config, collectionName) =>
@@ -68,8 +66,7 @@ trait Fixtures[T] {
       map(document)
     }
 
-    val enumerator = Enumerator.enumerate(documents)
-    bulkInsert(collectionName, enumerator)
+    bulkInsert(collectionName, documents.toStream)
   }
 
   protected def foreachCollection[A](resource: String, resources: String*)(f: (Config, String) => Future[A]): Future[Seq[A]] = {
@@ -82,26 +79,21 @@ trait Fixtures[T] {
     Future.sequence { (resolvedConfig.root.keySet diff reserved).toSeq map (f(resolvedConfig, _)) }
   }
 
-  def load(resource: String, resources: String*): Future[Seq[Int]] = {
+  def load(resource: String, resources: String*): Future[Seq[Int]] =
     foreachCollection(resource, resources: _*) { (config, collectionName) =>
       Logger.debug(s"Processing ${collectionName}.")
       processCollection(collectionName, config.getConfig(collectionName))
     }
+
+  def removeAll(resource: String, resources: String*): Future[Seq[WriteResult]] = foreachCollection(resource, resources: _*) { (_, collectionName) =>
+    Logger.debug(s"Removing all documents from ${collectionName}.")
+    removeAll(collectionName)
   }
 
-  def removeAll(resource: String, resources: String*): Future[Seq[LastError]] = {
-    foreachCollection(resource, resources: _*) { (_, collectionName) =>
-      Logger.debug(s"Removing all documents from ${collectionName}.")
-      removeAll(collectionName)
-    }
-  }
-
-  def dropAll(resource: String, resources: String*): Future[Seq[Boolean]] = {
+  def dropAll(resource: String, resources: String*): Future[Seq[Unit]] =
     foreachCollection(resource, resources: _*) { (_, collectionName) =>
       Logger.debug(s"Removing all documents from ${collectionName}.")
       drop(collectionName)
     }
-  }
-
 }
 

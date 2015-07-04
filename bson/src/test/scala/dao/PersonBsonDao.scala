@@ -16,22 +16,20 @@
 
 package reactivemongo.extensions.dao
 
-import reactivemongo.extensions.model.Person
-import reactivemongo.api.DefaultDB
-import reactivemongo.extensions.dsl.BsonDsl
 import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import reactivemongo.extensions.model.Person
+import reactivemongo.api.DefaultDB
+import reactivemongo.extensions.dsl.BsonDsl
+import reactivemongo.extensions.dao.Handlers._
+
 class PersonBsonDao(_db: DefaultDB)
-    extends BsonDao[Person, String](_db, "persons")
-    with BsonDsl {
+    extends BsonDao[Person, String](_db, "persons") with BsonDsl {
 
-  def findByName(name: String): Future[Option[Person]] = {
+  def findByName(name: String): Future[Option[Person]] =
     findOne("name" $eq name)
-  }
 
-  def dropDatabaseSync(): Boolean = {
-    Await.result(_db.drop(), 20 seconds)
-  }
+  def dropDatabaseSync(): Unit = Await.result(_db.drop(), 20 seconds)
 }
