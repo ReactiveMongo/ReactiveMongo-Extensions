@@ -29,5 +29,6 @@ case class Person(
   country: String)
 
 object Person {
+  import reactivemongo.extensions.dao.Handlers._ // extensions BSON handler
   implicit val personFormat = Macros.handler[Person]
 }

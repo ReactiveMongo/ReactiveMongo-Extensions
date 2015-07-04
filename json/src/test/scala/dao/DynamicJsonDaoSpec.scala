@@ -19,8 +19,16 @@ package reactivemongo.extensions.json.dao
 import org.scalatest._
 import org.scalatest.concurrent.{ ScalaFutures }
 import org.scalatest.time.{ Span, Seconds }
-import play.api.libs.json.{ Json, JsObject }
-import play.modules.reactivemongo.json.BSONFormats._
+import play.api.libs.json.{
+  OFormat,
+  JsError,
+  Json,
+  JsObject,
+  JsResult,
+  JsSuccess,
+  JsValue
+}
+import play.modules.reactivemongo.json._, BSONFormats._
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.extensions.dao.MongoContext
 import reactivemongo.extensions.json.dsl.JsonDsl._
@@ -37,6 +45,15 @@ class DynamicJsonDaoSpec
     with OneInstancePerTest {
 
   override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
+
+  implicit object JsObjectFormat extends OFormat[JsObject] {
+    def reads(json: JsValue): JsResult[JsObject] = json match {
+      case obj: JsObject => JsSuccess(obj)
+      case _ => JsError("error.jsobject.expected")
+    }
+
+    def writes(obj: JsObject): JsObject = obj
+  }
 
   val builder = JsonDaoBuilder[JsObject, BSONObjectID](MongoContext.db)
 
