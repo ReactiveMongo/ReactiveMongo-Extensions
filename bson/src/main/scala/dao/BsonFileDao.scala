@@ -16,20 +16,15 @@
 
 package reactivemongo.extensions.dao
 
-import scala.concurrent.{ Future, Await }
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import reactivemongo.bson.{ BSONWriter, BSONDocument, BSONValue, Producer }
+import reactivemongo.api.{ DBMetaCommands, DB }
+import reactivemongo.api.gridfs.IdProducer
+import reactivemongo.extensions.dao.FileDao.ReadFileWrapper
+import scala.concurrent.ExecutionContext
 
-import reactivemongo.extensions.model.Person
-import reactivemongo.api.DefaultDB
-import reactivemongo.extensions.dsl.BsonDsl
-import reactivemongo.extensions.dao.Handlers._
+abstract class BsonFileDao[Id <: BSONValue: IdProducer](db: => DB with DBMetaCommands, collectionName: String) extends FileDao[Id, BSONDocument](db, collectionName) {
 
-class PersonBsonDao(_db: DefaultDB)
-    extends BsonDao[Person, String](_db, "persons") with BsonDsl {
-
-  def findByName(name: String): Future[Option[Person]] =
-    findOne("name" $eq name)
-
-  def dropDatabaseSync(): Unit = Await.result(_db.drop(), 20 seconds)
+  def findById(id: Id)(implicit ec: ExecutionContext): ReadFileWrapper = {
+    findOne(BSONDocument("_id" -> id))
+  }
 }
