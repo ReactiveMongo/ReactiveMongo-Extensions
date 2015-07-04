@@ -38,9 +38,8 @@ trait BsonDsl {
     BSONArray(elements: _*)
   }
 
-  def $id[T](id: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = {
-    BSONDocument("_id" -> id)
-  }
+  def $id[T](id: T)(implicit writer: BSONWriter[T, _ <: BSONValue]): BSONDocument = BSONDocument("_id" -> id)
+
   // End of Helpers
   //**********************************************************************************************//
 
@@ -310,11 +309,9 @@ trait BsonDsl {
     expression.field -> expression.value
   }
 
-  implicit def toBSONDocument[V <: BSONValue](expression: Expression[V])(implicit writer: BSONWriter[V, _ <: BSONValue]): BSONDocument = {
+  implicit def toBSONDocument[V <: BSONValue](expression: Expression[V])(implicit writer: BSONWriter[V, _ <: BSONValue]): BSONDocument =
     BSONDocument(expression.field -> expression.value)
-  }
 
 }
 
 object BsonDsl extends BsonDsl
-

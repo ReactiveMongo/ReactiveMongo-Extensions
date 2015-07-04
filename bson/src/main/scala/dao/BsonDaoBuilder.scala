@@ -17,7 +17,13 @@
 package reactivemongo.extensions.dao
 
 import reactivemongo.api.DB
-import reactivemongo.bson.{ BSONValue, BSONWriter, BSONDocumentWriter, BSONDocumentReader }
+import reactivemongo.bson.{
+  BSONDocumentWriter,
+  BSONDocumentReader,
+  BSONReader,
+  BSONValue,
+  BSONWriter
+}
 
 import scala.concurrent.ExecutionContext
 
@@ -26,6 +32,7 @@ class BsonDaoBuilder[Model, ID](db: => DB) {
     implicit modelReader: BSONDocumentReader[Model],
     modelWriter: BSONDocumentWriter[Model],
     idWriter: BSONWriter[ID, _ <: BSONValue],
+    idReader: BSONReader[_ <: BSONValue, ID],
     lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
     ec: ExecutionContext): BsonDao[Model, ID] = {
     BsonDao(db, collectionName)

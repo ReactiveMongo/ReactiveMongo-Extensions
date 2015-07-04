@@ -20,11 +20,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import reactivemongo.extensions.model.MapModel
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.DefaultBSONHandlers._
-import reactivemongo.core.commands.GetLastError
+import reactivemongo.api.commands.GetLastError
 import reactivemongo.extensions.util.Misc.UUID
 
-class MapModelBsonDao
-    extends BsonDao[MapModel, BSONObjectID](MongoContext.db, "dummy-" + UUID()) {
+class MapModelBsonDao extends BsonDao[MapModel, BSONObjectID](
+  MongoContext.db, "dummy-" + UUID()) {
 
-  override def defaultWriteConcern = GetLastError(j = true)
+  override def defaultWriteConcern = GetLastError.Default.copy(j = true)
 }
