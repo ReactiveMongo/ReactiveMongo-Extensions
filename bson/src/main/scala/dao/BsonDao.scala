@@ -25,10 +25,6 @@ import reactivemongo.bson._
 import reactivemongo.api.{ DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.commands.{ GetLastError, WriteResult }
-import reactivemongo.api.commands.bson.{
-  BSONFindAndModifyCommand,
-  BSONFindAndModifyImplicits
-}
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.extensions.dsl.BsonDsl._
 
@@ -127,35 +123,25 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
 
   def findAll(
     selector: BSONDocument = BSONDocument.empty,
-    sort: BSONDocument = BSONDocument("_id" -> 1))(implicit ec: ExecutionContext): Future[List[Model]] = {
+    sort: BSONDocument = BSONDocument("_id" -> 1))(implicit ec: ExecutionContext): Future[List[Model]] =
     collection.find(selector).sort(sort).cursor[Model].collect[List]()
-  }
 
+  @deprecated(since = "0.11.1",
+    message = "Directly use [[findAndUpdate]] collection operation")
   def findAndUpdate(
     query: BSONDocument,
     update: BSONDocument,
     sort: BSONDocument = BSONDocument.empty,
     fetchNewObject: Boolean = false,
-    upsert: Boolean = false)(implicit ec: ExecutionContext): Future[Option[Model]] = {
-    val command = BSONFindAndModifyCommand.FindAndModify(
-      query = query,
-      modify = BSONFindAndModifyCommand.Update(update, fetchNewObject),
-      upsert = upsert,
-      sort = if (sort == BSONDocument.empty) None else Some(sort))
+    upsert: Boolean = false)(implicit ec: ExecutionContext): Future[Option[Model]] = collection.findAndUpdate(
+    query, update, fetchNewObject, upsert).map(_.result[Model])
 
-    import BSONFindAndModifyImplicits._
-    collection.runCommand(command).map(_.value.map(modelReader.read(_)))
-  }
-
-  def findAndRemove(query: BSONDocument, sort: BSONDocument = BSONDocument.empty)(implicit ec: ExecutionContext): Future[Option[Model]] = {
-    val command = BSONFindAndModifyCommand.FindAndModify(
-      query = query,
-      modify = BSONFindAndModifyCommand.Remove,
-      sort = if (sort == BSONDocument.empty) None else Some(sort))
-
-    import BSONFindAndModifyImplicits._
-    collection.runCommand(command).map(_.value.map(modelReader.read(_)))
-  }
+  @deprecated(since = "0.11.1",
+    message = "Directly use [[findAndRemove]] collection operation")
+  def findAndRemove(query: BSONDocument, sort: BSONDocument = BSONDocument.empty)(implicit ec: ExecutionContext): Future[Option[Model]] =
+    collection.findAndRemove(
+      query, if (sort == BSONDocument.empty) None else Some(sort)).
+      map(_.result[Model])
 
   def findRandom(selector: BSONDocument = BSONDocument.empty)(implicit ec: ExecutionContext): Future[Option[Model]] = for {
     count <- count(selector)
@@ -174,7 +160,7 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
   private val (maxBulkSize, maxBsonSize): (Int, Int) =
     collection.db.connection.metadata.map {
       metadata => metadata.maxBulkSize -> metadata.maxBsonSize
-    } getOrElse[(Int, Int)] (Int.MaxValue -> Int.MaxValue)
+    }.getOrElse[(Int, Int)](Int.MaxValue -> Int.MaxValue)
 
   def bulkInsert(
     documents: TraversableOnce[Model],
@@ -212,9 +198,9 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
         val mappedModel = lifeCycle.prePersist(model)
         collection.update(selector = $id(_id), update = mappedModel,
           upsert = true, writeConcern = writeConcern) map { result =>
-          lifeCycle.postPersist(mappedModel)
-          result
-        }
+            lifeCycle.postPersist(mappedModel)
+            result
+          }
       }
     } yield res
   }

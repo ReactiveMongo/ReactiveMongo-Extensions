@@ -26,16 +26,18 @@ import reactivemongo.api.{ DB, QueryOpts }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.commands.{ GetLastError, WriteResult }
 import play.modules.reactivemongo.json._, collection.JSONCollection
-import play.modules.reactivemongo.json.commands.{
-  JSONFindAndModifyCommand,
-  JSONFindAndModifyImplicits
-}
-
 import reactivemongo.extensions.dao.{ Dao, LifeCycle, ReflexiveLifeCycle }
 import reactivemongo.extensions.json.dsl.JsonDsl._
 
 import play.api.libs.json.{
-  Json, JsError, JsSuccess, JsObject, OFormat, OWrites, Reads, Writes
+  Json,
+  JsError,
+  JsSuccess,
+  JsObject,
+  OFormat,
+  OWrites,
+  Reads,
+  Writes
 }
 import play.api.libs.iteratee.{ Iteratee, Enumerator }
 
@@ -89,7 +91,7 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
  */
 abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: String)(implicit lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID], ec: ExecutionContext)
     extends Dao[JSONCollection, JsObject, Model, ID, OWrites](
-  db, collectionName) {
+      db, collectionName) {
 
   def ensureIndexes()(implicit ec: ExecutionContext): Future[Traversable[Boolean]] = Future sequence {
     autoIndexes map { index =>
@@ -131,39 +133,21 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
     collection.find(selector).sort(sort).cursor[Model].collect[List]()
   }
 
+  @deprecated(since = "0.11.1",
+    message = "Directly use [[findAndUpdate]] collection operation")
   def findAndUpdate(
     query: JsObject,
     update: JsObject,
     sort: JsObject = Json.obj(),
     fetchNewObject: Boolean = false,
-    upsert: Boolean = false)(implicit ec: ExecutionContext): Future[Option[Model]] = {
-    val command = JSONFindAndModifyCommand.FindAndModify(
-      query = query,
-      modify = JSONFindAndModifyCommand.Update(update, fetchNewObject),
-      upsert = upsert,
-      sort = if (sort == Json.obj()) None else Some(sort))
+    upsert: Boolean = false)(implicit ec: ExecutionContext): Future[Option[Model]] = collection.findAndUpdate(
+    query, update, fetchNewObject, upsert).map(_.result[Model])
 
-    import JSONFindAndModifyImplicits._
-    collection.runCommand(command).flatMap {
-      _.value.fold(Future.successful(Option.empty[Model])) { doc =>
-        Future(doc.as[Model]).map(Some(_))
-      }
-    }
-  }
-
-  def findAndRemove(query: JsObject, sort: JsObject = Json.obj())(implicit ec: ExecutionContext): Future[Option[Model]] = {
-    val command = JSONFindAndModifyCommand.FindAndModify(
-      query = query,
-      modify = JSONFindAndModifyCommand.Remove,
-      sort = if (sort == Json.obj()) None else Some(sort))
-
-    import JSONFindAndModifyImplicits._
-    collection.runCommand(command).flatMap {
-      _.value.fold(Future.successful(Option.empty[Model])) { doc =>
-        Future(doc.as[Model]).map(Some(_))
-      }
-    }
-  }
+  @deprecated(since = "0.11.1",
+    message = "Directly use [[findAndRemove]] collection operation")
+  def findAndRemove(query: JsObject, sort: JsObject = Json.obj())(implicit ec: ExecutionContext): Future[Option[Model]] = collection.findAndRemove(
+    query, if (sort == BSONDocument.empty) None else Some(sort)).
+    map(_.result[Model])
 
   def findRandom(selector: JsObject = Json.obj())(implicit ec: ExecutionContext): Future[Option[Model]] = for {
     count <- count(selector)
@@ -182,7 +166,7 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
   private val (maxBulkSize, maxBsonSize): (Int, Int) =
     collection.db.connection.metadata.map {
       metadata => metadata.maxBulkSize -> metadata.maxBsonSize
-    } getOrElse[(Int, Int)] (Int.MaxValue -> Int.MaxValue)  
+    }.getOrElse[(Int, Int)](Int.MaxValue -> Int.MaxValue)
 
   def bulkInsert(
     documents: TraversableOnce[Model],
