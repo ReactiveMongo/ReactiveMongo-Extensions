@@ -28,7 +28,6 @@ import play.api.libs.json.{
   JsSuccess,
   JsValue
 }
-import play.modules.reactivemongo.json._, BSONFormats._
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.extensions.dao.MongoContext
 import reactivemongo.extensions.json.dsl.JsonDsl._
@@ -43,6 +42,8 @@ class DynamicJsonDaoSpec
     with ScalaFutures
     with BeforeAndAfter
     with OneInstancePerTest {
+
+  import play.modules.reactivemongo.json._
 
   override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
