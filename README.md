@@ -7,6 +7,8 @@ Here is a complete example using Play 2.2, ReactiveMongo Extensions and Flight.j
 [![Build Status](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions.svg?branch=0.10.x)](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions)
 ![Progress](http://progressed.io/bar/70?title=stable)
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.reactivemongo/reactivemongo-extensions-core_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.reactivemongo/reactivemongo-extensions-core_2.11/)
+
 ## Introduction
 
 **ReactiveMongo Extensions** comes as 2 separate packages which are `reactivemongo-extensions-bson` and `reactivemongo-extensions-json`.
