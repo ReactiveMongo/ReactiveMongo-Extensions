@@ -23,7 +23,8 @@ import reactivemongo.extensions.dao.Handlers._
 import BsonDsl._
 import org.joda.time.DateTime
 
-class BsonDslSpec extends FlatSpec with Matchers {
+object BsonDslSpec extends FlatSpec with Matchers {
+  import reactivemongo.extensions.dao.Handlers._
 
   "A BsonDsl" should "create complex document 1" in {
     val dsl: BSONDocument = "age" $gt 50 $lt 60
