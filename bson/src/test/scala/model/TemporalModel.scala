@@ -30,6 +30,8 @@ case class TemporalModel(
   updatedAt: DateTime = DateTime.now)
 
 object TemporalModel {
+  import reactivemongo.extensions.dao.Handlers._
+
   implicit val temporalModelFormat = Macros.handler[TemporalModel]
 
   implicit object TemporalModelLifeCycle extends LifeCycle[TemporalModel, BSONObjectID] {
