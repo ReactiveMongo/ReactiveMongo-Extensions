@@ -25,7 +25,7 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.api.DB
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.collections.bson.BSONCollection
-import play.modules.reactivemongo.json.BSONFormats
+import reactivemongo.play.json.BSONFormats
 import reactivemongo.extensions.util.Logger
 
 class BsonFixtures(db: => DB)(implicit ec: ExecutionContext) extends Fixtures[BSONDocument] {

@@ -117,17 +117,17 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
       .find(selector)
       .sort(sort)
       .options(QueryOpts(skipN = from, batchSizeN = pageSize))
-      .cursor[Model]
+      .cursor[Model]()
       .collect[List](pageSize)
   }
 
   def findAll(
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1))(implicit ec: ExecutionContext): Future[List[Model]] =
-    collection.find(selector).sort(sort).cursor[Model].collect[List]()
+    collection.find(selector).sort(sort).cursor[Model]().collect[List]()
 
-  @deprecated(since = "0.11.1",
-    message = "Directly use [[findAndUpdate]] collection operation")
+  @deprecated("0.11.1",
+    "Directly use [[findAndUpdate]] collection operation")
   def findAndUpdate(
     query: BSONDocument,
     update: BSONDocument,
@@ -136,8 +136,8 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
     upsert: Boolean = false)(implicit ec: ExecutionContext): Future[Option[Model]] = collection.findAndUpdate(
     query, update, fetchNewObject, upsert).map(_.result[Model])
 
-  @deprecated(since = "0.11.1",
-    message = "Directly use [[findAndRemove]] collection operation")
+  @deprecated("0.11.1",
+    "Directly use [[findAndRemove]] collection operation")
   def findAndRemove(query: BSONDocument, sort: BSONDocument = BSONDocument.empty)(implicit ec: ExecutionContext): Future[Option[Model]] =
     collection.findAndRemove(
       query, if (sort == BSONDocument.empty) None else Some(sort)).
@@ -158,9 +158,7 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
   }
 
   private val (maxBulkSize, maxBsonSize): (Int, Int) =
-    collection.db.connection.metadata.map {
-      metadata => metadata.maxBulkSize -> metadata.maxBsonSize
-    }.getOrElse[(Int, Int)](Int.MaxValue -> Int.MaxValue)
+    Int.MaxValue -> Int.MaxValue
 
   def bulkInsert(
     documents: TraversableOnce[Model],
@@ -231,7 +229,7 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
   def foreach(
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1))(f: (Model) => Unit)(implicit ec: ExecutionContext): Future[Unit] = {
-    collection.find(selector).sort(sort).cursor[Model]
+    collection.find(selector).sort(sort).cursor[Model]()
       .enumerate()
       .apply(Iteratee.foreach(f))
       .flatMap(i => i.run)
@@ -241,7 +239,7 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
     selector: BSONDocument = BSONDocument.empty,
     sort: BSONDocument = BSONDocument("_id" -> 1),
     state: A)(f: (A, Model) => A)(implicit ec: ExecutionContext): Future[A] = {
-    collection.find(selector).sort(sort).cursor[Model]
+    collection.find(selector).sort(sort).cursor[Model]()
       .enumerate()
       .apply(Iteratee.fold(state)(f))
       .flatMap(i => i.run)
