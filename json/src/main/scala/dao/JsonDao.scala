@@ -163,7 +163,7 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
     }
   }
 
-  private val (maxBulkSize, maxBsonSize): (Int, Int) =
+  private lazy val (maxBulkSize, maxBsonSize): (Int, Int) =
     collection.db.connection.metadata.map {
       metadata => metadata.maxBulkSize -> metadata.maxBsonSize
     }.getOrElse[(Int, Int)](Int.MaxValue -> Int.MaxValue)
@@ -182,7 +182,7 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
 
     collection.bulkInsert(go(mappedDocuments.toTraversable),
       true, defaultWriteConcern, bulkSize, bulkByteSize) map { result =>
-        mappedDocuments.map(lifeCycle.postPersist)
+        mappedDocuments.foreach(lifeCycle.postPersist)
         result.n
       }
   }
