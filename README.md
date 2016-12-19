@@ -3,13 +3,7 @@
 The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
 > **Since ReactiveMongo 0.11, the useful functions are available directly in the [driver](../ReactiveMongo), so these extensions are not updated, and it's recommended to directly use the driver.**
-
-Here is a complete example using Play 2.2, ReactiveMongo Extensions and Flight.js https://github.com/mertkavi/play-reactivemongo-extensions-sample
-
-[![Build Status](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions.svg?branch=0.10.x)](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions)
-![Progress](http://progressed.io/bar/70?title=stable)
-
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.reactivemongo/reactivemongo-extensions-core_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.reactivemongo/reactivemongo-extensions-core_2.11/)
+> Some community projects like [ReactiveMongo-Criteria](https://github.com/osxhacker/ReactiveMongo-Criteria) can also be used.
 
 ## Introduction
 
@@ -90,6 +84,8 @@ PersonDao.findRandom("age" $gt 16 $lt 32)
 Read more about Query DSL [here](guide/dsl.md).
 
 #### Criteria DSL
+
+> An alternative providing such DSL extension can be found as a [community project](https://github.com/osxhacker/ReactiveMongo-Criteria).
 
 The Criteria DSL provides the ablity to formulate queries thusly:
 
