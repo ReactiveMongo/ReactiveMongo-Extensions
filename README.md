@@ -2,8 +2,8 @@
 
 The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for ReactiveMongo other than the core functionality.
 
-> **Since ReactiveMongo 0.11, the useful functions are available directly in the [driver](../ReactiveMongo), so these extensions are not updated, and it's recommended to directly use the driver.**
-> Some community projects like [ReactiveMongo-Criteria](https://github.com/osxhacker/ReactiveMongo-Criteria) can also be used.
+> **Since ReactiveMongo 0.11, some useful functions are available directly in the [driver](../ReactiveMongo), so these extensions are not updated, and it's recommended to directly use the driver.**
+> Some third party projects like [ReactiveMongo-Criteria](https://github.com/osxhacker/ReactiveMongo-Criteria) can also be used.
 
 ## Introduction
 
@@ -85,7 +85,7 @@ Read more about Query DSL [here](guide/dsl.md).
 
 #### Criteria DSL
 
-> An alternative providing such DSL extension can be found as a [community project](https://github.com/osxhacker/ReactiveMongo-Criteria).
+> An alternative providing such DSL extension can be found as a [third party project](https://github.com/osxhacker/ReactiveMongo-Criteria).
 
 The Criteria DSL provides the ablity to formulate queries thusly:
 
@@ -301,11 +301,3 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.10.0.0-SNAPSHOT"
 )
 ```
-
-## Contributions
-Contributions are always welcome. Good ways to contribute include:
-
-* Raising bugs and feature requests
-* Fixing bugs
-* Improving the performance
-* Adding to the documentation
