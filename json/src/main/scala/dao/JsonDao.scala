@@ -163,15 +163,32 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
     }
   }
 
-  private val (maxBulkSize, maxBsonSize): (Int, Int) =
+  /*private val (maxBulkSize, maxBsonSize): (Int, Int) =
     collection.db.connection.metadata.map {
       metadata => metadata.maxBulkSize -> metadata.maxBsonSize
-    }.getOrElse[(Int, Int)](Int.MaxValue -> Int.MaxValue)
+    }.getOrElse[(Int, Int)](Int.MaxValue -> Int.MaxValue)*/
+
+  def bulkInsert(
+    documents: TraversableOnce[Model])(implicit ec: ExecutionContext): Future[Int] = {
+    val mappedDocuments = documents.map(lifeCycle.prePersist)
+    val writer = implicitly[OWrites[Model]]
+
+    def go(docs: Traversable[Model]): Stream[JsObject] = docs.headOption match {
+      case Some(doc) => writer.writes(doc) #:: go(docs.tail)
+      case _ => Stream.Empty
+    }
+
+    collection.bulkInsert(go(mappedDocuments.toTraversable),
+      true, defaultWriteConcern) map { result =>
+        mappedDocuments.map(lifeCycle.postPersist)
+        result.n
+      }
+  }
 
   def bulkInsert(
     documents: TraversableOnce[Model],
-    bulkSize: Int = maxBulkSize,
-    bulkByteSize: Int = maxBsonSize)(implicit ec: ExecutionContext): Future[Int] = {
+    bulkSize: Int,
+    bulkByteSize: Int)(implicit ec: ExecutionContext): Future[Int] = {
     val mappedDocuments = documents.map(lifeCycle.prePersist)
     val writer = implicitly[OWrites[Model]]
 
