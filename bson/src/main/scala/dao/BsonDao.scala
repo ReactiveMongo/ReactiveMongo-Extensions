@@ -157,7 +157,7 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
     }
   }
 
-  private val (maxBulkSize, maxBsonSize): (Int, Int) =
+  private lazy val (maxBulkSize, maxBsonSize): (Int, Int) =
     collection.db.connection.metadata.map {
       metadata => metadata.maxBulkSize -> metadata.maxBsonSize
     }.getOrElse[(Int, Int)](Int.MaxValue -> Int.MaxValue)
@@ -171,7 +171,7 @@ abstract class BsonDao[Model, ID](db: => DB, collectionName: String)(implicit mo
 
     collection.bulkInsert(mappedDocuments.map(writer.write(_)).toStream,
       true, defaultWriteConcern, bulkSize, bulkByteSize) map { result =>
-        mappedDocuments.map(lifeCycle.postPersist)
+        mappedDocuments.foreach(lifeCycle.postPersist)
         result.n
       }
   }
