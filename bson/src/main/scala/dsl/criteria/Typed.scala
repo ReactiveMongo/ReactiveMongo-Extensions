@@ -64,13 +64,13 @@ object Typed {
               nme.CONSTRUCTOR
             ),
             List(st)
-          );
+          )
 
         case other =>
           c.abort(c.enclosingPosition, s"only property access is supported: $other");
       }
 
-      c.Expr[Any](tree);
+      c.Expr(tree)
     }
   }
 

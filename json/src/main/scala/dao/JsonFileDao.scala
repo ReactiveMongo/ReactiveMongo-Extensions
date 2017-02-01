@@ -39,7 +39,7 @@ abstract class JsonFileDao[Id <: JsValue: IdProducer](db: => DB with DBMetaComma
 }
 
 object JsonFileDao {
-  import play.modules.reactivemongo.json.BSONFormats
+  import reactivemongo.play.json.BSONFormats
 
   // !! unsafe
   implicit def defaultGridFSBSONId[T <: JsValue](json: T): BSONValue =

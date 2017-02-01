@@ -50,7 +50,7 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
  * {{{
  * import reactivemongo.bson.BSONObjectID
  * import play.api.libs.json.Json
- * import play.modules.reactivemongo.json.BSONFormats._
+ * import reactivemongo.play.json.BSONFormats._
  *
  * case class Person(
  *   _id: BSONObjectID = BSONObjectID.generate,
@@ -69,7 +69,7 @@ import play.api.libs.iteratee.{ Iteratee, Enumerator }
  * {{{
  * import reactivemongo.api.{ MongoDriver, DB }
  * import reactivemongo.bson.BSONObjectID
- * import play.modules.reactivemongo.json.BSONFormats._
+ * import reactivemongo.play.json.BSONFormats._
  * import reactivemongo.extensions.json.dao.JsonDao
  * import scala.concurrent.ExecutionContext.Implicits.global
  *
@@ -123,18 +123,17 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
       .find(selector)
       .sort(sort)
       .options(QueryOpts(skipN = from, batchSizeN = pageSize))
-      .cursor[Model]
+      .cursor[Model]()
       .collect[List](pageSize)
   }
 
   def findAll(
     selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1))(implicit ec: ExecutionContext): Future[List[Model]] = {
-    collection.find(selector).sort(sort).cursor[Model].collect[List]()
+    collection.find(selector).sort(sort).cursor[Model]().collect[List]()
   }
 
-  @deprecated(since = "0.11.1",
-    message = "Directly use [[findAndUpdate]] collection operation")
+  @deprecated("0.11.1", "Directly use [[findAndUpdate]] collection operation")
   def findAndUpdate(
     query: JsObject,
     update: JsObject,
@@ -143,8 +142,7 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
     upsert: Boolean = false)(implicit ec: ExecutionContext): Future[Option[Model]] = collection.findAndUpdate(
     query, update, fetchNewObject, upsert).map(_.result[Model])
 
-  @deprecated(since = "0.11.1",
-    message = "Directly use [[findAndRemove]] collection operation")
+  @deprecated("0.11.1", "Directly use [[findAndRemove]] collection operation")
   def findAndRemove(query: JsObject, sort: JsObject = Json.obj())(implicit ec: ExecutionContext): Future[Option[Model]] = collection.findAndRemove(
     query, if (sort == BSONDocument.empty) None else Some(sort)).
     map(_.result[Model])
@@ -164,9 +162,7 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
   }
 
   private val (maxBulkSize, maxBsonSize): (Int, Int) =
-    collection.db.connection.metadata.map {
-      metadata => metadata.maxBulkSize -> metadata.maxBsonSize
-    }.getOrElse[(Int, Int)](Int.MaxValue -> Int.MaxValue)
+    Int.MaxValue -> Int.MaxValue
 
   def bulkInsert(
     documents: TraversableOnce[Model],
@@ -235,7 +231,7 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
   def foreach(
     selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1))(f: (Model) => Unit)(implicit ec: ExecutionContext): Future[Unit] = {
-    collection.find(selector).sort(sort).cursor[Model]
+    collection.find(selector).sort(sort).cursor[Model]()
       .enumerate()
       .apply(Iteratee.foreach(f))
       .flatMap(i => i.run)
@@ -245,7 +241,7 @@ abstract class JsonDao[Model: OFormat, ID: Writes](db: => DB, collectionName: St
     selector: JsObject = Json.obj(),
     sort: JsObject = Json.obj("_id" -> 1),
     state: A)(f: (A, Model) => A)(implicit ec: ExecutionContext): Future[A] = {
-    collection.find(selector).sort(sort).cursor[Model]
+    collection.find(selector).sort(sort).cursor[Model]()
       .enumerate()
       .apply(Iteratee.fold(state)(f))
       .flatMap(i => i.run)
