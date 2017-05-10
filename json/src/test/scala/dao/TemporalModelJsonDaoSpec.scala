@@ -25,36 +25,36 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class TemporalModelJsonDaoSpec
-    extends FlatSpec
-    with Matchers
-    with ScalaFutures
-    with BeforeAndAfter
-    with OneInstancePerTest {
+		extends FlatSpec
+		with Matchers
+		with ScalaFutures
+		with BeforeAndAfter
+		with OneInstancePerTest {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
+	override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
 
-  val dao = new TemporalModelJsonDao
+	val dao = new TemporalModelJsonDao
 
-  after {
-    dao.dropSync()
-  }
+	after {
+		dao.dropSync()
+	}
 
-  "A TemporalModelJsonDao" should "update updateAt" in {
-    val temporalModel = TemporalModel(name = "foo", surname = "bar")
+	"A TemporalModelJsonDao" should "update updateAt" in {
+		val temporalModel = TemporalModel(name = "foo", surname = "bar")
 
-    val futureResult = for {
-      insertResult <- dao.insert(temporalModel)
-      maybeTemporalModel <- dao.findById(temporalModel._id)
-    } yield maybeTemporalModel
+		val futureResult = for {
+			insertResult <- dao.insert(temporalModel)
+			maybeTemporalModel <- dao.findById(temporalModel._id)
+		} yield maybeTemporalModel
 
-    whenReady(futureResult) { maybeTemporalModel =>
-      maybeTemporalModel should be('defined)
-      maybeTemporalModel.get._id shouldBe temporalModel._id
-      maybeTemporalModel.get.name shouldBe temporalModel.name
-      maybeTemporalModel.get.surname shouldBe temporalModel.surname
-      maybeTemporalModel.get.createdAt shouldBe temporalModel.createdAt
-      maybeTemporalModel.get.updatedAt.isAfter(temporalModel.updatedAt) shouldBe true
-    }
-  }
+		whenReady(futureResult) { maybeTemporalModel =>
+			maybeTemporalModel should be('defined)
+			maybeTemporalModel.get._id shouldBe temporalModel._id
+			maybeTemporalModel.get.name shouldBe temporalModel.name
+			maybeTemporalModel.get.surname shouldBe temporalModel.surname
+			maybeTemporalModel.get.createdAt shouldBe temporalModel.createdAt
+			maybeTemporalModel.get.updatedAt.isAfter(temporalModel.updatedAt) shouldBe true
+		}
+	}
 
 }

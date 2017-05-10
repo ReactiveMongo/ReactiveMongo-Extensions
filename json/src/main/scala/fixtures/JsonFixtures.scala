@@ -16,32 +16,34 @@
 
 package reactivemongo.extensions.json.fixtures
 
-import scala.concurrent.{ Future, ExecutionContext }
+import scala.concurrent.{ ExecutionContext, Future }
 import reactivemongo.extensions.util.Logger
 import reactivemongo.extensions.fixtures.Fixtures
-import reactivemongo.api.DB
+import reactivemongo.api.DefaultDB
 import reactivemongo.api.commands.WriteResult
-import play.modules.reactivemongo.json._, collection.JSONCollection
+import reactivemongo.play.json._
+import collection.JSONCollection
 import play.api.libs.iteratee.Enumerator
-import play.api.libs.json.{ Json, JsObject }
+import play.api.libs.json.{ JsObject, Json }
 
-class JsonFixtures(db: => DB)(implicit ec: ExecutionContext) extends Fixtures[JsObject] {
+class JsonFixtures(db: => Future[DefaultDB])(implicit ec: ExecutionContext) extends Fixtures[JsObject] {
 
-  def map(document: JsObject): JsObject = document
+	def map(document: JsObject): JsObject = document
 
-  def bulkInsert(collectionName: String, documents: Stream[JsObject]): Future[Int] = db.collection[JSONCollection](
-    collectionName).bulkInsert(documents, ordered = true).map(_.n)
+	def bulkInsert(collectionName: String, documents: Stream[JsObject]): Future[Int] = db.flatMap(_.collection[JSONCollection](
+		collectionName
+	).bulkInsert(documents, ordered = true).map(_.n))
 
-  def removeAll(collectionName: String): Future[WriteResult] =
-    db.collection[JSONCollection](collectionName).
-      remove(query = Json.obj(), firstMatchOnly = false)
+	def removeAll(collectionName: String): Future[WriteResult] =
+		db.flatMap(_.collection[JSONCollection](collectionName).
+			remove(selector = Json.obj(), firstMatchOnly = false))
 
-  def drop(collectionName: String): Future[Unit] =
-    db.collection[JSONCollection](collectionName).drop()
+	def drop(collectionName: String): Future[Unit] =
+		db.flatMap(_.collection[JSONCollection](collectionName).drop())
 
 }
 
 object JsonFixtures {
-  def apply(db: DB)(implicit ec: ExecutionContext): JsonFixtures = new JsonFixtures(db)
+	def apply(db: Future[DefaultDB])(implicit ec: ExecutionContext): JsonFixtures = new JsonFixtures(db)
 }
 

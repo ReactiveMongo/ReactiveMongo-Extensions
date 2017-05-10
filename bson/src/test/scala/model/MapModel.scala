@@ -21,13 +21,14 @@ import reactivemongo.extensions.dao.Handlers._
 import play.api.libs.json.Json
 
 case class MapModel(
-  _id: BSONObjectID = BSONObjectID.generate,
-  data: Map[String, Int])
+	_id: BSONObjectID = BSONObjectID.generate,
+	data: Map[String, Int]
+)
 
 object MapModel {
-  implicit val customIdModelHandler = Macros.handler[MapModel]
+	implicit val customIdModelHandler = Macros.handler[MapModel]
 
-  def random(n: Int): Seq[MapModel] = 1 to n map { index =>
-    MapModel(data = Map("count" -> n))
-  }
+	def random(n: Int): Seq[MapModel] = 1 to n map { index =>
+		MapModel(data = Map("count" -> n))
+	}
 }

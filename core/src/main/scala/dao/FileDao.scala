@@ -24,81 +24,81 @@ import play.api.libs.iteratee.Enumerator
 
 import reactivemongo.api.{ BSONSerializationPack, DBMetaCommands, Cursor, DB }
 import reactivemongo.api.gridfs.{
-  DefaultFileToSave,
-  ReadFile,
-  FileToSave,
-  GridFS,
-  IdProducer,
-  Implicits
+	DefaultFileToSave,
+	ReadFile,
+	FileToSave,
+	GridFS,
+	IdProducer,
+	Implicits
 }, Implicits.DefaultReadFileReader
 import reactivemongo.bson.{ BSONDocumentReader, BSONDocumentWriter, BSONValue }
 import reactivemongo.api.commands.WriteResult
 
 import reactivemongo.extensions.dao.FileDao.ReadFileWrapper
 
-/**
- * Base class for all File DAO implementations.
+/** Base class for all File DAO implementations.
  *
- * @param db A [[reactivemongo.api.DB]] instance.
- * @param collectionName Name of the collection this DAO is going to operate on.
+ *  @param db A [[reactivemongo.api.DB]] instance.
+ *  @param collectionName Name of the collection this DAO is going to operate on.
  */
-abstract class FileDao[Id <% BSONValue: IdProducer, Structure](
-    db: => DB with DBMetaCommands, collectionName: String) {
+abstract class FileDao[Id <% BSONValue: IdProducer, Structure](db: => DB with DBMetaCommands, collectionName: String) {
 
-  import FileDao.BSONReadFile
+	import FileDao.BSONReadFile
 
-  /** Reference to the GridFS instance this FileDao operates on. */
-  lazy val gfs = GridFS(db, collectionName)
+	/** Reference to the GridFS instance this FileDao operates on. */
+	lazy val gfs = GridFS[BSONSerializationPack.type](db, collectionName)
 
-  /**
-   * Finds the files matching the given selector.
-   *
-   * @param selector Selector document
-   * @return A cursor for the files matching the given selector.
-   */
-  def find(selector: Structure)(implicit sWriter: BSONDocumentWriter[Structure], ec: ExecutionContext): Cursor[BSONReadFile] = gfs.find[Structure, BSONReadFile](selector)
+	/** Finds the files matching the given selector.
+	 *
+	 *  @param selector Selector document
+	 *  @return A cursor for the files matching the given selector.
+	 */
+	def find(selector: Structure)(implicit sWriter: BSONDocumentWriter[Structure], ec: ExecutionContext): Cursor[BSONReadFile] = gfs.find[Structure, BSONReadFile](selector)
 
-  /** Retrieves the file with the given `id`. */
-  def findById(id: Id)(implicit ec: ExecutionContext): ReadFileWrapper
+	/** Retrieves the file with the given `id`. */
+	def findById(id: Id)(implicit ec: ExecutionContext): ReadFileWrapper
 
-  /* Retrieves at most one file matching the given selector. */
-  def findOne(selector: Structure)(implicit sWriter: BSONDocumentWriter[Structure], ec: ExecutionContext): ReadFileWrapper =
-    ReadFileWrapper(gfs, gfs.find(selector).headOption)
+	/* Retrieves at most one file matching the given selector. */
+	def findOne(selector: Structure)(implicit sWriter: BSONDocumentWriter[Structure], ec: ExecutionContext): ReadFileWrapper =
+		ReadFileWrapper(gfs, gfs.find(selector).headOption)
 
-  /** Removes the file with the given `id`. */
-  def removeById(id: Id)(implicit ec: ExecutionContext): Future[WriteResult] =
-    gfs.remove(implicitly[BSONValue](id))
+	/** Removes the file with the given `id`. */
+	def removeById(id: Id)(implicit ec: ExecutionContext): Future[WriteResult] =
+		gfs.remove(implicitly[BSONValue](id))
 
-  /** Saves the content provided by the given enumerator with the given metadata. */
-  def save(
-    enumerator: Enumerator[Array[Byte]],
-    file: FileToSave[BSONSerializationPack.type, BSONValue],
-    chunkSize: Int = 262144)(implicit readFileReader: BSONDocumentReader[BSONReadFile], ec: ExecutionContext): Future[BSONReadFile] =
-    gfs.save(enumerator, file, chunkSize)
+	/** Saves the content provided by the given enumerator with the given metadata. */
+	def save(
+		enumerator: Enumerator[Array[Byte]],
+		file: FileToSave[BSONSerializationPack.type, BSONValue],
+		chunkSize: Int = 262144
+	)(implicit readFileReader: BSONDocumentReader[BSONReadFile], ec: ExecutionContext): Future[BSONReadFile] =
+		gfs.save(enumerator, file, chunkSize)
 
-  /** Saves the content provided by the given enumerator with the given metadata. */
-  def save(
-    enumerator: Enumerator[Array[Byte]],
-    filename: String,
-    contentType: String)(implicit readFileReader: BSONDocumentReader[BSONReadFile], ec: ExecutionContext): Future[BSONReadFile] =
-    gfs.save(enumerator, DefaultFileToSave(
-      filename = filename, contentType = Some(contentType)))
+	/** Saves the content provided by the given enumerator with the given metadata. */
+	def save(
+		enumerator: Enumerator[Array[Byte]],
+		filename: Option[String],
+		contentType: String
+	)(implicit readFileReader: BSONDocumentReader[BSONReadFile], ec: ExecutionContext): Future[BSONReadFile] =
+		gfs.save(enumerator, DefaultFileToSave(
+			filename = filename, contentType = Some(contentType)
+		))
 
 }
 
 object FileDao {
-  type BSONReadFile = ReadFile[BSONSerializationPack.type, BSONValue]
+	type BSONReadFile = ReadFile[BSONSerializationPack.type, BSONValue]
 
-  case class ReadFileWrapper(gfs: GridFS[BSONSerializationPack.type], readFile: Future[Option[BSONReadFile]]) {
+	case class ReadFileWrapper(gfs: GridFS[BSONSerializationPack.type], readFile: Future[Option[BSONReadFile]]) {
 
-    def enumerate(implicit ec: ExecutionContext): Future[Option[Enumerator[Array[Byte]]]] = readFile.map(_.map(gfs.enumerate(_)))
+		def enumerate(implicit ec: ExecutionContext): Future[Option[Enumerator[Array[Byte]]]] = readFile.map(_.map(gfs.enumerate(_)))
 
-    def read(out: OutputStream)(implicit ec: ExecutionContext): Future[Option[Unit]] = readFile.flatMap {
-      case Some(readFile) => gfs.readToOutputStream(readFile, out).map(Some(_))
-      case None => Future.successful(None)
-    }
-  }
+		def read(out: OutputStream)(implicit ec: ExecutionContext): Future[Option[Unit]] = readFile.flatMap {
+			case Some(rf) => gfs.readToOutputStream(rf, out).map(Some(_))
+			case None => Future.successful(None)
+		}
+	}
 
-  implicit def readFileWrapperToReadFile(readFileWrapper: ReadFileWrapper): Future[Option[BSONReadFile]] = readFileWrapper.readFile
+	implicit def readFileWrapperToReadFile(readFileWrapper: ReadFileWrapper): Future[Option[BSONReadFile]] = readFileWrapper.readFile
 
 }

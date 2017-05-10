@@ -24,7 +24,8 @@ import reactivemongo.api.commands.GetLastError
 import reactivemongo.extensions.util.Misc.UUID
 
 class MapModelBsonDao extends BsonDao[MapModel, BSONObjectID](
-  MongoContext.db, "dummy-" + UUID()) {
+	MongoContext.db, "dummy-" + UUID()
+) {
 
-  override def defaultWriteConcern = GetLastError.Default.copy(j = true)
+	override def defaultWriteConcern = GetLastError.Default.copy(j = true)
 }

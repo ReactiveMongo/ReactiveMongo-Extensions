@@ -16,74 +16,72 @@
 
 package reactivemongo.extensions.dao
 
-/**
- * Type class to work with the life cycle of a model.
+/** Type class to work with the life cycle of a model.
  *
- * By defining a life cycle object, one can preprocess all models before being persisted or perform specific actions
- * after life cycle events.
+ *  By defining a life cycle object, one can preprocess all models before being persisted or perform specific actions
+ *  after life cycle events.
  *
- * This can be useful for updating temporal fields on all model instances before persisting.
+ *  This can be useful for updating temporal fields on all model instances before persisting.
  *
- * {{{
- * import reactivemongo.bson._
- * import reactivemongo.extensions.dao.LifeCycle
- * import reactivemongo.extensions.dao.Handlers._
- * import reactivemongo.extensions.util.Logger
- * import org.joda.time.DateTime
+ *  {{{
+ *  import reactivemongo.bson._
+ *  import reactivemongo.extensions.dao.LifeCycle
+ *  import reactivemongo.extensions.dao.Handlers._
+ *  import reactivemongo.extensions.util.Logger
+ *  import org.joda.time.DateTime
  *
- * case class TemporalModel(
- *   _id: BSONObjectID = BSONObjectID.generate,
- *   name: String,
- *   surname: String,
- *   createdAt: DateTime = DateTime.now,
- *   updatedAt: DateTime = DateTime.now)
+ *  case class TemporalModel(
+ *  _id: BSONObjectID = BSONObjectID.generate,
+ *  name: String,
+ *  surname: String,
+ *  createdAt: DateTime = DateTime.now,
+ *  updatedAt: DateTime = DateTime.now)
  *
- * object TemporalModel {
- *   implicit val temporalModelFormat = Macros.handler[TemporalModel]
+ *  object TemporalModel {
+ *  implicit val temporalModelFormat = Macros.handler[TemporalModel]
  *
- *   implicit object TemporalModelLifeCycle extends LifeCycle[TemporalModel, BSONObjectID] {
+ *  implicit object TemporalModelLifeCycle extends LifeCycle[TemporalModel, BSONObjectID] {
  *
- *     def prePersist(model: TemporalModel): TemporalModel = {
- *       Logger.debug(s"prePersist $model")
- *       model.copy(updatedAt = DateTime.now)
- *     }
- *
- *     def postPersist(model: TemporalModel): Unit = {
- *       Logger.debug(s"postPersist $model")
- *     }
- *
- *     def preRemove(id: BSONObjectID): Unit = {
- *       Logger.debug(s"preRemove $id")
- *     }
- *
- *     def postRemove(id: BSONObjectID): Unit = {
- *       Logger.debug(s"postRemove $id")
- *     }
- *
- *     def ensuredIndexes(): Unit = {
- *       Logger.debug("ensuredIndexes")
- *     }
+ *   def prePersist(model: TemporalModel): TemporalModel = {
+ *     Logger.debug(s"prePersist $model")
+ *     model.copy(updatedAt = DateTime.now)
  *   }
- * }
- * }}}
+ *
+ *   def postPersist(model: TemporalModel): Unit = {
+ *     Logger.debug(s"postPersist $model")
+ *   }
+ *
+ *   def preRemove(id: BSONObjectID): Unit = {
+ *     Logger.debug(s"preRemove $id")
+ *   }
+ *
+ *   def postRemove(id: BSONObjectID): Unit = {
+ *     Logger.debug(s"postRemove $id")
+ *   }
+ *
+ *   def ensuredIndexes(): Unit = {
+ *     Logger.debug("ensuredIndexes")
+ *   }
+ *  }
+ *  }
+ *  }}}
  */
 trait LifeCycle[Model, ID] {
-  def prePersist(model: Model): Model
-  def postPersist(model: Model): Unit
-  def preRemove(id: ID): Unit
-  def postRemove(id: ID): Unit
-  def ensuredIndexes(): Unit
+	def prePersist(model: Model): Model
+	def postPersist(model: Model): Unit
+	def preRemove(id: ID): Unit
+	def postRemove(id: ID): Unit
+	def ensuredIndexes(): Unit
 }
 
-/**
- * This is the default life cycle for all models.
+/** This is the default life cycle for all models.
  *
- * Basically it does not perform any actions after life cyle events nor does any transformations to model instances.
+ *  Basically it does not perform any actions after life cyle events nor does any transformations to model instances.
  */
 class ReflexiveLifeCycle[Model, ID] extends LifeCycle[Model, ID] {
-  def prePersist(model: Model): Model = model
-  def postPersist(model: Model): Unit = {}
-  def preRemove(id: ID): Unit = {}
-  def postRemove(id: ID): Unit = {}
-  def ensuredIndexes(): Unit = {}
+	def prePersist(model: Model): Model = model
+	def postPersist(model: Model): Unit = {}
+	def preRemove(id: ID): Unit = {}
+	def postRemove(id: ID): Unit = {}
+	def ensuredIndexes(): Unit = {}
 }
