@@ -1,12 +1,14 @@
 import scalariform.formatter.preferences._
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
 name := "reactivemongo-extensions"
 
+SbtScalariform.scalariformSettings
+
 lazy val commonSettings = Seq(
   organization := "org.reactivemongo",
-  version := "0.11.7.play24",
-  scalaVersion  := "2.11.7",
-  crossScalaVersions  := Seq("2.11.7"),
+  version := "0.12.3",
+  scalaVersion  := "2.11.11",
   scalacOptions := Seq(
     "-unchecked",
     "-deprecation",
@@ -16,7 +18,7 @@ lazy val commonSettings = Seq(
     "-language:postfixOps",
     "-language:implicitConversions",
     "-language:existentials",
-    "-target:jvm-1.6"),
+    "-target:jvm-1.8"),
   resolvers ++= Seq(
     "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/",
     "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"),
@@ -28,7 +30,7 @@ lazy val commonSettings = Seq(
   .setPreference(AlignParameters, true)
   .setPreference(DoubleIndentClassDeclaration, true)
   .setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
-  .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true))
+  .setPreference(IndentWithTabs, true))
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
@@ -40,7 +42,7 @@ lazy val publishSettings = Seq(
     else
       Some("releases"  at nexus + "service/local/staging/deploy/maven2")
   },
-  pomExtra := (
+  pomExtra :=
     <url>http://github.com/fehmicansaglam/reactivemongo-extensions</url>
     <licenses>
       <license>
@@ -64,7 +66,7 @@ lazy val publishSettings = Seq(
         <name>Steve Vickers</name>
         <url>http://github.com/osxhacker</url>
       </developer>
-    </developers>))
+    </developers>)
 
 val travisSettings = Seq(
   Travis.travisSnapshotBranches := Seq("0.10.x", "0.10.5.akka23-SNAPSHOT"),
@@ -74,15 +76,14 @@ val travisSettings = Seq(
 lazy val settings = (
   commonSettings
   ++ travisSettings
-  ++ scalariformSettings
-  ++ org.scalastyle.sbt.ScalastylePlugin.Settings)
+  ++ scalariformSettings)
 
 lazy val root = project.in(file("."))
   .aggregate(bson, json, core, samples)
   .settings(settings: _*)
   .settings(publishSettings: _*)
   .settings(publishArtifact := false)
-  .settings(unidocSettings: _*)
+  .enablePlugins(ScalaUnidocPlugin)
 
 lazy val core = project.in(file("core"))
   .settings(settings: _*)

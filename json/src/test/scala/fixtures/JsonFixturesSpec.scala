@@ -27,50 +27,50 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class JsonFixturesSpec extends FlatSpec with Matchers with ScalaFutures with BeforeAndAfter {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
+	override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
-  val db = MongoContext.randomDb
-  val fixtures = JsonFixtures(db)
-  val personDao = new PersonJsonDao(db)
-  val eventDao = new EventJsonDao(db)
+	val db = MongoContext.randomDb
+	val fixtures = JsonFixtures(db)
+	val personDao = new PersonJsonDao(db)
+	val eventDao = new EventJsonDao(db)
 
-  after {
-    db.drop()
-  }
+	after {
+		db.flatMap(_.drop())
+	}
 
-  "A JsonFixtures" should "load persons" in {
-    val futureCount = for {
-      remove <- fixtures.removeAll("json/persons.conf")
-      beforeCount <- personDao.count()
-      insert <- fixtures.load("json/persons.conf")
-      afterCount <- personDao.count()
-      person1 <- ~personDao.findByName("Ali")
-    } yield (beforeCount, afterCount, person1)
+	"A JsonFixtures" should "load persons" in {
+		val futureCount = for {
+			remove <- fixtures.removeAll("json/persons.conf")
+			beforeCount <- personDao.count()
+			insert <- fixtures.load("json/persons.conf")
+			afterCount <- personDao.count()
+			person1 <- ~personDao.findByName("Ali")
+		} yield (beforeCount, afterCount, person1)
 
-    whenReady(futureCount) {
-      case (beforeCount, afterCount, person1) =>
-        beforeCount shouldBe 0
-        afterCount shouldBe 2
-        person1.fullname shouldBe "Ali Veli"
-    }
-  }
+		whenReady(futureCount) {
+			case (beforeCount, afterCount, person1) =>
+				beforeCount shouldBe 0
+				afterCount shouldBe 2
+				person1.fullname shouldBe "Ali Veli"
+		}
+	}
 
-  it should "load persons and events" in {
-    val futureCount = for {
-      remove <- fixtures.removeAll("json/persons.conf", "json/events.conf")
-      beforeCount <- eventDao.count()
-      insert <- fixtures.load("json/persons.conf", "json/events.conf")
-      afterCount <- eventDao.count()
-      event2 <- ~eventDao.findByTitle("Some movie")
-    } yield (beforeCount, afterCount, event2)
+	it should "load persons and events" in {
+		val futureCount = for {
+			remove <- fixtures.removeAll("json/persons.conf", "json/events.conf")
+			beforeCount <- eventDao.count()
+			insert <- fixtures.load("json/persons.conf", "json/events.conf")
+			afterCount <- eventDao.count()
+			event2 <- ~eventDao.findByTitle("Some movie")
+		} yield (beforeCount, afterCount, event2)
 
-    whenReady(futureCount) {
-      case (beforeCount, afterCount, event2) =>
-        beforeCount shouldBe 0
-        afterCount shouldBe 2
-        event2.organizer shouldBe "Haydar Cabbar"
-        event2.location.city shouldBe "Ankara"
-    }
-  }
+		whenReady(futureCount) {
+			case (beforeCount, afterCount, event2) =>
+				beforeCount shouldBe 0
+				afterCount shouldBe 2
+				event2.organizer shouldBe "Haydar Cabbar"
+				event2.location.city shouldBe "Ankara"
+		}
+	}
 
 }

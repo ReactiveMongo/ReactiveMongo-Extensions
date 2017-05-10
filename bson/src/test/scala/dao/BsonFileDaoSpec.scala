@@ -29,125 +29,125 @@ import reactivemongo.bson.{ BSONDocument, BSONObjectID }
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class BsonFileDaoSpec
-    extends FlatSpec
-    with Matchers
-    with ScalaFutures
-    with BeforeAndAfter
-    with OneInstancePerTest {
+		extends FlatSpec
+		with Matchers
+		with ScalaFutures
+		with BeforeAndAfter
+		with OneInstancePerTest {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
+	override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
-  val dao = new BsonFileDao[BSONObjectID](MongoContext.db, "bson-files") {}
+	val dao = new BsonFileDao[BSONObjectID](MongoContext.syncDb, "bson-files") {}
 
-  "A BsonFileDao" should "save and remove file" in {
-    val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
+	"A BsonFileDao" should "save and remove file" in {
+		val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
 
-    val result = for {
-      save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
-      findBefore <- dao.findById(id)
-      remove <- dao.removeById(id)
-      findAfter <- dao.findById(id)
-    } yield (id, findBefore, findAfter)
+		val result = for {
+			save <- dao.save(enumerator, filename = Some("whyfp90.pdf"), contentType = "application/pdf")
+			id = save.id.asInstanceOf[BSONObjectID]
+			findBefore <- dao.findById(id)
+			remove <- dao.removeById(id)
+			findAfter <- dao.findById(id)
+		} yield (id, findBefore, findAfter)
 
-    whenReady(result) {
-      case (id, findBefore, findAfter) =>
-        import org.scalatest.OptionValues._
-        findBefore.value.id should be(id)
-        findBefore.value.length should be(200007)
-        findAfter should be('empty)
-    }
-  }
+		whenReady(result) {
+			case (id, findBefore, findAfter) =>
+				import org.scalatest.OptionValues._
+				findBefore.value.id should be(id)
+				findBefore.value.length should be(200007)
+				findAfter should be('empty)
+		}
+	}
 
-  it should "find file by name" in {
-    val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
+	it should "find file by name" in {
+		val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
 
-    val result = for {
-      save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
-      find <- dao.findOne(BSONDocument("filename" -> save.filename))
-      remove <- dao.removeById(id)
-    } yield (id, find)
+		val result = for {
+			save <- dao.save(enumerator, filename = Some("whyfp90.pdf"), contentType = "application/pdf")
+			id = save.id.asInstanceOf[BSONObjectID]
+			find <- dao.findOne(BSONDocument("filename" -> save.filename))
+			remove <- dao.removeById(id)
+		} yield (id, find)
 
-    whenReady(result) {
-      case (id, find) =>
-        import org.scalatest.OptionValues._
-        find.value.id should be(id)
-    }
-  }
+		whenReady(result) {
+			case (id, find) =>
+				import org.scalatest.OptionValues._
+				find.value.id should be(id)
+		}
+	}
 
-  it should "enumerate one" in {
-    val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
+	it should "enumerate one" in {
+		val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
 
-    val length = Iteratee.fold(0) { (state: Int, bytes: Array[Byte]) =>
-      state + bytes.size
-    }
+		val length = Iteratee.fold(0) { (state: Int, bytes: Array[Byte]) =>
+			state + bytes.length
+		}
 
-    val result = for {
-      save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
-      enumerator <- dao.findOne(BSONDocument("filename" -> save.filename)).enumerate
-      len <- enumerator.get |>>> length
-      remove <- dao.removeById(id)
-    } yield (len)
+		val result = for {
+			save <- dao.save(enumerator, filename = Some("whyfp90.pdf"), contentType = "application/pdf")
+			id = save.id.asInstanceOf[BSONObjectID]
+			enumerator <- dao.findOne(BSONDocument("filename" -> save.filename)).enumerate
+			len <- enumerator.get |>>> length
+			remove <- dao.removeById(id)
+		} yield len
 
-    whenReady(result) { length =>
-      length shouldBe 200007
-    }
-  }
+		whenReady(result) { length =>
+			length shouldBe 200007
+		}
+	}
 
-  it should "enumerate by id" in {
-    val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
+	it should "enumerate by id" in {
+		val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
 
-    val length = Iteratee.fold(0) { (state: Int, bytes: Array[Byte]) =>
-      state + bytes.size
-    }
+		val length = Iteratee.fold(0) { (state: Int, bytes: Array[Byte]) =>
+			state + bytes.length
+		}
 
-    val result = for {
-      save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
-      enumerator <- dao.findById(id).enumerate
-      len <- enumerator.get |>>> length
-      remove <- dao.removeById(id)
-    } yield (len)
+		val result = for {
+			save <- dao.save(enumerator, filename = Some("whyfp90.pdf"), contentType = "application/pdf")
+			id = save.id.asInstanceOf[BSONObjectID]
+			enumerator <- dao.findById(id).enumerate
+			len <- enumerator.get |>>> length
+			remove <- dao.removeById(id)
+		} yield len
 
-    whenReady(result) { length =>
-      length shouldBe 200007
-    }
-  }
+		whenReady(result) { length =>
+			length shouldBe 200007
+		}
+	}
 
-  it should "read one to outputstream" in {
-    val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
-    val out = new ByteArrayOutputStream
+	it should "read one to outputstream" in {
+		val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
+		val out = new ByteArrayOutputStream
 
-    val result = for {
-      save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
-      read <- dao.findOne(BSONDocument("filename" -> save.filename)).read(out)
-      remove <- dao.removeById(id)
-    } yield read
+		val result = for {
+			save <- dao.save(enumerator, filename = Some("whyfp90.pdf"), contentType = "application/pdf")
+			id = save.id.asInstanceOf[BSONObjectID]
+			read <- dao.findOne(BSONDocument("filename" -> save.filename)).read(out)
+			remove <- dao.removeById(id)
+		} yield read
 
-    whenReady(result) { read =>
-      read shouldBe ('defined)
-      out.size() shouldBe 200007
-    }
-  }
+		whenReady(result) { read =>
+			read shouldBe 'defined
+			out.size() shouldBe 200007
+		}
+	}
 
-  it should "read by id to outputstream" in {
-    val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
-    val out = new ByteArrayOutputStream
+	it should "read by id to outputstream" in {
+		val enumerator = Enumerator.fromStream(getClass.getResourceAsStream("/whyfp90.pdf"))
+		val out = new ByteArrayOutputStream
 
-    val result = for {
-      save <- dao.save(enumerator, filename = "whyfp90.pdf", contentType = "application/pdf")
-      id = save.id.asInstanceOf[BSONObjectID]
-      read <- dao.findById(id).read(out)
-      remove <- dao.removeById(id)
-    } yield read
+		val result = for {
+			save <- dao.save(enumerator, filename = Some("whyfp90.pdf"), contentType = "application/pdf")
+			id = save.id.asInstanceOf[BSONObjectID]
+			read <- dao.findById(id).read(out)
+			remove <- dao.removeById(id)
+		} yield read
 
-    whenReady(result) { read =>
-      read shouldBe ('defined)
-      out.size() shouldBe 200007
-    }
-  }
+		whenReady(result) { read =>
+			read shouldBe 'defined
+			out.size() shouldBe 200007
+		}
+	}
 
 }

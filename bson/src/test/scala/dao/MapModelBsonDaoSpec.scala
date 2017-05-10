@@ -28,92 +28,92 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class MapModelBsonDaoSpec
-    extends FlatSpec
-    with Matchers
-    with ScalaFutures
-    with BeforeAndAfter
-    with OneInstancePerTest {
+		extends FlatSpec
+		with Matchers
+		with ScalaFutures
+		with BeforeAndAfter
+		with OneInstancePerTest {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
+	override implicit def patienceConfig = PatienceConfig(timeout = 20 seconds, interval = 1 seconds)
 
-  val dao = new MapModelBsonDao
+	val dao = new MapModelBsonDao
 
-  after {
-    dao.dropSync()
-  }
+	after {
+		dao.dropSync()
+	}
 
-  "A MapModelBsonDao" should "find one document" in {
-    val mapModel = MapModel(data = Map("count" -> 1))
+	"A MapModelBsonDao" should "find one document" in {
+		val mapModel = MapModel(data = Map("count" -> 1))
 
-    val futureResult = for {
-      insertResult <- dao.insert(mapModel)
-      maybeMapModel <- dao.findOne()
-    } yield maybeMapModel
+		val futureResult = for {
+			insertResult <- dao.insert(mapModel)
+			maybeMapModel <- dao.findOne()
+		} yield maybeMapModel
 
-    whenReady(futureResult) { maybeMapModel =>
-      maybeMapModel should be('defined)
-      maybeMapModel.get._id shouldBe mapModel._id
-      maybeMapModel.get.data("count") shouldBe 1
-    }
-  }
+		whenReady(futureResult) { maybeMapModel =>
+			maybeMapModel should be('defined)
+			maybeMapModel.get._id shouldBe mapModel._id
+			maybeMapModel.get.data("count") shouldBe 1
+		}
+	}
 
-  it should "support ~ operator" in {
-    val mapModel = MapModel(data = Map("count" -> 1))
+	it should "support ~ operator" in {
+		val mapModel = MapModel(data = Map("count" -> 1))
 
-    val futureResult = for {
-      insertResult <- dao.insert(mapModel)
-      mapModel <- ~dao.findOne()
-      count <- dao.count($id(mapModel._id))
-    } yield (mapModel, count)
+		val futureResult = for {
+			insertResult <- dao.insert(mapModel)
+			mapModel <- ~dao.findOne()
+			count <- dao.count($id(mapModel._id))
+		} yield (mapModel, count)
 
-    whenReady(futureResult) {
-      case (foundMapModel, count) =>
-        foundMapModel._id shouldBe mapModel._id
-        foundMapModel.data("count") shouldBe 1
-        count shouldBe 1
-    }
-  }
+		whenReady(futureResult) {
+			case (foundMapModel, count) =>
+				foundMapModel._id shouldBe mapModel._id
+				foundMapModel.data("count") shouldBe 1
+				count shouldBe 1
+		}
+	}
 
-  it should "throw exception when using ~ operator with None" in {
-    val mapModel = MapModel(data = Map("count" -> 1))
+	it should "throw exception when using ~ operator with None" in {
+		val mapModel = MapModel(data = Map("count" -> 1))
 
-    val futureResult = (for {
-      insertResult <- dao.insert(mapModel)
-      mapModel <- ~dao.findOne("none" $eq "unknown")
-      count <- dao.count($id(mapModel._id))
-    } yield count) recover {
-      case ex: java.util.NoSuchElementException => ex
-    }
+		val futureResult = (for {
+			insertResult <- dao.insert(mapModel)
+			mapModel <- ~dao.findOne("none" $eq "unknown")
+			count <- dao.count($id(mapModel._id))
+		} yield count) recover {
+			case ex: java.util.NoSuchElementException => ex
+		}
 
-    whenReady(futureResult) { ex =>
-      ex shouldBe a[java.util.NoSuchElementException]
-    }
-  }
+		whenReady(futureResult) { ex =>
+			ex shouldBe a[java.util.NoSuchElementException]
+		}
+	}
 
-  it should "save document" in {
-    val mapModel = MapModel(data = Map("count" -> 1))
+	it should "save document" in {
+		val mapModel = MapModel(data = Map("count" -> 1))
 
-    val futureResult = for {
-      insert <- dao.save(mapModel)
-      maybeInsertedDummyModel <- dao.findById(mapModel._id)
-      newData = mapModel.data + ("total" -> 2, "count" -> 2)
-      update <- dao.save(mapModel.copy(data = newData))
-      maybeUpdatedDummyModel <- dao.findById(mapModel._id)
-    } yield (maybeInsertedDummyModel, maybeUpdatedDummyModel)
+		val futureResult = for {
+			insert <- dao.save(mapModel)
+			maybeInsertedDummyModel <- dao.findById(mapModel._id)
+			newData = mapModel.data + ("total" -> 2, "count" -> 2)
+			update <- dao.save(mapModel.copy(data = newData))
+			maybeUpdatedDummyModel <- dao.findById(mapModel._id)
+		} yield (maybeInsertedDummyModel, maybeUpdatedDummyModel)
 
-    whenReady(futureResult) {
-      case (maybeInsertedDummyModel, maybeUpdatedDummyModel) =>
-        maybeInsertedDummyModel should be('defined)
-        val insertedDummyModel = maybeInsertedDummyModel.get
-        insertedDummyModel._id shouldBe mapModel._id
-        insertedDummyModel.data("count") shouldBe 1
+		whenReady(futureResult) {
+			case (maybeInsertedDummyModel, maybeUpdatedDummyModel) =>
+				maybeInsertedDummyModel should be('defined)
+				val insertedDummyModel = maybeInsertedDummyModel.get
+				insertedDummyModel._id shouldBe mapModel._id
+				insertedDummyModel.data("count") shouldBe 1
 
-        maybeUpdatedDummyModel should be('defined)
-        val updatedDummyModel = maybeUpdatedDummyModel.get
-        updatedDummyModel._id shouldBe mapModel._id
-        updatedDummyModel.data("count") shouldBe 2
-        updatedDummyModel.data("total") shouldBe 2
-    }
-  }
+				maybeUpdatedDummyModel should be('defined)
+				val updatedDummyModel = maybeUpdatedDummyModel.get
+				updatedDummyModel._id shouldBe mapModel._id
+				updatedDummyModel.data("count") shouldBe 2
+				updatedDummyModel.data("total") shouldBe 2
+		}
+	}
 
 }

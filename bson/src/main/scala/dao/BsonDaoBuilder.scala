@@ -16,31 +16,27 @@
 
 package reactivemongo.extensions.dao
 
-import reactivemongo.api.DB
-import reactivemongo.bson.{
-  BSONDocumentWriter,
-  BSONDocumentReader,
-  BSONReader,
-  BSONValue,
-  BSONWriter
-}
+import reactivemongo.api.DefaultDB
+import reactivemongo.bson.{ BSONDocumentReader, BSONDocumentWriter, BSONReader, BSONValue, BSONWriter }
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
-class BsonDaoBuilder[Model, ID](db: => DB) {
-  def apply(collectionName: String)(
-    implicit modelReader: BSONDocumentReader[Model],
-    modelWriter: BSONDocumentWriter[Model],
-    idWriter: BSONWriter[ID, _ <: BSONValue],
-    idReader: BSONReader[_ <: BSONValue, ID],
-    lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
-    ec: ExecutionContext): BsonDao[Model, ID] = {
-    BsonDao(db, collectionName)
-  }
+class BsonDaoBuilder[Model, ID](db: => Future[DefaultDB]) {
+	def apply(collectionName: String)(
+		implicit
+		modelReader: BSONDocumentReader[Model],
+		modelWriter: BSONDocumentWriter[Model],
+		idWriter: BSONWriter[ID, _ <: BSONValue],
+		idReader: BSONReader[_ <: BSONValue, ID],
+		lifeCycle: LifeCycle[Model, ID] = new ReflexiveLifeCycle[Model, ID],
+		ec: ExecutionContext
+	): BsonDao[Model, ID] = {
+		BsonDao(db, collectionName)
+	}
 }
 
 object BsonDaoBuilder {
-  def apply[Model, ID](db: => DB): BsonDaoBuilder[Model, ID] = {
-    new BsonDaoBuilder[Model, ID](db)
-  }
+	def apply[Model, ID](db: => Future[DefaultDB]): BsonDaoBuilder[Model, ID] = {
+		new BsonDaoBuilder[Model, ID](db)
+	}
 }

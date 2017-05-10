@@ -27,43 +27,43 @@ import scala.concurrent.{ Future, Await }
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DynamicBsonDaoSpec
-    extends FlatSpec
-    with Matchers
-    with ScalaFutures
-    with BeforeAndAfter
-    with OneInstancePerTest {
+		extends FlatSpec
+		with Matchers
+		with ScalaFutures
+		with BeforeAndAfter
+		with OneInstancePerTest {
 
-  override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
+	override implicit def patienceConfig = PatienceConfig(timeout = Span(20, Seconds), interval = Span(1, Seconds))
 
-  val builder = BsonDaoBuilder[BSONDocument, BSONObjectID](MongoContext.db)
+	val builder = BsonDaoBuilder[BSONDocument, BSONObjectID](MongoContext.db)
 
-  before {
-    import scala.concurrent.duration._
-    Await.ready(builder("collection1").removeAll(), 10 seconds)
-    Await.ready(builder("collection2").removeAll(), 10 seconds)
-  }
+	before {
+		import scala.concurrent.duration._
+		Await.ready(builder("collection1").removeAll(), 10 seconds)
+		Await.ready(builder("collection2").removeAll(), 10 seconds)
+	}
 
-  "A DynamicBsonDao" should "use different collections" in {
-    val dao1 = builder("collection1")
-    val dao2 = builder("collection2")
+	"A DynamicBsonDao" should "use different collections" in {
+		val dao1 = builder("collection1")
+		val dao2 = builder("collection2")
 
-    val futureResult = for {
-      insertResult1 <- dao1.insert($doc("name" -> "ali", "surname" -> "veli"))
-      insertResult2 <- dao2.insert($doc("name" -> "haydar", "surname" -> "cabbar", "age" -> 18))
-      result1 <- ~dao1.findOne("name" $eq "ali")
-      result2 <- ~dao2.findOne("name" $eq "haydar")
-      insertResult12 <- dao1.insert(result2)
-      count1 <- dao1.count()
-      count2 <- dao2.count()
-    } yield (result1, result2, count1, count2)
+		val futureResult = for {
+			insertResult1 <- dao1.insert($doc("name" -> "ali", "surname" -> "veli"))
+			insertResult2 <- dao2.insert($doc("name" -> "haydar", "surname" -> "cabbar", "age" -> 18))
+			result1 <- ~dao1.findOne("name" $eq "ali")
+			result2 <- ~dao2.findOne("name" $eq "haydar")
+			insertResult12 <- dao1.insert(result2)
+			count1 <- dao1.count()
+			count2 <- dao2.count()
+		} yield (result1, result2, count1, count2)
 
-    whenReady(futureResult) {
-      case (result1, result2, count1, count2) =>
-        result1.getAs[String]("surname") should be(Some("veli"))
-        result2.getAs[String]("surname") should be(Some("cabbar"))
-        count1 shouldBe 2
-        count2 shouldBe 1
-    }
-  }
+		whenReady(futureResult) {
+			case (result1, result2, count1, count2) =>
+				result1.getAs[String]("surname") should be(Some("veli"))
+				result2.getAs[String]("surname") should be(Some("cabbar"))
+				count1 shouldBe 2
+				count2 shouldBe 1
+		}
+	}
 
 }

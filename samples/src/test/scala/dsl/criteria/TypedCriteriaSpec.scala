@@ -24,73 +24,72 @@ import reactivemongo.bson._
 import reactivemongo.extensions.dsl.criteria._
 
 trait Company {
-  val name: String;
-  val employees: Int;
+	val name: String;
+	val employees: Int;
 }
 
 case class Person(val firstName: String, val lastName: String, age: Int)
 
-/**
- * The '''TypedCriteriaSpec''' type verifies the expected behaviour of the
- * [[reactivemongo.extensions.dsl.criteria.Typed]] Criteria DSL.
+/** The '''TypedCriteriaSpec''' type verifies the expected behaviour of the
+ *  [[reactivemongo.extensions.dsl.criteria.Typed]] Criteria DSL.
  *
- * @author svickers
+ *  @author svickers
  *
  */
 class TypedCriteriaSpec
-    extends FlatSpec
-    with Matchers {
-  /// Class Imports
-  import Typed._
+		extends FlatSpec
+		with Matchers {
+	/// Class Imports
+	import Typed._
 
-  "Typed criteria" should "produce a Term" in
-    {
-      val t = criteria[Person].firstName;
+	"Typed criteria" should "produce a Term" in
+		{
+			val t = criteria[Person].firstName;
 
-      t.getClass shouldBe (classOf[Term[_]]);
-    }
+			t.getClass shouldBe (classOf[Term[_]]);
+		}
 
-  it should "produce a Term with the given property name" in
-    {
-      val t = criteria[Person].lastName;
+	it should "produce a Term with the given property name" in
+		{
+			val t = criteria[Person].lastName;
 
-      t match {
-        case Term(propertyName) =>
-          propertyName shouldBe ("lastName");
-      }
-    }
+			t match {
+				case Term(propertyName) =>
+					propertyName shouldBe ("lastName");
+			}
+		}
 
-  it should "work with valid expressions" in
-    {
-      (criteria[Person].firstName =~ "sample regex") shouldBe (
-        Expression(
-          Some("firstName"),
-          ("$regex", BSONRegex("sample regex", ""))
-        )
-      );
-    }
+	it should "work with valid expressions" in
+		{
+			(criteria[Person].firstName =~ "sample regex") shouldBe (
+				Expression(
+					Some("firstName"),
+					("$regex", BSONRegex("sample regex", ""))
+				)
+			);
+		}
 
-  it should "support trait-based expressions" in
-    {
-      val query = criteria[Company].employees === 42 ||
-        criteria[Company].employees < 10;
+	it should "support trait-based expressions" in
+		{
+			val query = criteria[Company].employees === 42 ||
+				criteria[Company].employees < 10;
 
-      BSONDocument.pretty(query) shouldBe (
-        BSONDocument.pretty(
-          BSONDocument(
-            "$or" ->
-              BSONArray(
-                BSONDocument(
-                  "employees" -> BSONInteger(42)
-                ),
-                BSONDocument(
-                  "employees" ->
-                    BSONDocument("$lt" -> 10)
-                )
-              )
-          )
-        )
-      );
-    }
+			BSONDocument.pretty(query) shouldBe (
+				BSONDocument.pretty(
+					BSONDocument(
+						"$or" ->
+							BSONArray(
+								BSONDocument(
+									"employees" -> BSONInteger(42)
+								),
+								BSONDocument(
+									"employees" ->
+										BSONDocument("$lt" -> 10)
+								)
+							)
+					)
+				)
+			);
+		}
 }
 

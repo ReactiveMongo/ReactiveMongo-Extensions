@@ -23,37 +23,38 @@ import reactivemongo.extensions.util.Logger
 import org.joda.time.DateTime
 
 case class TemporalModel(
-  _id: BSONObjectID = BSONObjectID.generate,
-  name: String,
-  surname: String,
-  createdAt: DateTime = DateTime.now,
-  updatedAt: DateTime = DateTime.now)
+	_id: BSONObjectID = BSONObjectID.generate,
+	name: String,
+	surname: String,
+	createdAt: DateTime = DateTime.now,
+	updatedAt: DateTime = DateTime.now
+)
 
 object TemporalModel {
-  import reactivemongo.extensions.dao.Handlers._
+	import reactivemongo.extensions.dao.Handlers._
 
-  implicit val temporalModelFormat = Macros.handler[TemporalModel]
+	implicit val temporalModelFormat = Macros.handler[TemporalModel]
 
-  implicit object TemporalModelLifeCycle extends LifeCycle[TemporalModel, BSONObjectID] {
-    def prePersist(model: TemporalModel): TemporalModel = {
-      Logger.debug(s"prePersist $model")
-      model.copy(updatedAt = DateTime.now)
-    }
+	implicit object TemporalModelLifeCycle extends LifeCycle[TemporalModel, BSONObjectID] {
+		def prePersist(model: TemporalModel): TemporalModel = {
+			Logger.debug(s"prePersist $model")
+			model.copy(updatedAt = DateTime.now)
+		}
 
-    def postPersist(model: TemporalModel): Unit = {
-      Logger.debug(s"postPersist $model")
-    }
+		def postPersist(model: TemporalModel): Unit = {
+			Logger.debug(s"postPersist $model")
+		}
 
-    def preRemove(id: BSONObjectID): Unit = {
-      Logger.debug(s"preRemove $id")
-    }
+		def preRemove(id: BSONObjectID): Unit = {
+			Logger.debug(s"preRemove $id")
+		}
 
-    def postRemove(id: BSONObjectID): Unit = {
-      Logger.debug(s"postRemove $id")
-    }
+		def postRemove(id: BSONObjectID): Unit = {
+			Logger.debug(s"postRemove $id")
+		}
 
-    def ensuredIndexes(): Unit = {
-      Logger.debug("ensuredIndexes")
-    }
-  }
+		def ensuredIndexes(): Unit = {
+			Logger.debug("ensuredIndexes")
+		}
+	}
 }

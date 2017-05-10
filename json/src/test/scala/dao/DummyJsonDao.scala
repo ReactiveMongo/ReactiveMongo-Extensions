@@ -25,8 +25,8 @@ import play.modules.reactivemongo.json.BSONFormats._
 import reactivemongo.extensions.util.Misc.UUID
 
 class DummyJsonDao extends {
-  override val autoIndexes = Seq(
-    Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),
-    Index(Seq("age" -> IndexType.Ascending), background = true)
-  )
+	override val autoIndexes = Seq(
+		Index(Seq("name" -> IndexType.Ascending), unique = true, background = true),
+		Index(Seq("age" -> IndexType.Ascending), background = true)
+	)
 } with JsonDao[DummyModel, BSONObjectID](MongoContext.db, "dummy-" + UUID())

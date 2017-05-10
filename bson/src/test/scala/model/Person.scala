@@ -19,16 +19,17 @@ package reactivemongo.extensions.model
 import reactivemongo.bson._
 
 case class Person(
-  _id: String,
-  name: String,
-  surname: String,
-  fullname: String,
-  age: Int,
-  salary: Double,
-  time: Long,
-  country: String)
+	_id: String,
+	name: String,
+	surname: String,
+	fullname: String,
+	age: Int,
+	salary: Double,
+	time: Long,
+	country: String
+)
 
 object Person {
-  import reactivemongo.extensions.dao.Handlers._ // extensions BSON handler
-  implicit val personFormat = Macros.handler[Person]
+	import reactivemongo.extensions.dao.Handlers._ // extensions BSON handler
+	implicit val personFormat = Macros.handler[Person]
 }

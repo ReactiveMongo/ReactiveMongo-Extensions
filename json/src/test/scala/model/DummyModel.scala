@@ -17,21 +17,21 @@
 package reactivemongo.extensions.json.model
 
 import reactivemongo.bson._
-import reactivemongo.extensions.dao.Handlers._
+import reactivemongo.play.json.BSONFormats._
 import play.api.libs.json.Json
-import play.modules.reactivemongo.json.BSONFormats._
 
 case class DummyModel(
-  _id: BSONObjectID = BSONObjectID.generate,
-  name: String,
-  surname: String,
-  age: Int)
+	_id: BSONObjectID = BSONObjectID.generate,
+	name: String,
+	surname: String,
+	age: Int
+)
 
 object DummyModel {
-  implicit val dummyModelHandler = Macros.handler[DummyModel]
-  implicit val dummyModelFormat = Json.format[DummyModel]
+	implicit val dummyModelHandler = Macros.handler[DummyModel]
+	implicit val dummyModelFormat = Json.format[DummyModel]
 
-  def random(n: Int): Seq[DummyModel] = 1 to n map { index =>
-    DummyModel(name = s"name$index", surname = "surname$index", age = index)
-  }
+	def random(n: Int): Seq[DummyModel] = 1 to n map { index =>
+		DummyModel(name = s"name$index", surname = "surname$index", age = index)
+	}
 }

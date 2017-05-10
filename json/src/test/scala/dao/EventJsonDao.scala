@@ -20,13 +20,13 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import reactivemongo.extensions.json.model.Event
 import reactivemongo.extensions.json.dsl.JsonDsl
-import reactivemongo.api.DB
+import reactivemongo.api.DefaultDB
 
-class EventJsonDao(_db: DB)
-    extends JsonDao[Event, String](_db, "events")
-    with JsonDsl {
+class EventJsonDao(_db: Future[DefaultDB])
+		extends JsonDao[Event, String](_db, "events")
+		with JsonDsl {
 
-  def findByTitle(title: String): Future[Option[Event]] = {
-    findOne("title" $eq title)
-  }
+	def findByTitle(title: String): Future[Option[Event]] = {
+		findOne("title" $eq title)
+	}
 }

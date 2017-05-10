@@ -24,7 +24,7 @@ import scala.concurrent.ExecutionContext
 
 abstract class BsonFileDao[Id <: BSONValue: IdProducer](db: => DB with DBMetaCommands, collectionName: String) extends FileDao[Id, BSONDocument](db, collectionName) {
 
-  def findById(id: Id)(implicit ec: ExecutionContext): ReadFileWrapper = {
-    findOne(BSONDocument("_id" -> id))
-  }
+	def findById(id: Id)(implicit ec: ExecutionContext): ReadFileWrapper = {
+		findOne(BSONDocument("_id" -> id))
+	}
 }

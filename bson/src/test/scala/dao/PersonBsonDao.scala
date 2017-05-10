@@ -25,11 +25,11 @@ import reactivemongo.api.DefaultDB
 import reactivemongo.extensions.dsl.BsonDsl
 import reactivemongo.extensions.dao.Handlers._
 
-class PersonBsonDao(_db: DefaultDB)
-    extends BsonDao[Person, String](_db, "persons") with BsonDsl {
+class PersonBsonDao(_db: Future[DefaultDB])
+		extends BsonDao[Person, String](_db, "persons") with BsonDsl {
 
-  def findByName(name: String): Future[Option[Person]] =
-    findOne("name" $eq name)
+	def findByName(name: String): Future[Option[Person]] =
+		findOne("name" $eq name)
 
-  def dropDatabaseSync(): Unit = Await.result(_db.drop(), 20 seconds)
+	def dropDatabaseSync(): Unit = Await.result(_db.map(_.drop()), 20 seconds)
 }
