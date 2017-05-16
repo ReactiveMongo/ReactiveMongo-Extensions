@@ -4,12 +4,11 @@ The goal of *ReactiveMongo Extensions* is to provide all the necessary tools for
 
 > **Since ReactiveMongo 0.11, the useful functions are available directly in the [driver](../ReactiveMongo), so these extensions are not updated, and it's recommended to directly use the driver.**
 
-Here is a complete example using Play 2.2, ReactiveMongo Extensions and Flight.js https://github.com/mertkavi/play-reactivemongo-extensions-sample
 
-[![Build Status](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions.svg?branch=0.10.x)](https://travis-ci.org/ReactiveMongo/ReactiveMongo-Extensions)
+[![Build Status](https://travis-ci.org/playalot/ReactiveMongo-Extensions.svg?branch=0.10.x)](https://travis-ci.org/playalot/ReactiveMongo-Extensions)
 ![Progress](http://progressed.io/bar/70?title=stable)
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.reactivemongo/reactivemongo-extensions-core_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.reactivemongo/reactivemongo-extensions-core_2.11/)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/cn.playalot/reactivemongo-extensions-core_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cn.playalot/reactivemongo-extensions-core_2.11/)
 
 ## Introduction
 
@@ -278,13 +277,13 @@ Current version matrix is below:
 
 | reactivemongo-extensions-bson    | Target ReactiveMongo version |
 |----------------------------------|------------------------------|
-| 0.10.0.0-SNAPSHOT                | 0.10.0                       |
+| 0.12.3                           | 0.12.3                       |
 
 | reactivemongo-extensions-json    | Target Play-ReactiveMongo version |
 |----------------------------------|-----------------------------------|
-| 0.10.0.0-SNAPSHOT                | 0.10.2                            |
+| 0.12.3                           | 0.12.3                            |
 
-Note: Only available for scala 2.10.
+Note: Only available for scala 2.11.
 
 If you use SBT, you just have to edit build.sbt and add the following:
 
@@ -292,7 +291,7 @@ If you use SBT, you just have to edit build.sbt and add the following:
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.10.0.0-SNAPSHOT"
+  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.12.3"
 )
 ```
 
@@ -302,7 +301,7 @@ or
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.10.0.0-SNAPSHOT"
+  "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.12.3"
 )
 ```
 

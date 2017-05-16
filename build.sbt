@@ -6,7 +6,7 @@ name := "reactivemongo-extensions"
 SbtScalariform.scalariformSettings
 
 lazy val commonSettings = Seq(
-  organization := "org.reactivemongo",
+  organization := "cn.playalot",
   version := "0.12.3",
   scalaVersion  := "2.11.11",
   scalacOptions := Seq(
@@ -33,6 +33,7 @@ lazy val commonSettings = Seq(
   .setPreference(IndentWithTabs, true))
 
 lazy val publishSettings = Seq(
+  organization := "cn.playalot",
   publishMavenStyle := true,
   publishArtifact in Test := false,
   publishTo := {
@@ -43,33 +44,28 @@ lazy val publishSettings = Seq(
       Some("releases"  at nexus + "service/local/staging/deploy/maven2")
   },
   pomExtra :=
-    <url>http://github.com/fehmicansaglam/reactivemongo-extensions</url>
+    <url>http://github.com/playalot/ReactiveMongo-Extensions</url>
     <licenses>
       <license>
         <name>Apache 2</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         <distribution>repo</distribution>
       </license>
     </licenses>
     <scm>
-      <url>git@github.com:fehmicansaglam/reactivemongo-extensions.git</url>
-      <connection>scm:git@github.com:fehmicansaglam/reactivemongo-extensions.git</connection>
+      <url>github.com:playalot/ReactiveMongo-Extensions.git</url>
+      <connection>scm:git:github.com:playalot/ReactiveMongo-Extensions.git</connection>
     </scm>
     <developers>
       <developer>
-        <id>fehmicansaglam</id>
-        <name>Fehmi Can Saglam</name>
-        <url>http://github.com/fehmicansaglam</url>
-      </developer>
-      <developer>
-        <id>osxhacker</id>
-        <name>Steve Vickers</name>
-        <url>http://github.com/osxhacker</url>
+        <id>gguan</id>
+        <name>Guan Guan</name>
+        <url>http://github.com/gguan</url>
       </developer>
     </developers>)
 
 val travisSettings = Seq(
-  Travis.travisSnapshotBranches := Seq("0.10.x", "0.10.5.akka23-SNAPSHOT"),
+  Travis.travisSnapshotBranches := Seq("0.11.x", "0.10.5.akka23-SNAPSHOT"),
   commands += Travis.travisCommand
 )
 
