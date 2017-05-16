@@ -291,19 +291,10 @@ If you use SBT, you just have to edit build.sbt and add the following:
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo-extensions-bson" % "0.12.3"
+  "cn.playalot" %% "reactivemongo-extensions-bson" % "0.12.3"
 )
 ```
 
-or
-
-```scala
-resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
-
-libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo-extensions-json" % "0.12.3"
-)
-```
 
 ## Contributions
 Contributions are always welcome. Good ways to contribute include:
