@@ -1,5 +1,5 @@
 language: scala
-script: sbt ++$TRAVIS_SCALA_VERSION 'test'
+script: sbt ++$TRAVIS_SCALA_VERSION 'test-only'
 scala:
 - 2.11.11
 jdk:
@@ -10,5 +10,3 @@ before_install:
   sudo tee /etc/apt/sources.list.d/mongodb.list
 - sudo apt-get update
 - sudo apt-get install mongodb-org-server
-after_success:
-- .travis_scripts/publishSnapshots.sh
